@@ -6,25 +6,18 @@
 //
 import UIKit
 import WebKit
+import NMapsMap
 
 
 class MapViewController: UIViewController {
-    @IBOutlet weak var webView: WKWebView!
+//    @IBOutlet weak var mapView: WKWebView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let mapView = NMFMapView(frame: view.frame)
+        view.addSubview(mapView)
 
-        // 1) WKWebView Delegate 설정 (필요 시)
-        webView.navigationDelegate = self
-
-        // 2) 번들에 포함된 map.html 경로
-        guard let url = Bundle.main.url(forResource: "map", withExtension: "html") else {
-            print("⚠️ map.html 파일을 찾을 수 없습니다.")
-            return
-        }
-
-        // 3) 로컬 파일 로드
-        webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
     }
 }
 
