@@ -1,0 +1,36 @@
+[
+  {
+    "id": "D4F1A8E2-1234-4B56-9F0A-ABCDEF123456",
+    "name": "테스트 그룹",
+    "colorHex": "#FF3B30",
+    "alpha": 0.4,
+    "shapes": [
+      {
+        "id": "A1B2C3D4-5678-90AB-CDEF-1234567890AB",
+        "title": "서울시청 반경",
+        "shapeType": "circle",
+        "baseCoordinate": { "latitude": 37.5665, "longitude": 126.9780 },
+        "radius": 500,
+        "memo": "서울광장 주변 500m",
+        "expireDate": "2025-06-30T00:00:00Z",
+        "createdAt": "2025-05-14T10:00:00Z"
+      },
+      {
+        "id": "B2C3D4E5-6789-01AB-CDEF-2345678901BC",
+        "title": "광화문 외곽",
+        "shapeType": "polygon",
+        "baseCoordinate": { "latitude": 37.5710, "longitude": 126.9768 },
+        "polygonCoordinates": [
+          { "latitude": 37.5715, "longitude": 126.9760 },
+          { "latitude": 37.5715, "longitude": 126.9780 },
+          { "latitude": 37.5700, "longitude": 126.9780 },
+          { "latitude": 37.5700, "longitude": 126.9760 }
+        ],
+        "memo": "광화문 사각형 영역",
+        "expireDate": null,
+        "createdAt": "2025-05-14T11:00:00Z"
+      }
+    ],
+    "createdAt": "2025-05-14T09:00:00Z"
+  }
+]
