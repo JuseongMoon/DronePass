@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C057812DD2F8ED0044CF9B /* Assets.xcassets */; };
+		63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */; };
+		63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057862DD2F8ED0044CF9B /* Main.storyboard */; };
+		63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057802DD2F8ED0044CF9B /* AppDelegate.swift */; };
+		63C057912DD2F8ED0044CF9B /* MapSketch.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 63C057872DD2F8ED0044CF9B /* MapSketch.xcdatamodeld */; };
+		63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */; };
+		63C057932DD2F8ED0044CF9B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057892DD2F8ED0044CF9B /* ViewController.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		63C0575C2DD2F6540044CF9B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,27 +37,17 @@
 		63C057422DD2F6530044CF9B /* MapSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C0575B2DD2F6540044CF9B /* MapSketchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C057652DD2F6540044CF9B /* MapSketchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		63C057802DD2F8ED0044CF9B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		63C057812DD2F8ED0044CF9B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		63C057822DD2F8ED0044CF9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		63C057832DD2F8ED0044CF9B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		63C057852DD2F8ED0044CF9B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		63C057892DD2F8ED0044CF9B /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		63C0578B2DD2F8ED0044CF9B /* MapSketch.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MapSketch.xcdatamodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		63C0576D2DD2F6540044CF9B /* Exceptions for "MapSketch" folder in "MapSketch" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 63C057412DD2F6530044CF9B /* MapSketch */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		63C057442DD2F6530044CF9B /* MapSketch */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				63C0576D2DD2F6540044CF9B /* Exceptions for "MapSketch" folder in "MapSketch" target */,
-			);
-			path = MapSketch;
-			sourceTree = "<group>";
-		};
 		63C0575E2DD2F6540044CF9B /* MapSketchTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MapSketchTests;
@@ -88,7 +88,7 @@
 		63C057392DD2F6530044CF9B = {
 			isa = PBXGroup;
 			children = (
-				63C057442DD2F6530044CF9B /* MapSketch */,
+				63C0578A2DD2F8ED0044CF9B /* MapSketch */,
 				63C0575E2DD2F6540044CF9B /* MapSketchTests */,
 				63C057682DD2F6540044CF9B /* MapSketchUITests */,
 				63C057432DD2F6530044CF9B /* Products */,
@@ -105,6 +105,45 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		63C0577D2DD2F8ED0044CF9B /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		63C0577E2DD2F8ED0044CF9B /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		63C0577F2DD2F8ED0044CF9B /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		63C0578A2DD2F8ED0044CF9B /* MapSketch */ = {
+			isa = PBXGroup;
+			children = (
+				63C057802DD2F8ED0044CF9B /* AppDelegate.swift */,
+				63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */,
+				63C0577E2DD2F8ED0044CF9B /* Model */,
+				63C0577F2DD2F8ED0044CF9B /* View */,
+				63C0577D2DD2F8ED0044CF9B /* Controller */,
+				63C057812DD2F8ED0044CF9B /* Assets.xcassets */,
+				63C057822DD2F8ED0044CF9B /* Info.plist */,
+				63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */,
+				63C057862DD2F8ED0044CF9B /* Main.storyboard */,
+				63C057872DD2F8ED0044CF9B /* MapSketch.xcdatamodeld */,
+				63C057892DD2F8ED0044CF9B /* ViewController.swift */,
+			);
+			path = MapSketch;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -119,9 +158,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				63C057442DD2F6530044CF9B /* MapSketch */,
 			);
 			name = MapSketch;
 			packageProductDependencies = (
@@ -225,6 +261,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */,
+				63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */,
+				63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +288,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */,
+				63C057912DD2F8ED0044CF9B /* MapSketch.xcdatamodeld in Sources */,
+				63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */,
+				63C057932DD2F8ED0044CF9B /* ViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +323,25 @@
 			targetProxy = 63C057662DD2F6540044CF9B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				63C057832DD2F8ED0044CF9B /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		63C057862DD2F8ED0044CF9B /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				63C057852DD2F8ED0044CF9B /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		63C0576F2DD2F6540044CF9B /* Debug */ = {
@@ -571,6 +633,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		63C057872DD2F8ED0044CF9B /* MapSketch.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				63C0578B2DD2F8ED0044CF9B /* MapSketch.xcdatamodel */,
+			);
+			currentVersion = 63C0578B2DD2F8ED0044CF9B /* MapSketch.xcdatamodel */;
+			path = MapSketch.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 63C0573A2DD2F6530044CF9B /* Project object */;
 }
