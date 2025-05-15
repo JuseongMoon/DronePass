@@ -10,10 +10,8 @@
 
 import UIKit
 
-
-// PlaceShape.swift
 public enum ShapeType: String, Codable {
-  case circle, rectangle, polygon
+    case circle, rectangle, polygon, polyline
 }
 
 public struct PlaceShape: Codable, Identifiable {
@@ -21,9 +19,20 @@ public struct PlaceShape: Codable, Identifiable {
     public var title: String
     public var shapeType: ShapeType
     public var baseCoordinate: Coordinate
+
+    // circle 전용
     public var radius: Double?
+
+    // rectangle 전용
     public var secondCoordinate: Coordinate?
+
+    // polygon 전용
     public var polygonCoordinates: [Coordinate]?
+
+    // polyline 전용
+    public var polylineCoordinates: [Coordinate]?
+
+    // 공통
     public var memo: String?
     public var expireDate: Date?
     public let createdAt: Date
@@ -36,6 +45,7 @@ public struct PlaceShape: Codable, Identifiable {
         radius: Double? = nil,
         secondCoordinate: Coordinate? = nil,
         polygonCoordinates: [Coordinate]? = nil,
+        polylineCoordinates: [Coordinate]? = nil,
         memo: String? = nil,
         expireDate: Date? = nil,
         createdAt: Date = Date()
@@ -47,6 +57,7 @@ public struct PlaceShape: Codable, Identifiable {
         self.radius = radius
         self.secondCoordinate = secondCoordinate
         self.polygonCoordinates = polygonCoordinates
+        self.polylineCoordinates = polylineCoordinates
         self.memo = memo
         self.expireDate = expireDate
         self.createdAt = createdAt
