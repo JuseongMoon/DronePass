@@ -22,18 +22,7 @@ class IntroViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        // 저장속성에서 임시 그룹 생성
-        if ShapeGroupStore.shared.groups.isEmpty {
-            let sampleGroup = ShapeGroup(
-                name: "예시 그룹",
-                colorHex: "#007AFF",
-                alpha: 0.4,
-                shapes: []
-            )
-            ShapeGroupStore.shared.addGroup(sampleGroup)
-        }
-        
+
 //        
 //        if UserDefaults.standard.bool(forKey: "hasSeenIntro") {
 //            // 이미 본 적이 있다면 바로 메인으로 이동

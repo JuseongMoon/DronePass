@@ -8,77 +8,99 @@
 import UIKit
 
 class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
-    
-    private let mapTabIndex     = 0
-    private let savedTabIndex   = 1
-    private let settingTabIndex = 2
+
+    let mapTabIndex     = 0
+    let savedTabIndex   = 1
+    let settingTabIndex = 2
 
     override func viewDidLoad() {
         super.viewDidLoad()
         delegate = self
         definesPresentationContext = true
+        resetAllTabIcons()
+        tabBar.tintColor = .black
+        tabBar.unselectedItemTintColor = .black
     }
 
-    
+    func resetAllTabIcons() {
+        if let tabBarItems = tabBar.items {
+            tabBarItems[mapTabIndex].image = UIImage(named: "tab_map_inactive")
+            tabBarItems[savedTabIndex].image = UIImage(named: "tab_favorite_inactive")
+            tabBarItems[settingTabIndex].image = UIImage(named: "tab_setting_inactive")
+        }
+    }
+
+    func highlightTabIcon(at index: Int) {
+        resetAllTabIcons()
+        if let tabBarItems = tabBar.items {
+            switch index {
+            case mapTabIndex:
+                tabBarItems[mapTabIndex].image = UIImage(named: "tab_map_active")
+            case savedTabIndex:
+                tabBarItems[savedTabIndex].image = UIImage(named: "tab_favorite_active")
+            case settingTabIndex:
+                tabBarItems[settingTabIndex].image = UIImage(named: "tab_setting_active")
+            default: break
+            }
+        }
+    }
 
     func tabBarController(_ tabBarController: UITabBarController,
                           shouldSelect viewController: UIViewController) -> Bool {
-        print("🔔 shouldSelect:", type(of: viewController))
-
-        // 1) “저장” 탭 누름 감지
+        // 1. 기존 오버레이 제거
+        children
+            .filter { $0 is SavedBottomSheetViewController }
+            .forEach {
+                $0.willMove(toParent: nil)
+                $0.view.removeFromSuperview()
+                $0.removeFromParent()
+            }
+        // 2. 저장 탭 클릭 시
         if viewController is SavedViewController {
-            // 탭 전환 없이 시트만 띄움
+            highlightTabIcon(at: savedTabIndex)
             presentSavedSheet()
+            // 지도 탭에 selectedIndex를 고정
+            selectedIndex = mapTabIndex // or 적절한 기본값 (일부러 저장탭이 선택되지 않게)
             return false
         }
-        // 2) “설정” 탭 이전에 올라온 시트 제거
-        if viewController is SettingViewController {
-            children
-              .filter { $0 is SavedBottomSheetViewController }
-              .forEach {
-                  $0.willMove(toParent: nil)
-                  $0.view.removeFromSuperview()
-                  $0.removeFromParent()
-              }
+        // 3. 지도/설정 탭 클릭 시 하이라이트 동기화
+        if viewController is MapViewController {
+            highlightTabIcon(at: mapTabIndex)
         }
-        // 그 외 탭(지도/설정 등)은 평소대로 전환
+        if viewController is SettingViewController {
+            highlightTabIcon(at: settingTabIndex)
+        }
         return true
     }
+    
+    
 
     private func presentSavedSheet() {
-        // 기존 시트 제거
+        
+        // 기존에 붙은 시트 모두 제거
         children
-          .filter { $0 is SavedBottomSheetViewController }
-          .forEach {
-              $0.willMove(toParent: nil)
-              $0.view.removeFromSuperview()
-              $0.removeFromParent()
-          }
+            .filter { $0 is SavedBottomSheetViewController }
+            .forEach {
+                $0.willMove(toParent: nil)
+                $0.view.removeFromSuperview()
+                $0.removeFromParent()
+            }
 
-        // 새 시트 생성 & 붙이기
         guard let sheetVC = storyboard?
-                .instantiateViewController(
-                  withIdentifier: "SavedBottomSheetViewController"
-                ) as? SavedBottomSheetViewController
+                .instantiateViewController(withIdentifier: "SavedBottomSheetViewController")
+                as? SavedBottomSheetViewController
         else { return }
 
         addChild(sheetVC)
         view.insertSubview(sheetVC.view, belowSubview: tabBar)
         sheetVC.didMove(toParent: self)
 
-        // Auto Layout 제약
         sheetVC.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-          sheetVC.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-          sheetVC.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-          sheetVC.view.topAnchor.constraint(equalTo: view.topAnchor),
-          sheetVC.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            sheetVC.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            sheetVC.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            sheetVC.view.topAnchor.constraint(equalTo: view.topAnchor),
+            sheetVC.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-
-        // 즉시 레이아웃 반영
-        view.setNeedsLayout()
-        view.layoutIfNeeded()
-        print("📐 sheetVC.view 제약 완료, frame:", sheetVC.view.frame)
-
     }
 }

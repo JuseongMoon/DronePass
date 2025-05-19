@@ -121,16 +121,24 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NUS-8Z-eDd" customClass="NMFMapView">
-                                <rect key="frame" x="76" y="362" width="240" height="128"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NUS-8Z-eDd" customClass="NMFNaverMapView">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="735"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemGreenColor"/>
+                        <constraints>
+                            <constraint firstItem="NUS-8Z-eDd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="DxX-10-mJe"/>
+                            <constraint firstItem="NUS-8Z-eDd" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="N8e-18-LGn"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="NUS-8Z-eDd" secondAttribute="bottom" id="pvb-cc-hPr"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="NUS-8Z-eDd" secondAttribute="trailing" id="sPp-Be-oyx"/>
+                        </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="지도" image="map" catalog="system" id="gAo-CX-WkM"/>
+                    <tabBarItem key="tabBarItem" title="지도" image="tab_map_inactive" selectedImage="tab_map_active" id="gAo-CX-WkM"/>
+                    <connections>
+                        <outlet property="naverMapView" destination="NUS-8Z-eDd" id="xQQ-YI-EZm"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
@@ -158,7 +166,7 @@
                             <constraint firstItem="kcg-8o-2qs" firstAttribute="centerY" secondItem="mVX-U3-5Lw" secondAttribute="centerY" id="Uqx-je-KHO"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="설정" image="gearshape" catalog="system" id="GuA-oP-8zl"/>
+                    <tabBarItem key="tabBarItem" title="설정" image="tab_setting_inactive" selectedImage="tab_setting_active" id="GuA-oP-8zl"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="TZZ-HW-dXz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -171,14 +179,36 @@
                     <view key="view" contentMode="scaleToFill" id="MTP-7K-m9x">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="qbd-Uq-0Si">
+                                <rect key="frame" x="0.0" y="30" width="393" height="705"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" rowHeight="105" id="E43-Hk-Rcg">
+                                        <rect key="frame" x="0.0" y="50" width="393" height="105"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="E43-Hk-Rcg" id="3OH-Z0-sYk">
+                                            <rect key="frame" x="0.0" y="0.0" width="393" height="105"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                            </tableView>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="4Vc-Vc-BwJ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="qbd-Uq-0Si" secondAttribute="trailing" id="AKb-AR-AVO"/>
+                            <constraint firstItem="4Vc-Vc-BwJ" firstAttribute="bottom" secondItem="qbd-Uq-0Si" secondAttribute="bottom" id="C5b-eT-BlM"/>
+                            <constraint firstItem="qbd-Uq-0Si" firstAttribute="leading" secondItem="MTP-7K-m9x" secondAttribute="leading" id="baw-zg-NvS"/>
+                            <constraint firstItem="qbd-Uq-0Si" firstAttribute="top" secondItem="MTP-7K-m9x" secondAttribute="top" constant="30" id="hrp-x3-MtG"/>
+                        </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="저장" image="star" catalog="system" id="ZnJ-BR-fdn"/>
+                    <tabBarItem key="tabBarItem" title="저장" image="tab_favorite_inactive" selectedImage="tab_favorite_active" id="ZnJ-BR-fdn"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="jTD-pU-Csg" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="984" y="735"/>
+            <point key="canvasLocation" x="983.96946564885491" y="734.50704225352115"/>
         </scene>
         <!--Saved Bottom Sheet View Controller-->
         <scene sceneID="r5I-tY-MQm">
@@ -193,24 +223,27 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Kma-jK-57k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="984" y="1456"/>
+            <point key="canvasLocation" x="984" y="1412"/>
         </scene>
     </scenes>
     <resources>
-        <image name="gearshape" catalog="system" width="128" height="123"/>
-        <image name="map" catalog="system" width="128" height="112"/>
-        <image name="star" catalog="system" width="128" height="116"/>
+        <image name="tab_favorite_active" width="24" height="24"/>
+        <image name="tab_favorite_inactive" width="24" height="24"/>
+        <image name="tab_map_active" width="24" height="24"/>
+        <image name="tab_map_inactive" width="24" height="24"/>
+        <image name="tab_setting_active" width="24" height="24"/>
+        <image name="tab_setting_inactive" width="24" height="24"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGrayColor">
-            <color red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

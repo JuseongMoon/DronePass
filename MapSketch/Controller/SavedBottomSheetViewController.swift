@@ -22,6 +22,9 @@ class SavedBottomSheetViewController: UIViewController {
     private var containerView: BottomSheetContainerView!
     private var initialHeight: CGFloat = 0
     private var hasSetInitialPosition = false
+    
+    // ✅ 커스텀 중간 높이 (기본값: 1/2)
+    var midHeight: CGFloat? = 430
 
     // MARK: - 초기화
     required init?(coder: NSCoder) {
@@ -73,17 +76,21 @@ class SavedBottomSheetViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         guard !hasSetInitialPosition else { return }
-        let midHeight = (expandedHeight + collapsedHeight) / 2
-        sheetHeightConstraint.constant = midHeight
+        
+        // midHeight를 커스텀값 있으면 그걸, 없으면 기존 공식 사용
+        let mid = midHeight ?? (expandedHeight + collapsedHeight) / 2
+        sheetHeightConstraint.constant = mid
         containerView.layoutIfNeeded()
         hasSetInitialPosition = true
     }
+    
+
 
     // MARK: - Pan 제스처 핸들러
     @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
         guard let container = view as? BottomSheetContainerView else { return }
         let translation = gesture.translation(in: view).y
-
+        
         switch gesture.state {
         case .began:
             initialHeight = sheetHeightConstraint.constant
@@ -95,41 +102,51 @@ class SavedBottomSheetViewController: UIViewController {
 
         case .ended, .cancelled:
             let velocityY = gesture.velocity(in: view).y
-            let midHeight = (expandedHeight + collapsedHeight) / 2
+            if velocityY > 500 {
+                dismissSheet()
+                return
+            }
+            // 커스텀 midHeight 적용
+            let mid = midHeight ?? (expandedHeight + collapsedHeight) / 2
             var targetHeight: CGFloat
             if velocityY < -500 {
-                // 빠른 위 방향 스와이프 → expand
                 targetHeight = expandedHeight
             } else if velocityY > 500 {
-                // 빠른 아래 스와이프 → close (완전 닫혀 버림)
-                willMove(toParent: nil)
-                view.removeFromSuperview()
-                removeFromParent()
+                dismissSheet()
                 return
             } else {
-                // 세 개 스냅 포인트 중 가장 가까운 곳으로 이동
                 let distances = [
                     abs(sheetHeightConstraint.constant - collapsedHeight),
-                    abs(sheetHeightConstraint.constant - midHeight),
+                    abs(sheetHeightConstraint.constant - mid),
                     abs(sheetHeightConstraint.constant - expandedHeight)
                 ]
                 if let minIndex = distances.enumerated().min(by: { $0.element < $1.element })?.offset {
                     switch minIndex {
                     case 0: targetHeight = collapsedHeight
-                    case 1: targetHeight = midHeight
+                    case 1: targetHeight = mid
                     default: targetHeight = expandedHeight
                     }
                 } else {
-                    targetHeight = midHeight
+                    targetHeight = mid
                 }
             }
             UIView.animate(withDuration: 0.3) {
                 self.sheetHeightConstraint.constant = targetHeight
                 self.containerView.layoutIfNeeded()
             }
-
         default:
             break
         }
     }
+    
+    private func dismissSheet() {
+        willMove(toParent: nil)
+        view.removeFromSuperview()
+        removeFromParent()
+        // 추가: 메인 탭의 하이라이트 동기화 (필요시)
+        if let mainTab = parent as? MainTabBarController {
+            mainTab.highlightTabIcon(at: mainTab.mapTabIndex)
+        }
+    }
+    
 }

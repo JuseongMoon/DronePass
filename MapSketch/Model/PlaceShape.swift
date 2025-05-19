@@ -8,7 +8,7 @@
 // 역할: 도형 데이터 모델
 // 연관기능: 지도, 저장, 설정에서 공통 사용
 
-import UIKit
+import Foundation
 
 public enum ShapeType: String, Codable {
     case circle, rectangle, polygon, polyline
@@ -20,19 +20,12 @@ public struct PlaceShape: Codable, Identifiable {
     public var shapeType: ShapeType
     public var baseCoordinate: Coordinate
 
-    // circle 전용
+    // 추가 도형 타입별 옵션
     public var radius: Double?
-
-    // rectangle 전용
-    public var secondCoordinate: Coordinate?
-
-    // polygon 전용
+    public var secondCoordinate: Coordinate? // 사각형 등
     public var polygonCoordinates: [Coordinate]?
-
-    // polyline 전용
     public var polylineCoordinates: [Coordinate]?
 
-    // 공통
     public var memo: String?
     public var expireDate: Date?
     public let createdAt: Date

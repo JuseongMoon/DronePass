@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */; };
+		63AFEEFE2DDB2B5000D8866B /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEEFD2DDB2B4F00D8866B /* PlaceShapeStore.swift */; };
+		63AFEF002DDB600C00D8866B /* TestShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEEFF2DDB600500D8866B /* TestShape.swift */; };
 		63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C057812DD2F8ED0044CF9B /* Assets.xcassets */; };
 		63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */; };
 		63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057862DD2F8ED0044CF9B /* Main.storyboard */; };
@@ -21,12 +23,9 @@
 		63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C0579E2DD313F80044CF9B /* MainTabBarController.swift */; };
 		63C057A12DD31F5C0044CF9B /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A02DD31F570044CF9B /* PlaceShape.swift */; };
 		63C057A32DD31F700044CF9B /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A22DD31F680044CF9B /* Coordinate.swift */; };
-		63C057AA2DD320B00044CF9B /* SavedShapeCell .swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A92DD320AE0044CF9B /* SavedShapeCell .swift */; };
-		63C057AC2DD323130044CF9B /* ShapeGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057AB2DD3230F0044CF9B /* ShapeGroup.swift */; };
-		63C057AE2DD323A80044CF9B /* ShapeGroupStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057AD2DD323A50044CF9B /* ShapeGroupStore.swift */; };
+		63C057AA2DD320B00044CF9B /* SavedShapeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */; };
 		63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */; };
-		63C057B72DD336A40044CF9B /* JSONStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057B62DD336A30044CF9B /* JSONStorage.swift */; };
-		63F3F5F92DD3481F004C546F /* GroupDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F3F5F82DD34816004C546F /* GroupDetailViewController.swift */; };
+		63C057B72DD336A40044CF9B /* PlaceShapeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057B62DD336A30044CF9B /* PlaceShapeStorage.swift */; };
 		63F3F5FB2DD34AB2004C546F /* sample_shape_groups.json in Resources */ = {isa = PBXBuildFile; fileRef = 63F3F5FA2DD34AB2004C546F /* sample_shape_groups.json */; };
 		63F3F5FD2DD34C00004C546F /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F3F5FC2DD34BFE004C546F /* AppInfo.swift */; };
 		63F3F6012DD3525A004C546F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63F3F5FF2DD35156004C546F /* WebKit.framework */; };
@@ -51,6 +50,8 @@
 
 /* Begin PBXFileReference section */
 		631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
+		63AFEEFD2DDB2B4F00D8866B /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
+		63AFEEFF2DDB600500D8866B /* TestShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestShape.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* MapSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C0575B2DD2F6540044CF9B /* MapSketchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C057652DD2F6540044CF9B /* MapSketchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -67,12 +68,9 @@
 		63C0579E2DD313F80044CF9B /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		63C057A02DD31F570044CF9B /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
 		63C057A22DD31F680044CF9B /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
-		63C057A92DD320AE0044CF9B /* SavedShapeCell .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SavedShapeCell .swift"; sourceTree = "<group>"; };
-		63C057AB2DD3230F0044CF9B /* ShapeGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeGroup.swift; sourceTree = "<group>"; };
-		63C057AD2DD323A50044CF9B /* ShapeGroupStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeGroupStore.swift; sourceTree = "<group>"; };
+		63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShapeViewCell.swift; sourceTree = "<group>"; };
 		63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
-		63C057B62DD336A30044CF9B /* JSONStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONStorage.swift; sourceTree = "<group>"; };
-		63F3F5F82DD34816004C546F /* GroupDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailViewController.swift; sourceTree = "<group>"; };
+		63C057B62DD336A30044CF9B /* PlaceShapeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStorage.swift; sourceTree = "<group>"; };
 		63F3F5FA2DD34AB2004C546F /* sample_shape_groups.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample_shape_groups.json; sourceTree = "<group>"; };
 		63F3F5FC2DD34BFE004C546F /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		63F3F5FF2DD35156004C546F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -118,6 +116,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		63AFEEF82DDB14D800D8866B /* Overay */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Overay;
+			sourceTree = "<group>";
+		};
 		63C057392DD2F6530044CF9B = {
 			isa = PBXGroup;
 			children = (
@@ -142,9 +147,9 @@
 		63C0577D2DD2F8ED0044CF9B /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				63AFEEF82DDB14D800D8866B /* Overay */,
 				631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */,
 				63C0579C2DD313450044CF9B /* IntroViewController.swift */,
-				63F3F5F82DD34816004C546F /* GroupDetailViewController.swift */,
 				63C0579E2DD313F80044CF9B /* MainTabBarController.swift */,
 				63C0579A2DD310D90044CF9B /* SettingViewController.swift */,
 				63C057982DD310D00044CF9B /* SavedViewController.swift */,
@@ -159,7 +164,6 @@
 			children = (
 				63C057B32DD336860044CF9B /* Storage */,
 				63C057A02DD31F570044CF9B /* PlaceShape.swift */,
-				63C057AB2DD3230F0044CF9B /* ShapeGroup.swift */,
 				63C057A22DD31F680044CF9B /* Coordinate.swift */,
 			);
 			path = Model;
@@ -168,7 +172,7 @@
 		63C0577F2DD2F8ED0044CF9B /* View */ = {
 			isa = PBXGroup;
 			children = (
-				63C057A92DD320AE0044CF9B /* SavedShapeCell .swift */,
+				63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -201,8 +205,9 @@
 		63C057B32DD336860044CF9B /* Storage */ = {
 			isa = PBXGroup;
 			children = (
-				63C057AD2DD323A50044CF9B /* ShapeGroupStore.swift */,
-				63C057B62DD336A30044CF9B /* JSONStorage.swift */,
+				63AFEEFF2DDB600500D8866B /* TestShape.swift */,
+				63AFEEFD2DDB2B4F00D8866B /* PlaceShapeStore.swift */,
+				63C057B62DD336A30044CF9B /* PlaceShapeStorage.swift */,
 				63F3F5FA2DD34AB2004C546F /* sample_shape_groups.json */,
 			);
 			path = Storage;
@@ -366,19 +371,18 @@
 			buildActionMask = 2147483647;
 			files = (
 				63C057992DD310D40044CF9B /* SavedViewController.swift in Sources */,
-				63F3F5F92DD3481F004C546F /* GroupDetailViewController.swift in Sources */,
 				63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */,
 				63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */,
-				63C057B72DD336A40044CF9B /* JSONStorage.swift in Sources */,
+				63C057B72DD336A40044CF9B /* PlaceShapeStorage.swift in Sources */,
 				63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */,
-				63C057AA2DD320B00044CF9B /* SavedShapeCell .swift in Sources */,
+				63C057AA2DD320B00044CF9B /* SavedShapeViewCell.swift in Sources */,
 				63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */,
 				63C057A32DD31F700044CF9B /* Coordinate.swift in Sources */,
 				63C057A12DD31F5C0044CF9B /* PlaceShape.swift in Sources */,
-				63C057AC2DD323130044CF9B /* ShapeGroup.swift in Sources */,
-				63C057AE2DD323A80044CF9B /* ShapeGroupStore.swift in Sources */,
 				63C057972DD310CC0044CF9B /* MapViewController.swift in Sources */,
 				63C0579B2DD310DE0044CF9B /* SettingViewController.swift in Sources */,
+				63AFEF002DDB600C00D8866B /* TestShape.swift in Sources */,
+				63AFEEFE2DDB2B5000D8866B /* PlaceShapeStore.swift in Sources */,
 				63C0579D2DD3134B0044CF9B /* IntroViewController.swift in Sources */,
 				631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */,
 				63F3F5FD2DD34C00004C546F /* AppInfo.swift in Sources */,
@@ -440,7 +444,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;
@@ -471,7 +475,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;
