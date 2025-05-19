@@ -8,12 +8,14 @@
 // 역할: 도형 데이터 모델
 // 연관기능: 지도, 저장, 설정에서 공통 사용
 
+
 import Foundation
 
 public enum ShapeType: String, Codable {
     case circle, rectangle, polygon, polyline
 }
 
+// ✅ color: PaletteColor(컬러매니저 기반 enum)로 변경
 public struct PlaceShape: Codable, Identifiable {
     public let id: UUID
     public var title: String
@@ -30,6 +32,9 @@ public struct PlaceShape: Codable, Identifiable {
     public var expireDate: Date?
     public let createdAt: Date
 
+    /// **팔레트 컬러 (색상 팔레트에서 고름)**
+    public var color: String
+
     public init(
         id: UUID = UUID(),
         title: String,
@@ -40,8 +45,10 @@ public struct PlaceShape: Codable, Identifiable {
         polygonCoordinates: [Coordinate]? = nil,
         polylineCoordinates: [Coordinate]? = nil,
         memo: String? = nil,
-        expireDate: Date? = nil,
-        createdAt: Date = Date()
+        expireDate: Date? = nil,         // ✅ color 앞에 배치
+        createdAt: Date = Date(),
+        color: String = "#007AFF",     // ✅ 마지막(혹은 뒤쪽)에 배치
+
     ) {
         self.id = id
         self.title = title
@@ -54,5 +61,7 @@ public struct PlaceShape: Codable, Identifiable {
         self.memo = memo
         self.expireDate = expireDate
         self.createdAt = createdAt
+        self.color = color
+
     }
 }

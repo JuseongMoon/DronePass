@@ -3,9 +3,7 @@
 //  MapSketch
 //
 //  Created by 문주성 on 5/13/25.
-
-// MARK: — MapViewController.swift
-
+//
 
 import UIKit
 import NMapsMap
@@ -13,23 +11,31 @@ import CoreLocation
 
 class MapViewController: UIViewController, CLLocationManagerDelegate {
 
+    // MARK: - Properties
     @IBOutlet public var naverMapView: NMFNaverMapView! // 스토리보드에 연결
 
     private let locationManager = CLLocationManager()
     private var hasCenteredOnUser = false
 
+    // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupMapView()
+        setupLocationManager()
+        drawSampleShapes()
+    }
 
+    // MARK: - Setup Methods
+    private func setupMapView() {
         // 현위치 버튼 표시
         naverMapView.showLocationButton = true
-
 
         // 카메라 초기 위치 설정 (서울 중심 예시)
         let position = NMFCameraPosition(NMGLatLng(lat: 37.575563, lng: 126.976793), zoom: 14)
         naverMapView.mapView.moveCamera(NMFCameraUpdate(position: position))
+    }
 
-        // 위치 권한 요청 및 업데이트
+    private func setupLocationManager() {
         locationManager.delegate = self
         let status = locationManager.authorizationStatus
         switch status {
@@ -40,29 +46,28 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
         default:
             break
         }
-
-        // 저장된 모든 도형 오버레이로 그리기
-        for shape in PlaceShapeStore.shared.shapes {
-            addOverlay(for: shape)
-        }
-        
-        // 테스트용 원 오버레이
-        let circleOverlay = NMFCircleOverlay(NMGLatLng(lat: 37.5666102, lng: 126.9783881), radius: 5000)
-        circleOverlay.fillColor = UIColor.red.withAlphaComponent(0.2)
-        circleOverlay.outlineColor = UIColor.red
-        circleOverlay.outlineWidth = 2
-        circleOverlay.mapView = naverMapView.mapView
-        
     }
 
-    // CLLocationManagerDelegate: 권한 변경 시 위치 업데이트
+    private func drawSampleShapes() {
+        // 샘플 도형 불러오기 (TestShape.swift)
+//        let shapesToShow = [TestShape.circle01, TestShape.circle02, TestShape.circle03, TestShape.circle04]
+        // JSON 파일에서 샘플도형 불러오기
+        let shapesToShow = SampleShapeLoader.loadSampleShapes()
+        // 특정 도형만 불러오기
+//        let shapesToShow = SampleShapeLoader.loadSampleShapes().filter { $0.color == .red || $0.color == .green }
+
+        for shape in shapesToShow {
+            addOverlay(for: shape)
+        }
+    }
+
+    // MARK: - CLLocationManagerDelegate Methods
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
             manager.startUpdatingLocation()
         }
     }
 
-    // CLLocationManagerDelegate: 위치 업데이트 시 지도 중심 이동
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let loc = locations.last else { return }
         let latlng = NMGLatLng(lat: loc.coordinate.latitude, lng: loc.coordinate.longitude)
@@ -78,7 +83,8 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
         }
     }
 
-    // 저장된 PlaceShape를 지도 오버레이로 추가
+    // MARK: - Overlay Drawing
+    /// 저장된 PlaceShape를 지도 오버레이로 추가
     func addOverlay(for shape: PlaceShape) {
         switch shape.shapeType {
         case .circle:
@@ -86,15 +92,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
             let circleOverlay = NMFCircleOverlay()
             circleOverlay.center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
             circleOverlay.radius = radius
-            circleOverlay.fillColor = UIColor.blue.withAlphaComponent(0.4)
+            // ✅ 팔레트 컬러 적용
+            let mainColor = UIColor(hex: shape.color)
+            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
             circleOverlay.outlineWidth = 2
-            circleOverlay.outlineColor = .systemBlue
+            circleOverlay.outlineColor = mainColor
             circleOverlay.mapView = naverMapView.mapView
-        // 추후 .rectangle, .polygon, .polyline 등도 여기에 추가
+        // TODO: 사각형/다각형 등은 여기에 추가
         default:
             break
         }
     }
 
-    // (필요하다면) 저장탭에서 도형 선택 시 지도 이동/하이라이트 처리용 메서드도 여기에 추가
+    // MARK: - (Optional) 유틸리티 함수, 도형 선택/이동 등
+    // 필요 시 여기에 추가
 }

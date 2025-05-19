@@ -1,0 +1,46 @@
+[
+  {
+    "id": "C4E0C26E-427A-41C6-B1AA-30AEF447193B",
+    "title": "Circle 01",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.5666102, "longitude": 126.9783881 },
+    "radius": 400,
+    "memo": "Circle 01",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:00:00Z",
+    "color": "#FF3B30"
+  },
+  {
+    "id": "2A6878B2-39F8-4C19-8F10-4BA1F924A247",
+    "title": "Circle 02",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.565000, "longitude": 126.979000 },
+    "radius": 300,
+    "memo": "Circle 02",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:01:00Z",
+    "color": "#FFD700"
+  },
+  {
+    "id": "B5F6CB6C-00D5-46A2-893F-49EDDEB80E63",
+    "title": "Circle 03",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.567000, "longitude": 126.975000 },
+    "radius": 500,
+    "memo": "Circle 03",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:02:00Z",
+    "color": "#34C759"
+  },
+  {
+    "id": "6525A3F8-6337-4C6E-A6A2-5D44F7EFA3AD",
+    "title": "Circle 04",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.570000, "longitude": 126.973000 },
+    "radius": 450,
+    "memo": "Circle 04",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:03:00Z",
+    "color": "#FF9500"
+  }
+]
