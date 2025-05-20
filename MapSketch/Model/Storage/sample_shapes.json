@@ -6,6 +6,7 @@
     "baseCoordinate": { "latitude": 37.5666102, "longitude": 126.9783881 },
     "radius": 400,
     "memo": "Circle 01",
+    "address": "서울특별시 중구 세종대로 110",
     "expireDate": null,
     "createdAt": "2024-05-19T12:00:00Z",
     "color": "#FF3B30"
@@ -17,6 +18,7 @@
     "baseCoordinate": { "latitude": 37.565000, "longitude": 126.979000 },
     "radius": 300,
     "memo": "Circle 02",
+    "address": "서울특별시 종로구 종로 1",
     "expireDate": null,
     "createdAt": "2024-05-19T12:01:00Z",
     "color": "#FFD700"
@@ -28,6 +30,7 @@
     "baseCoordinate": { "latitude": 37.567000, "longitude": 126.975000 },
     "radius": 500,
     "memo": "Circle 03",
+    "address": "서울특별시 용산구 한강대로 405",
     "expireDate": null,
     "createdAt": "2024-05-19T12:02:00Z",
     "color": "#34C759"
@@ -39,8 +42,105 @@
     "baseCoordinate": { "latitude": 37.570000, "longitude": 126.973000 },
     "radius": 450,
     "memo": "Circle 04",
+    "address": "서울특별시 강남구 테헤란로 521",
     "expireDate": null,
     "createdAt": "2024-05-19T12:03:00Z",
     "color": "#FF9500"
+  },
+  {
+    "id": "A1B2C3D4-E5F6-7890-1234-56789ABCDEF0",
+    "title": "Circle 05",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.561000, "longitude": 126.982000 },
+    "radius": 350,
+    "memo": "Circle 05",
+    "address": "서울특별시 마포구 월드컵북로 396",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:04:00Z",
+    "color": "#007AFF"
+  },
+  {
+    "id": "B2C3D4E5-F678-9012-3456-789ABCDEF012",
+    "title": "Circle 06",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.558000, "longitude": 126.984000 },
+    "radius": 420,
+    "memo": "Circle 06",
+    "address": "서울특별시 송파구 올림픽로 300",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:05:00Z",
+    "color": "#AF52DE"
+  },
+  {
+    "id": "C3D4E5F6-7890-1234-5678-9ABCDEF01234",
+    "title": "Circle 07",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.555000, "longitude": 126.987000 },
+    "radius": 380,
+    "memo": "Circle 07",
+    "address": "경기도 성남시 분당구 판교역로 235",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:06:00Z",
+    "color": "#FF2D55"
+  },
+  {
+    "id": "D4E5F678-9012-3456-789A-BCDEF0123456",
+    "title": "Circle 08",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.552000, "longitude": 126.990000 },
+    "radius": 410,
+    "memo": "Circle 08",
+    "address": "경기도 고양시 일산동구 중앙로 1036",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:07:00Z",
+    "color": "#FFCC00"
+  },
+  {
+    "id": "E5F67890-1234-5678-9ABC-DEF012345678",
+    "title": "Circle 09",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.549000, "longitude": 126.993000 },
+    "radius": 390,
+    "memo": "Circle 09",
+    "address": "경기도 수원시 영통구 광교로 156",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:08:00Z",
+    "color": "#5856D6"
+  },
+  {
+    "id": "F6789012-3456-789A-BCDE-F01234567890",
+    "title": "Circle 10",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.546000, "longitude": 126.996000 },
+    "radius": 370,
+    "memo": "Circle 10",
+    "address": "경기도 안양시 동안구 시민대로 180",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:09:00Z",
+    "color": "#34C759"
+  },
+  {
+    "id": "67890123-4567-89AB-CDEF-012345678901",
+    "title": "Circle 11",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.543000, "longitude": 126.999000 },
+    "radius": 360,
+    "memo": "Circle 11",
+    "address": "경기도 부천시 길주로 210",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:10:00Z",
+    "color": "#FF3B30"
+  },
+  {
+    "id": "78901234-5678-9ABC-DEF0-123456789012",
+    "title": "Circle 12",
+    "shapeType": "circle",
+    "baseCoordinate": { "latitude": 37.540000, "longitude": 127.002000 },
+    "radius": 340,
+    "memo": "Circle 12",
+    "address": "경기도 의정부시 시민로 80",
+    "expireDate": null,
+    "createdAt": "2024-05-19T12:11:00Z",
+    "color": "#FFD700"
   }
 ]

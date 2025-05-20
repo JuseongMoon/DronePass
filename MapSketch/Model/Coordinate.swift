@@ -13,7 +13,7 @@ import CoreLocation
 import NMapsMap
 
 /// GPS 좌표값을 저장하는 모델
-public struct Coordinate: Codable {
+public struct Coordinate: Codable, Equatable {
     public let latitude: Double
     public let longitude: Double
 
@@ -22,9 +22,9 @@ public struct Coordinate: Codable {
         self.longitude = longitude
     }
 
-    public init(from location: CLLocationCoordinate2D) {
-        self.latitude = location.latitude
-        self.longitude = location.longitude
+    public init(_ coordinate: CLLocationCoordinate2D) {
+        self.latitude = coordinate.latitude
+        self.longitude = coordinate.longitude
     }
 
     public func toCLLocationCoordinate2D() -> CLLocationCoordinate2D {
@@ -35,5 +35,9 @@ public struct Coordinate: Codable {
     /// NMGLatLng으로 변환 (네이버 지도 API용)
     public func toNMGLatLng() -> NMGLatLng {
         return NMGLatLng(lat: latitude, lng: longitude)
+    }
+
+    var clCoordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 }

@@ -27,8 +27,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
 
     // MARK: - Setup Methods
     private func setupMapView() {
-        // 현위치 버튼 표시
+        // 현위치 버튼 표시 및 활성화
         naverMapView.showLocationButton = true
+        naverMapView.mapView.locationOverlay.hidden = false
 
         // 카메라 초기 위치 설정 (서울 중심 예시)
         let position = NMFCameraPosition(NMGLatLng(lat: 37.575563, lng: 126.976793), zoom: 14)
@@ -37,6 +38,9 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
 
     private func setupLocationManager() {
         locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = 10 // 10미터마다 위치 업데이트
+        
         let status = locationManager.authorizationStatus
         switch status {
         case .notDetermined:
@@ -49,28 +53,25 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
     }
 
     private func drawSampleShapes() {
-        // 샘플 도형 불러오기 (TestShape.swift)
-//        let shapesToShow = [TestShape.circle01, TestShape.circle02, TestShape.circle03, TestShape.circle04]
-        // JSON 파일에서 샘플도형 불러오기
         let shapesToShow = SampleShapeLoader.loadSampleShapes()
-        // 특정 도형만 불러오기
-//        let shapesToShow = SampleShapeLoader.loadSampleShapes().filter { $0.color == .red || $0.color == .green }
-
         for shape in shapesToShow {
             addOverlay(for: shape)
         }
     }
 
-    // MARK: - CLLocationManagerDelegate Methods
+    // MARK: - CLLocationManagerDelegate
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if manager.authorizationStatus == .authorizedWhenInUse || manager.authorizationStatus == .authorizedAlways {
-            manager.startUpdatingLocation()
+        switch manager.authorizationStatus {
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.startUpdatingLocation()
+        default:
+            break
         }
     }
-
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let loc = locations.last else { return }
-        let latlng = NMGLatLng(lat: loc.coordinate.latitude, lng: loc.coordinate.longitude)
+        guard let location = locations.last else { return }
+        let latlng = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
 
         // 현위치 오버레이 표시
         naverMapView.mapView.locationOverlay.location = latlng
@@ -79,8 +80,13 @@ class MapViewController: UIViewController, CLLocationManagerDelegate {
         if !hasCenteredOnUser {
             hasCenteredOnUser = true
             let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(latlng, zoom: 16))
+            cameraUpdate.animation = .easeIn
             naverMapView.mapView.moveCamera(cameraUpdate)
         }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location manager failed with error: \(error.localizedDescription)")
     }
 
     // MARK: - Overlay Drawing

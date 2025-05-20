@@ -8,42 +8,55 @@
 import UIKit
 
 class IntroViewController: UIViewController {
+    // MARK: - IBOutlets
+    @IBOutlet private weak var descriptionLabel: UILabel!
+    @IBOutlet private weak var versionLabel: UILabel!
     
+    // MARK: - Properties
+    private let userDefaults = UserDefaults.standard
+    private let hasSeenIntroKey = "hasSeenIntro"
     
-    @IBOutlet weak var descriptionLabel: UILabel!
-    
-    @IBOutlet weak var versionLabel: UILabel!
-    
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-        descriptionLabel.text = AppInfo.description
-        versionLabel.text = AppInfo.version
+        print("📱 IntroViewController - viewDidLoad")
+        setupUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("📱 IntroViewController - viewWillAppear")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
-//        
-//        if UserDefaults.standard.bool(forKey: "hasSeenIntro") {
-//            // 이미 본 적이 있다면 바로 메인으로 이동
-//            moveToMain(animated: false)
-//        }
+        print("📱 IntroViewController - viewDidAppear")
+        // 자동 이동 제거
     }
     
-    @IBAction func didTapStartButton(_ sender: UIButton) {
-        UserDefaults.standard.set(true, forKey: "hasSeenIntro")
+    // MARK: - Private Methods
+    private func setupUI() {
+        print("📱 IntroViewController - setupUI")
+        descriptionLabel.text = AppInfo.Description.intro
+        versionLabel.text = AppInfo.Version.current
+    }
+    
+    // MARK: - IBActions
+    @IBAction private func didTapStartButton(_ sender: UIButton) {
+        print("📱 IntroViewController - didTapStartButton")
+        userDefaults.set(true, forKey: hasSeenIntroKey)
         moveToMain(animated: true)
     }
     
-    // 중복 제거: 화면 전환 메서드 분리
+    // MARK: - Navigation
     private func moveToMain(animated: Bool) {
-        if let tabBarVC = storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") {
-            tabBarVC.modalPresentationStyle = .fullScreen
-            present(tabBarVC, animated: animated)
+        print("📱 IntroViewController - moveToMain")
+        guard let tabBarVC = storyboard?.instantiateViewController(withIdentifier: "MainTabBarController") else {
+            print("❌ Error: MainTabBarController not found in storyboard")
+            return
         }
+        
+        tabBarVC.modalPresentationStyle = .fullScreen
+        present(tabBarVC, animated: animated)
     }
-    
-
-
-    
 }

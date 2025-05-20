@@ -8,99 +8,158 @@
 import UIKit
 
 class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
-
+    // MARK: - Properties
     let mapTabIndex     = 0
     let savedTabIndex   = 1
     let settingTabIndex = 2
+    
+    private var currentBottomSheet: SavedBottomSheetViewController?
+    private var lastSelectedIndex = 0
+    private var isSavedSheetPresented = false
 
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
+        print("📱 MainTabBarController - viewDidLoad")
         delegate = self
         definesPresentationContext = true
-        resetAllTabIcons()
+        setupTabBar()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        print("📱 MainTabBarController - viewWillAppear")
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("📱 MainTabBarController - viewDidAppear")
+    }
+    
+    // MARK: - Setup Methods
+    private func setupTabBar() {
+        print("📱 MainTabBarController - setupTabBar")
         tabBar.tintColor = .black
         tabBar.unselectedItemTintColor = .black
+        
+        // 초기 선택 탭 설정
+        selectedIndex = mapTabIndex
+        updateTabBarIcons()
     }
-
-    func resetAllTabIcons() {
-        if let tabBarItems = tabBar.items {
-            tabBarItems[mapTabIndex].image = UIImage(named: "tab_map_inactive")
-            tabBarItems[savedTabIndex].image = UIImage(named: "tab_favorite_inactive")
-            tabBarItems[settingTabIndex].image = UIImage(named: "tab_setting_inactive")
-        }
-    }
-
-    func highlightTabIcon(at index: Int) {
-        resetAllTabIcons()
-        if let tabBarItems = tabBar.items {
-            switch index {
+    
+    // MARK: - Tab Bar Methods
+    private func updateTabBarIcons() {
+        print("📱 MainTabBarController - updateTabBarIcons")
+        guard let items = tabBar.items else { return }
+        
+        // 모든 아이콘을 비활성화 상태로 설정
+        items[mapTabIndex].image = UIImage(named: "tab_map_inactive")
+        items[savedTabIndex].image = UIImage(named: "tab_favorite_inactive")
+        items[settingTabIndex].image = UIImage(named: "tab_setting_inactive")
+        
+        // 현재 선택된 탭과 저장 시트 상태에 따라 아이콘 활성화
+        if isSavedSheetPresented {
+            items[savedTabIndex].image = UIImage(named: "tab_favorite_active")
+        } else {
+            switch selectedIndex {
             case mapTabIndex:
-                tabBarItems[mapTabIndex].image = UIImage(named: "tab_map_active")
+                items[mapTabIndex].image = UIImage(named: "tab_map_active")
             case savedTabIndex:
-                tabBarItems[savedTabIndex].image = UIImage(named: "tab_favorite_active")
+                items[savedTabIndex].image = UIImage(named: "tab_favorite_active")
             case settingTabIndex:
-                tabBarItems[settingTabIndex].image = UIImage(named: "tab_setting_active")
-            default: break
+                items[settingTabIndex].image = UIImage(named: "tab_setting_active")
+            default:
+                break
             }
         }
     }
 
+    // MARK: - UITabBarControllerDelegate
     func tabBarController(_ tabBarController: UITabBarController,
-                          shouldSelect viewController: UIViewController) -> Bool {
-        // 1. 기존 오버레이 제거
-        children
-            .filter { $0 is SavedBottomSheetViewController }
-            .forEach {
-                $0.willMove(toParent: nil)
-                $0.view.removeFromSuperview()
-                $0.removeFromParent()
-            }
-        // 2. 저장 탭 클릭 시
+                         shouldSelect viewController: UIViewController) -> Bool {
+        print("📱 MainTabBarController - shouldSelect: \(type(of: viewController))")
+        
+        // 저장 탭 클릭 시
         if viewController is SavedViewController {
-            highlightTabIcon(at: savedTabIndex)
-            presentSavedSheet()
-            // 지도 탭에 selectedIndex를 고정
-            selectedIndex = mapTabIndex // or 적절한 기본값 (일부러 저장탭이 선택되지 않게)
-            return false
+            if isSavedSheetPresented {
+                print("📱 MainTabBarController - 닫기 시도")
+                removeBottomSheet()
+                selectedIndex = mapTabIndex
+                return false
+            } else {
+                print("📱 MainTabBarController - 열기 시도")
+                presentBottomSheet()
+                selectedIndex = mapTabIndex
+                return false
+            }
         }
-        // 3. 지도/설정 탭 클릭 시 하이라이트 동기화
-        if viewController is MapViewController {
-            highlightTabIcon(at: mapTabIndex)
+        
+        // 다른 탭 클릭 시
+        if isSavedSheetPresented {
+            print("📱 MainTabBarController - 다른 탭 선택으로 시트 닫기")
+            removeBottomSheet()
         }
-        if viewController is SettingViewController {
-            highlightTabIcon(at: settingTabIndex)
-        }
+        lastSelectedIndex = selectedIndex
         return true
     }
     
+    func tabBarController(_ tabBarController: UITabBarController,
+                         didSelect viewController: UIViewController) {
+        print("📱 MainTabBarController - didSelect: \(type(of: viewController))")
+        updateTabBarIcons()
+    }
     
-
-    private func presentSavedSheet() {
-        
-        // 기존에 붙은 시트 모두 제거
-        children
-            .filter { $0 is SavedBottomSheetViewController }
-            .forEach {
-                $0.willMove(toParent: nil)
-                $0.view.removeFromSuperview()
-                $0.removeFromParent()
-            }
-
-        guard let sheetVC = storyboard?
-                .instantiateViewController(withIdentifier: "SavedBottomSheetViewController")
-                as? SavedBottomSheetViewController
-        else { return }
-
+    // MARK: - Bottom Sheet Methods
+    private func presentBottomSheet() {
+        print("📱 MainTabBarController - presentBottomSheet 시작")
+        // 이미 표시된 바텀시트가 있다면 제거
+        if let existingSheet = children.first(where: { $0 is SavedBottomSheetViewController }) {
+            existingSheet.willMove(toParent: nil)
+            existingSheet.view.removeFromSuperview()
+            existingSheet.removeFromParent()
+        }
+        // 새로운 바텀시트 생성
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let sheetVC = storyboard.instantiateViewController(withIdentifier: "SavedBottomSheetViewController") as? SavedBottomSheetViewController else {
+            print("📱 MainTabBarController - SavedBottomSheetViewController 생성 실패")
+            return
+        }
+        print("📱 MainTabBarController - SavedBottomSheetViewController 생성 성공")
+        // delegate 연결
+        sheetVC.delegate = self
+        // 바텀시트 추가
         addChild(sheetVC)
-        view.insertSubview(sheetVC.view, belowSubview: tabBar)
+        view.addSubview(sheetVC.view)
         sheetVC.didMove(toParent: self)
-
         sheetVC.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             sheetVC.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sheetVC.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            sheetVC.view.topAnchor.constraint(equalTo: view.topAnchor),
-            sheetVC.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            sheetVC.view.bottomAnchor.constraint(equalTo: tabBar.topAnchor)
         ])
+        // 상태 관리
+        currentBottomSheet = sheetVC
+        isSavedSheetPresented = true
+        updateTabBarIcons()
+        print("📱 MainTabBarController - presentBottomSheet 완료")
+    }
+    
+    func removeBottomSheet() {
+        print("📱 MainTabBarController - removeBottomSheet 시작")
+        currentBottomSheet?.willMove(toParent: nil)
+        currentBottomSheet?.view.removeFromSuperview()
+        currentBottomSheet?.removeFromParent()
+        currentBottomSheet = nil
+        isSavedSheetPresented = false
+        updateTabBarIcons()
+        print("📱 MainTabBarController - removeBottomSheet 완료")
     }
 }
+
+// MARK: - SavedBottomSheetDelegate
+extension MainTabBarController: SavedBottomSheetDelegate {
+    func savedBottomSheetDidDismiss() {
+        removeBottomSheet()
+    }
+}
+
