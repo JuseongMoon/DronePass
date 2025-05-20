@@ -41,13 +41,21 @@ class BottomSheetContainerView: UIView {
     }
     
     // MARK: - Touch Handling
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let pointInSheet = convert(point, to: sheetView)
+        return sheetView.bounds.contains(pointInSheet)
+    }
+    
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let localPoint = convert(point, to: sheetView)
-        if sheetView.bounds.contains(localPoint) {
-            // sheetView 내부라면 sheetView의 hitTest를 직접 호출하여 내부 터치가 정확히 전달되도록 한다.
-            return sheetView.hitTest(localPoint, with: event)
+        let pointInSheet = convert(point, to: sheetView)
+        
+        // sheetView 영역 밖이면 nil 반환 (터치 패스스루)
+        guard sheetView.bounds.contains(pointInSheet) else {
+            return nil
         }
-        // sheetView 외부(투명 영역)는 패스스루
-        return nil
+        
+        // sheetView 내부의 모든 서브뷰들에 대해 hitTest 수행
+        let hitView = sheetView.hitTest(pointInSheet, with: event)
+        return hitView ?? sheetView
     }
 }

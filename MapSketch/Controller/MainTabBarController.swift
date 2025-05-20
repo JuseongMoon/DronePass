@@ -36,7 +36,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         print("📱 MainTabBarController - viewDidAppear")
     }
     
-    // MARK: - Setup Methods
+    // MARK: - TabBar Setup Methods
     private func setupTabBar() {
         print("📱 MainTabBarController - setupTabBar")
         tabBar.tintColor = .black
@@ -118,6 +118,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             existingSheet.view.removeFromSuperview()
             existingSheet.removeFromParent()
         }
+        
         // 새로운 바텀시트 생성
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let sheetVC = storyboard.instantiateViewController(withIdentifier: "SavedBottomSheetViewController") as? SavedBottomSheetViewController else {
@@ -125,18 +126,24 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
             return
         }
         print("📱 MainTabBarController - SavedBottomSheetViewController 생성 성공")
+        
         // delegate 연결
         sheetVC.delegate = self
+        
         // 바텀시트 추가
         addChild(sheetVC)
         view.addSubview(sheetVC.view)
         sheetVC.didMove(toParent: self)
+        
+        // 바텀시트 뷰 설정
         sheetVC.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             sheetVC.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             sheetVC.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            sheetVC.view.bottomAnchor.constraint(equalTo: tabBar.topAnchor)
+            sheetVC.view.bottomAnchor.constraint(equalTo: tabBar.topAnchor),
+            sheetVC.view.topAnchor.constraint(equalTo: tabBar.superview!.topAnchor)
         ])
+        
         // 상태 관리
         currentBottomSheet = sheetVC
         isSavedSheetPresented = true
@@ -146,6 +153,8 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     
     func removeBottomSheet() {
         print("📱 MainTabBarController - removeBottomSheet 시작")
+        // 하이라이트 해제 Notification 전송
+        NotificationCenter.default.post(name: .clearShapeHighlight, object: nil)
         currentBottomSheet?.willMove(toParent: nil)
         currentBottomSheet?.view.removeFromSuperview()
         currentBottomSheet?.removeFromParent()

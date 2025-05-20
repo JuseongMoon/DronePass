@@ -30,24 +30,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setupAppearance()
         return true
     }
-    
+
     // MARK: - UISceneSession Lifecycle
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
-    
+
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         // 필요한 리소스 정리
     }
-    
+
     // MARK: - Core Data Saving support
     func saveContext() {
         let context = persistentContainer.viewContext
         guard context.hasChanges else { return }
         
-        do {
-            try context.save()
-        } catch {
+            do {
+                try context.save()
+            } catch {
             handleCoreDataError(error as NSError)
         }
     }

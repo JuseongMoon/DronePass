@@ -9,10 +9,20 @@
 import UIKit
 import Combine
 
+
+
 /// 터치 패스스루 컨테이너 필요 (BottomSheetContainerView.swift)
 final class SavedBottomSheetViewController: UIViewController, UIGestureRecognizerDelegate {
+    
+    
     // MARK: - UI Components
     private let tableView = UITableView()
+    private lazy var handleTouchAreaView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        view.isUserInteractionEnabled = true
+        return view
+    }()
     private lazy var handleView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray3
@@ -21,11 +31,11 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }()
     private lazy var contentView: UIView = {
         let view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = .lightGray
         view.layer.cornerRadius = Metric.cornerRadius
         view.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         view.layer.masksToBounds = true
-        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowColor = UIColor.lightGray.cgColor
         view.layer.shadowOpacity = Metric.shadowOpacity
         view.layer.shadowOffset = CGSize(width: 0, height: Metric.shadowYOffset)
         view.layer.shadowRadius = Metric.shadowRadius
@@ -39,7 +49,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     
     // MARK: - Constants
     private enum Metric {
-        static let handleHeight: CGFloat = 6
+        static let handleHeight: CGFloat = 9
         static let handleWidth: CGFloat = 40
         static let handleTopPadding: CGFloat = 8
         static let tableViewTopPadding: CGFloat = 12
@@ -73,7 +83,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initialization
-    init(viewModel: SavedBottomSheetViewModel, 
+    init(viewModel: SavedBottomSheetViewModel,
          tabBarHeight: CGFloat = 49,
          collapsedHeight: CGFloat = 200,
          midHeight: CGFloat = 430) {
@@ -94,12 +104,36 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     // MARK: - Lifecycle
+    override func loadView() {
+        self.view = PassThroughView()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .clear
+        if let passView = self.view as? PassThroughView {
+            passView.passThroughTarget = containerView
+        }
         print("📱 SavedBottomSheetViewController - viewDidLoad")
         setupUI()
         bindViewModel()
         viewModel.loadData()
+    }
+    
+    
+    final class PassThroughView: UIView {
+        weak var passThroughTarget: UIView?
+        
+        override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+            if let target = passThroughTarget {
+                let targetPoint = convert(point, to: target)
+                if target.bounds.contains(targetPoint) {
+                    return super.hitTest(point, with: event)
+                }
+                return nil
+            }
+            return super.hitTest(point, with: event)
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -110,6 +144,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         print("📱 SavedBottomSheetViewController - viewDidAppear")
+        setupInitialPosition()
     }
     
     // MARK: - Setup
@@ -119,7 +154,6 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         setupHandleView()
         setupTableView()
         setupGestures()
-        setupInitialPosition()
     }
     
     private func setupContainerView() {
@@ -148,12 +182,21 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     private func setupHandleView() {
-        handleView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(handleTouchAreaView)
         contentView.addSubview(handleView)
-        
+        handleTouchAreaView.translatesAutoresizingMaskIntoConstraints = false
+        handleView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            handleView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: Metric.handleTopPadding),
-            handleView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            // 터치 영역은 높이 40, 전체 폭
+            handleTouchAreaView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            handleTouchAreaView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            //            handleTouchAreaView.leadingAnchor.constraint(greaterThanOrEqualTo: contentView.leadingAnchor, constant: 8),
+            
+            handleTouchAreaView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            handleTouchAreaView.heightAnchor.constraint(equalToConstant: 40),
+            // 핸들 바는 중앙에 위치, 높이 6, 폭 40
+            handleView.centerXAnchor.constraint(equalTo: handleTouchAreaView.centerXAnchor),
+            handleView.centerYAnchor.constraint(equalTo: handleTouchAreaView.centerYAnchor),
             handleView.widthAnchor.constraint(equalToConstant: Metric.handleWidth),
             handleView.heightAnchor.constraint(equalToConstant: Metric.handleHeight)
         ])
@@ -167,8 +210,13 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         tableView.dataSource = self
         tableView.isScrollEnabled = true
         tableView.register(SavedShapeViewCell.self, forCellReuseIdentifier: "SavedShapeViewCell")
+        tableView.delaysContentTouches = false
+        tableView.canCancelContentTouches = true
+        tableView.backgroundColor = .white
+        tableView.separatorColor = .lightGray
+        
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: handleView.bottomAnchor, constant: Metric.tableViewTopPadding),
+            tableView.topAnchor.constraint(equalTo: handleTouchAreaView.bottomAnchor, constant: Metric.tableViewTopPadding),
             tableView.leadingAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.bottomAnchor)
@@ -179,14 +227,24 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         panGesture.delegate = self
         panGesture.cancelsTouchesInView = false
-        containerView.addGestureRecognizer(panGesture)
+        panGesture.delaysTouchesBegan = false
+        panGesture.delaysTouchesEnded = false
+        handleTouchAreaView.addGestureRecognizer(panGesture)
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        tapGesture.delaysTouchesBegan = false
+        tapGesture.delaysTouchesEnded = false
+        handleTouchAreaView.addGestureRecognizer(tapGesture)
     }
     
     private func setupInitialPosition() {
         guard !hasSetInitialPosition else { return }
         hasSetInitialPosition = true
+        
+        // 초기 레이아웃 설정
         view.layoutIfNeeded()
         sheetHeightConstraint.constant = midHeight
+        
+        // 애니메이션으로 부드럽게 표시
         UIView.animate(withDuration: Metric.animationDuration) {
             self.view.layoutIfNeeded()
         }
@@ -210,18 +268,21 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         switch gesture.state {
         case .began:
             initialHeight = sheetHeightConstraint.constant
-            
         case .changed:
             let newHeight = initialHeight - translation
             sheetHeightConstraint.constant = newHeight.clamped(to: collapsedHeight...expandedHeight)
             view.layoutIfNeeded()
-            
         case .ended, .cancelled:
             handlePanEnd(velocity: velocity)
-            
         default:
             break
         }
+    }
+    
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+        let currentHeight = sheetHeightConstraint.constant
+        let targetHeight = currentHeight == expandedHeight ? midHeight : expandedHeight
+        animateToHeight(targetHeight)
     }
     
     private func handlePanEnd(velocity: CGFloat) {
@@ -229,7 +290,6 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
             dismissSheet()
             return
         }
-        
         let targetHeight = calculateTargetHeight(velocity: velocity)
         animateToHeight(targetHeight)
     }
@@ -238,14 +298,12 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         if velocity < -Metric.velocityThreshold {
             return expandedHeight
         }
-        
         let currentHeight = sheetHeightConstraint.constant
         let distances = [
             (height: collapsedHeight, distance: abs(currentHeight - collapsedHeight)),
             (height: midHeight, distance: abs(currentHeight - midHeight)),
             (height: expandedHeight, distance: abs(currentHeight - expandedHeight))
         ]
-        
         return distances.min { $0.distance < $1.distance }?.height ?? midHeight
     }
     
@@ -262,15 +320,31 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         view.removeFromSuperview()
         removeFromParent()
     }
-
+    
     // MARK: - UIGestureRecognizerDelegate
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 테이블뷰의 스크롤과 시트의 드래그 동작을 분리
+        if otherGestureRecognizer == tableView.panGestureRecognizer {
+            let location = gestureRecognizer.location(in: handleTouchAreaView)
+            return handleTouchAreaView.bounds.contains(location)
+        }
+        return false
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer == panGesture {
+            let location = gestureRecognizer.location(in: handleTouchAreaView)
+            return handleTouchAreaView.bounds.contains(location)
+        }
         return true
     }
-
-    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        let location = gestureRecognizer.location(in: containerView)
-        return location.y <= Metric.dragThreshold
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 테이블뷰의 스크롤 제스처가 실패한 경우에만 팬 제스처를 인식
+        if gestureRecognizer == panGesture && otherGestureRecognizer == tableView.panGestureRecognizer {
+            return true
+        }
+        return false
     }
 }
 
@@ -284,18 +358,34 @@ extension SavedBottomSheetViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "SavedShapeViewCell", for: indexPath) as? SavedShapeViewCell else {
             return UITableViewCell()
         }
-        
         let shape = viewModel.shapes[indexPath.row]
         cell.configure(with: shape)
+        cell.backgroundColor = .white
+        cell.contentView.backgroundColor = .white
+        cell.setLightTheme()
+        cell.infoButtonTapped = { [weak self] in
+            self?.showShapeDetail(shape: shape)
+        }
         return cell
+    }
+    
+    private func showShapeDetail(shape: PlaceShape) {
+        let detailVC = ShapeDetailViewController(shape: shape)
+        detailVC.modalPresentationStyle = .fullScreen
+        if let nav = self.navigationController {
+            nav.pushViewController(detailVC, animated: true)
+        } else {
+            self.present(detailVC, animated: true, completion: nil)
+        }
     }
 }
 
 // MARK: - UITableViewDelegate, UIScrollViewDelegate
 extension SavedBottomSheetViewController: UITableViewDelegate, UIScrollViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        viewModel.didSelectShape(at: indexPath)
+        // 선택된 셀이 계속 선택 상태로 유지되도록 deselectRow를 호출하지 않음
+        let shape = viewModel.shapes[indexPath.row]
+        ShapeSelectionCoordinator.shared.selectShapeOnList(shape)
     }
     // 스크롤 시작 시 바텀시트 드래그 비활성화
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {

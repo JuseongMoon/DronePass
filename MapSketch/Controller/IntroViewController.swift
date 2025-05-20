@@ -56,7 +56,7 @@ class IntroViewController: UIViewController {
             return
         }
         
-        tabBarVC.modalPresentationStyle = .fullScreen
-        present(tabBarVC, animated: animated)
-    }
+            tabBarVC.modalPresentationStyle = .fullScreen
+            present(tabBarVC, animated: animated)
+        }
 }
