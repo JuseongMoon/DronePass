@@ -313,7 +313,8 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     private func dismissSheet() { // 시트 닫기 처리
-        viewModel.dismissSheet()
+//        viewModel.dismissSheet()
+        delegate?.savedBottomSheetDidDismiss()
         willMove(toParent: nil)
         view.removeFromSuperview()
         removeFromParent()
@@ -348,6 +349,9 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
 
 // MARK: - UITableViewDataSource
 extension SavedBottomSheetViewController: UITableViewDataSource {
+    
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return viewModel.shapes.count
     }
@@ -405,4 +409,8 @@ private extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
         return min(max(self, range.lowerBound), range.upperBound)
     }
+    
+    
+    
+    
 }

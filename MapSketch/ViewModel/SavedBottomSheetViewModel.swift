@@ -1,3 +1,11 @@
+//
+//  SavedBottomSheetViewModel.swift
+//  MapSketch
+//
+//  Created by 문주성 on 5/13/25.
+//
+
+
 import Foundation
 import Combine
 
@@ -8,17 +16,28 @@ protocol SavedBottomSheetDelegate: AnyObject {
 
 final class SavedBottomSheetViewModel {
     @Published private(set) var shapes: [PlaceShape] = []
-    weak var delegate: SavedBottomSheetDelegate?
-    
+    private var cancellables = Set<AnyCancellable>()
+
+    init() {
+        PlaceShapeStore.shared.$shapes
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] shapes in
+                self?.shapes = shapes
+            }
+            .store(in: &cancellables)
+    }
+
     func loadData() {
-        shapes = SampleShapeLoader.loadSampleShapes()
+        // 최초 실행 시 데이터를 PlaceShapeStore에서 불러옴
+        self.shapes = PlaceShapeStore.shared.shapes
     }
-    
-    func dismissSheet() {
-        delegate?.savedBottomSheetDidDismiss()
+
+    func addShape(_ shape: PlaceShape) {
+        PlaceShapeStore.shared.addShape(shape)
     }
-    
-    func didSelectShape(at indexPath: IndexPath) {
-        // TODO: 선택된 도형 처리 로직 구현
+
+    func removeShape(at indexPath: IndexPath) {
+        let shape = shapes[indexPath.row]
+        PlaceShapeStore.shared.removeShape(id: shape.id)
     }
 }

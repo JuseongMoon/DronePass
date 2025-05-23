@@ -4,105 +4,210 @@
 //
 //  Created by 문주성 on 5/13/25.
 //
+import UIKit
 
-// 역할: 도형 상세 정보를 보여주는 뷰 컨트롤러
-// 연관기능: 도형 정보 표시, 상세 화면, 닫기 버튼
-
-import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
-
-final class ShapeDetailViewController: UIViewController { // 도형 상세 정보를 보여주는 뷰 컨트롤러입니다.
-    private let shape: PlaceShape // 상세 정보를 표시할 도형 데이터입니다.
+final class ShapeDetailViewController: UIViewController {
+    private let shape: PlaceShape
     
-    private let titleLabel = UILabel() // 제목 레이블
-    private let typeLabel = UILabel() // 도형 타입 레이블
-    private let addressLabel = UILabel() // 주소 레이블
-    private let radiusLabel = UILabel() // 반경 레이블
-    private let memoLabel = UILabel() // 메모 레이블
-    private let createdAtLabel = UILabel() // 생성일 레이블
-    private let expireDateLabel = UILabel() // 만료일 레이블
-    private let colorLabel = UILabel() // 색상 레이블
-    private let idLabel = UILabel() // ID 레이블
-    private let stackView = UIStackView() // 정보를 세로로 정렬할 스택뷰
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    private let infoStack = UIStackView()
+    private let closeButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("닫기", for: .normal)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.titleLabel?.font = .boldSystemFont(ofSize: 17)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    private let editButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("수정하기", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemBlue
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        button.layer.cornerRadius = 12
+        button.layer.masksToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    private let deleteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("삭제하기", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemRed
+        button.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        button.layer.cornerRadius = 12
+        button.layer.masksToBounds = true
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    private let buttonStack = UIStackView()
     
-    init(shape: PlaceShape) { // 도형 데이터를 받아 초기화합니다.
+    init(shape: PlaceShape) {
         self.shape = shape
         super.init(nibName: nil, bundle: nil)
     }
-    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - viewDidLoad
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white // 배경색을 흰색으로 지정
-        setupLabels() // 레이블 스타일 설정
-        setupStackView() // 스택뷰 설정
-        setupCloseButton() // 닫기 버튼 설정
-        fillData() // 도형 데이터로 레이블 채우기
+        view.backgroundColor = .white
+        print("ShapeDetailViewcontroller viewDidLoad 진입")
+        setupLayout()
+        configureInfo()
+        print("infoStack subviews: \(infoStack.arrangedSubviews.count)")
     }
     
-    private func setupLabels() { // 레이블 스타일을 일괄 설정합니다.
-        [titleLabel, typeLabel, addressLabel, radiusLabel, memoLabel, createdAtLabel, expireDateLabel, colorLabel, idLabel].forEach {
-            $0.font = .systemFont(ofSize: 16)
-            $0.textColor = .black
-            $0.numberOfLines = 0
+    
+    
+    // MARK: - viewDidLayoutSubviews에서 각 뷰의 frame 찍기
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        print("scrollView frame:", scrollView.frame)
+        print("contentView frame:", contentView.frame)
+        print("infoStack frame:", infoStack.frame)
+        for (i, view) in infoStack.arrangedSubviews.enumerated() {
+            print("infoStack[\(i)] frame:", view.frame)
         }
     }
     
-    private func setupStackView() { // 스택뷰에 레이블을 추가하고 제약조건을 설정합니다.
-        stackView.axis = .vertical
-        stackView.spacing = 12
-        stackView.alignment = .leading
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        [titleLabel, typeLabel, addressLabel, radiusLabel, memoLabel, createdAtLabel, expireDateLabel, colorLabel, idLabel].forEach {
-            stackView.addArrangedSubview($0)
-        }
-        view.addSubview(stackView)
-        NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 24),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
-        ])
-    }
     
-    private func setupCloseButton() { // 닫기 버튼을 추가하고 제약조건을 설정합니다.
-        let closeButton = UIButton(type: .system)
-        closeButton.setTitle("닫기", for: .normal)
-        closeButton.titleLabel?.font = .boldSystemFont(ofSize: 17)
-        closeButton.tintColor = .systemBlue
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
+    private func setupLayout() {
+        // 닫기 버튼
         view.addSubview(closeButton)
+        print("closeButton added")
+        closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
             closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
+        
+        // 스크롤뷰, 컨텐츠, 스택
+        view.addSubview(scrollView)
+        print("scrollView added")
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.addSubview(contentView)
+        print("contentView added")
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(infoStack)
+        print("infoStack added")
+        infoStack.axis = .vertical
+        infoStack.spacing = 16
+        infoStack.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        // MARK: - (디버그)임시 색상으로 각각 확인
+//        scrollView.backgroundColor = .yellow.withAlphaComponent(0.2)
+//        contentView.backgroundColor = .cyan.withAlphaComponent(0.2)
+//        infoStack.backgroundColor = .green.withAlphaComponent(0.2)
+        
+        
+        // 버튼스택
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 16
+        buttonStack.distribution = .fillEqually
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+        buttonStack.addArrangedSubview(editButton)
+        buttonStack.addArrangedSubview(deleteButton)
+        view.addSubview(buttonStack)
+
+        NSLayoutConstraint.activate([
+            // 닫기 버튼
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
+            // 스크롤뷰
+            scrollView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 8),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: buttonStack.topAnchor, constant: -16),
+            
+            // contentView
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+
+            // infoStack
+            infoStack.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 32),
+            infoStack.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            infoStack.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            infoStack.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -24), // ★
+            
+            // 버튼스택
+            buttonStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            buttonStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            buttonStack.heightAnchor.constraint(equalToConstant: 50)
+        ])
+        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     
-    @objc private func closeTapped() { // 닫기 버튼 탭 시 화면을 닫습니다.
+    private func configureInfo() {
+        print("configureInfo 진입")
+        let beforeCount = infoStack.arrangedSubviews.count
+        infoStack.addArrangedSubview(makeInfoLabel("제목: \(shape.title)"))
+        infoStack.addArrangedSubview(makeInfoLabel("도형 타입: \(shape.shapeType.rawValue)"))
+        infoStack.addArrangedSubview(makeInfoLabel("주소: \(shape.address ?? "-")"))
+        if let radius = shape.radius {
+            infoStack.addArrangedSubview(makeInfoLabel("반경: \(Int(radius)) m"))
+        }
+        infoStack.addArrangedSubview(makeInfoLabel("메모: \(shape.memo ?? "-")"))
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd h:mm:ss a"
+        infoStack.addArrangedSubview(makeInfoLabel("생성일: \(dateFormatter.string(from: shape.createdAt))"))
+        if let expire = shape.expireDate {
+            infoStack.addArrangedSubview(makeInfoLabel("종료일: \(dateFormatter.string(from: expire))"))
+        } else {
+            infoStack.addArrangedSubview(makeInfoLabel("종료일: -"))
+        }
+        infoStack.addArrangedSubview(makeInfoLabel("색상: \(shape.color)"))
+        infoStack.addArrangedSubview(makeInfoLabel("ID: \(shape.id.uuidString)"))
+        print("infoStack arrangedSubviews before: \(beforeCount) → after: \(infoStack.arrangedSubviews.count)")
+    }
+    
+    
+    // MARK: - 도형 세부정보
+
+    private func makeInfoLabel(_ text: String) -> UILabel {
+        print("makeInfoLabel: \(text)")
+        let label = UILabel()
+        label.text = text
+        label.font = .systemFont(ofSize: 16)
+        label.textColor = .black
+        label.numberOfLines = 0
+        return label
+    }
+    
+    @objc private func deleteButtonTapped() {
+        let alert = UIAlertController(
+            title: "도형 삭제",
+            message: "'\(shape.title)' 도형을 삭제하시겠습니까?",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+        alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            PlaceShapeStore.shared.removeShape(id: self.shape.id)
+            self.dismiss(animated: true)
+        })
+        present(alert, animated: true)
+    }
+    @objc private func editButtonTapped() {
+        // TODO: 수정 화면 이동 구현
+    }
+    @objc private func closeTapped() {
         if let nav = navigationController {
             nav.popViewController(animated: true)
         } else {
             dismiss(animated: true, completion: nil)
         }
-    }
-    
-    private func fillData() { // 도형 데이터를 레이블에 채워 넣습니다.
-        titleLabel.text = "제목: \(shape.title)"
-        typeLabel.text = "도형 타입: \(shape.shapeType.rawValue)"
-        addressLabel.text = "주소: \(shape.address ?? "-")"
-        radiusLabel.text = "반경: \(shape.radius != nil ? String(format: "%.0f m", shape.radius!) : "-")"
-        memoLabel.text = "메모: \(shape.memo ?? "-")"
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        createdAtLabel.text = "생성일: \(dateFormatter.string(from: shape.createdAt))"
-        if let expire = shape.expireDate {
-            expireDateLabel.text = "종료일: \(dateFormatter.string(from: expire))"
-        } else {
-            expireDateLabel.text = "종료일: -"
-        }
-        colorLabel.text = "색상: \(shape.color)"
-        idLabel.text = "ID: \(shape.id.uuidString)"
     }
 }

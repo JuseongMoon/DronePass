@@ -11,12 +11,13 @@
 import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
 import NMapsMap // 네이버 지도 SDK를 가져옵니다. (지도 표시 기능)
 import CoreLocation // CoreLocation 프레임워크를 가져옵니다. (위치 관련 기능)
+import Combine
 
 extension Notification.Name {
     static let clearShapeHighlight = Notification.Name("clearShapeHighlight") // 도형 하이라이트 해제 알림 이름 정의
 }
 
-class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도 및 위치 관리를 담당하는 뷰 컨트롤러입니다.
+final class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도 및 위치 관리를 담당하는 뷰 컨트롤러입니다.
     
     // MARK: - Properties
     @IBOutlet public var naverMapView: NMFNaverMapView! // 스토리보드에 연결된 네이버 지도 뷰입니다.
@@ -25,15 +26,18 @@ class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도
     private var hasCenteredOnUser = false // 사용자의 위치로 카메라를 이동했는지 여부
     private var highlightedShapeID: UUID? // 하이라이트된 도형의 ID
     private var overlays: [NMFOverlay] = [] // 지도에 표시된 오버레이 배열
+    private var cancellables: Set<AnyCancellable> = []
     
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupMapView() // 지도 뷰 설정
-        setupLocationManager() // 위치 매니저 설정
-        drawSampleShapes() // 샘플 도형 표시
-        NotificationCenter.default.addObserver(self, selector: #selector(moveToShape(_:)), name: ShapeSelectionCoordinator.shapeSelectedOnList, object: nil) // 리스트에서 도형 선택 시 이동
-        NotificationCenter.default.addObserver(self, selector: #selector(clearHighlight), name: .clearShapeHighlight, object: nil) // 하이라이트 해제 알림 등록
+        setupMapView()
+        setupLocationManager()
+        setupLongPressGesture()
+        setupShapeStoreObserver() // PlaceShapeStore 옵저버 추가
+        drawSampleShapes()
+        NotificationCenter.default.addObserver(self, selector: #selector(moveToShape(_:)), name: ShapeSelectionCoordinator.shapeSelectedOnList, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(clearHighlight), name: .clearShapeHighlight, object: nil)
     }
     
     // MARK: - Setup Methods
@@ -63,11 +67,47 @@ class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도
         }
     }
     
-    private func drawSampleShapes() { // 샘플 도형을 지도에 표시하는 메서드입니다.
-        let shapesToShow = SampleShapeLoader.loadSampleShapes()
-        for shape in shapesToShow {
+    private func drawSampleShapes() {
+        // 샘플 도형 표시
+        let sampleShapes = SampleShapeLoader.loadSampleShapes()
+        for shape in sampleShapes {
             addOverlay(for: shape)
         }
+        
+        // PlaceShapeStore의 도형들도 표시
+        let savedShapes = PlaceShapeStore.shared.shapes
+        for shape in savedShapes {
+            addOverlay(for: shape)
+        }
+    }
+    
+    private func setupLongPressGesture() {
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        naverMapView.addGestureRecognizer(longPressGesture)
+    }
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        if gesture.state == .began {
+            let point = gesture.location(in: naverMapView)
+            let latLng = naverMapView.mapView.projection.latlng(from: point)
+            let coordinate = Coordinate(latitude: latLng.lat, longitude: latLng.lng)
+            let addVC = AddShapePopupViewController(coordinate: coordinate) { [weak self] newShape in
+                PlaceShapeStore.shared.addShape(newShape)
+                self?.addOverlay(for: newShape)
+            }
+            addVC.modalPresentationStyle = .fullScreen
+            present(addVC, animated: true)
+        }
+    }
+    
+    // PlaceShapeStore 변경 감지 및 지도 업데이트
+    private func setupShapeStoreObserver() {
+        PlaceShapeStore.shared.$shapes
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.reloadOverlays()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - CLLocationManagerDelegate
@@ -135,8 +175,22 @@ class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도
         }
     }
     
-    // MARK: - (Optional) 유틸리티 함수, 도형 선택/이동 등
-    // 필요 시 여기에 추가
+    // MARK: - 도형 추가
+    
+//    @objc func addShapeButtonTapped() {
+//        let coordinate = ... // 유저가 지도에서 지정한 위치
+//        let newShape = PlaceShape(
+//            title: "새 도형",
+//            shapeType: .circle,
+//            baseCoordinate: Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude),
+//            radius: 200, // 기본값, 사용자 입력 가능
+//            memo: "직접 추가",
+//            color: PaletteColor.blue.hex // 색상 선택 가능
+//        )
+//        // 도형 추가는 뷰모델을 통해
+//        SavedBottomSheetViewModel().addShape(newShape)
+//        // 또는 PlaceShapeStore.shared.addShape(newShape) 직접 사용
+//    }
     
     // MARK: - 리스트에서 터치하면 지도의 해당 장소로 시점을 이동
     @objc private func moveToShape(_ notification: Notification) { // 리스트에서 도형을 선택하면 해당 위치로 이동하는 메서드입니다.
@@ -183,13 +237,20 @@ class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도
         return projection.latlng(from: offsetPoint)
     }
     
-    private func reloadOverlays() { // 지도 오버레이를 모두 다시 그리는 메서드입니다.
+    private func reloadOverlays() {
         // 기존 오버레이 모두 제거
         overlays.forEach { $0.mapView = nil }
         overlays.removeAll()
-        // 다시 그리기
-        let shapesToShow = SampleShapeLoader.loadSampleShapes()
-        for shape in shapesToShow {
+        
+        // 샘플 도형 다시 그리기
+        let sampleShapes = SampleShapeLoader.loadSampleShapes()
+        for shape in sampleShapes {
+            addOverlay(for: shape)
+        }
+        
+        // PlaceShapeStore의 도형들 다시 그리기
+        let savedShapes = PlaceShapeStore.shared.shapes
+        for shape in savedShapes {
             addOverlay(for: shape)
         }
     }
@@ -205,6 +266,189 @@ class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도
     
     private func dismissSheet() { // 바텀시트 닫기 시 호출되는 메서드입니다.
         NotificationCenter.default.post(name: .clearShapeHighlight, object: nil)
-        // ... 기존 바텀시트 닫기 코드 ...
+    }
+}
+
+
+// MARK: - 도형생성
+
+final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
+    private let coordinate: Coordinate
+    private let onAdd: (PlaceShape) -> Void
+    
+    private let titleField = UITextField()
+    private let addressField = UITextField()
+    private let memoField = UITextField()
+    private let radiusField = UITextField()
+    private let saveButton = UIButton(type: .system)
+    private let cancelButton = UIButton(type: .system)
+    
+    init(coordinate: Coordinate, onAdd: @escaping (PlaceShape) -> Void) {
+        self.coordinate = coordinate
+        self.onAdd = onAdd
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        setupUI()
+        setupTapToDismissKeyboard()
+    }
+    
+    private func setupUI() {
+        let closeButton = UIButton(type: .system)
+        closeButton.setTitle("닫기", for: .normal)
+        closeButton.setTitleColor(.systemBlue, for: .normal)
+        closeButton.titleLabel?.font = .boldSystemFont(ofSize: 17)
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        view.addSubview(closeButton)
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+        ])
+        
+        // 입력 필드별 가로 스택
+        let titleRow = makeInputRow(title: "제목", field: titleField)
+        let addressRow = makeInputRow(title: "주소", field: addressField)
+        let memoRow = makeInputRow(title: "메모", field: memoField)
+        let radiusRow = makeInputRow(title: "반경(m)", field: radiusField)
+        
+        // 필드별 설정
+        titleField.placeholder = "제목을 입력하세요"
+        titleField.borderStyle = .roundedRect
+        titleField.delegate = self
+        titleField.returnKeyType = .next
+        
+        addressField.placeholder = "해당 장소의 주소를 입력하세요"
+        addressField.borderStyle = .roundedRect
+        addressField.delegate = self
+        addressField.returnKeyType = .next
+        
+        memoField.placeholder = "메모를 입력하세요"
+        memoField.borderStyle = .roundedRect
+        memoField.delegate = self
+        memoField.returnKeyType = .next
+        
+        radiusField.placeholder = "미터 단위로 입력해주세요"
+        radiusField.borderStyle = .roundedRect
+        radiusField.keyboardType = .numberPad
+        radiusField.delegate = self
+        radiusField.returnKeyType = .done
+        radiusField.inputAccessoryView = makeKeyboardToolbar()
+        
+        let stack = UIStackView(arrangedSubviews: [titleRow, addressRow, memoRow, radiusRow])
+        stack.axis = .vertical
+        stack.spacing = 20
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stack)
+        
+        let buttonStack = UIStackView(arrangedSubviews: [saveButton, cancelButton])
+        buttonStack.axis = .horizontal
+        buttonStack.spacing = 16
+        buttonStack.distribution = .fillEqually
+        buttonStack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(buttonStack)
+        
+        saveButton.setTitle("저장", for: .normal)
+        saveButton.setTitleColor(.white, for: .normal)
+        saveButton.backgroundColor = .systemBlue
+        saveButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        saveButton.layer.cornerRadius = 12
+        saveButton.layer.masksToBounds = true
+        saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
+        
+        cancelButton.setTitle("취소", for: .normal)
+        cancelButton.setTitleColor(.white, for: .normal)
+        cancelButton.backgroundColor = .systemGray
+        cancelButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        cancelButton.layer.cornerRadius = 12
+        cancelButton.layer.masksToBounds = true
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 32),
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            
+            buttonStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            buttonStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            buttonStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -32),
+            buttonStack.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    private func makeInputRow(title: String, field: UITextField) -> UIStackView {
+        let label = UILabel()
+        label.text = title
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        let row = UIStackView(arrangedSubviews: [label, field])
+        row.axis = .horizontal
+        row.spacing = 12
+        row.alignment = .center
+        return row
+    }
+    
+    // 키보드 툴바: "완료" 버튼
+    private func makeKeyboardToolbar() -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let done = UIBarButtonItem(title: "완료", style: .done, target: self, action: #selector(doneButtonTapped))
+        toolbar.items = [UIBarButtonItem.flexibleSpace(), done]
+        return toolbar
+    }
+    
+    // 텍스트필드 delegate: Return 키로 다음 필드로 이동, 마지막 필드에서 닫기
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == titleField {
+            addressField.becomeFirstResponder()
+        } else if textField == addressField {
+            memoField.becomeFirstResponder()
+        } else if textField == memoField {
+            radiusField.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
+        return true
+    }
+    
+    @objc private func doneButtonTapped() {
+        view.endEditing(true)
+    }
+    
+    // 배경 탭하면 키보드 내리기
+    private func setupTapToDismissKeyboard() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc private func saveTapped() {
+        let title = titleField.text?.isEmpty == false ? titleField.text! : "새 도형"
+        let address = addressField.text?.isEmpty == false ? addressField.text : nil
+        let memo = memoField.text
+        let radius = Double(radiusField.text ?? "") ?? 200
+        let newShape = PlaceShape(
+            title: title,
+            shapeType: .circle,
+            baseCoordinate: coordinate,
+            radius: radius,
+            memo: memo,
+            address: address,
+            color: "#FF3B30"
+        )
+        onAdd(newShape)
+        dismiss(animated: true)
+    }
+    
+    @objc private func cancelTapped() {
+        dismiss(animated: true)
     }
 }

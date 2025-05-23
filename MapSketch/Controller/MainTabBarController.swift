@@ -171,7 +171,15 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate { // 
 // MARK: - SavedBottomSheetDelegate
 extension MainTabBarController: SavedBottomSheetDelegate {
     func savedBottomSheetDidDismiss() {
-        removeBottomSheet()
+        // 저장 오버레이가 드래그로 닫힐 때, 저장탭을 직접 누른 것과 동일한 효과를 만듭니다.
+        // 1. 저장탭을 선택한 것처럼 selectedIndex를 저장탭 인덱스로 변경
+        let savedTabVC = viewControllers?[savedTabIndex]
+        selectedIndex = savedTabIndex
+        // 2. shouldSelect/didSelect를 강제로 호출하여 실제 탭을 누른 것과 동일하게 처리
+        if let tabVC = savedTabVC, let delegate = self.delegate {
+            _ = delegate.tabBarController?(self, shouldSelect: tabVC)
+            delegate.tabBarController?(self, didSelect: tabVC)
+        }
     }
 }
 

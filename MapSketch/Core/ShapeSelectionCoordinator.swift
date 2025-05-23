@@ -1,3 +1,10 @@
+//
+//  ShapeSelectionCoordinator.swift
+//  MapSketch
+//
+//  Created by 문주성 on 5/13/25.
+//
+
 import Foundation // Foundation 프레임워크를 가져옵니다. (기본적인 데이터 타입과 기능을 사용하기 위함)
 import CoreLocation // CoreLocation 프레임워크를 가져옵니다. (위치 관련 기능을 사용하기 위함)
 
