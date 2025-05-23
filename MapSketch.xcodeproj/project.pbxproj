@@ -12,7 +12,6 @@
 		632279AA2DDC059D00C55901 /* sample_shapes.json in Resources */ = {isa = PBXBuildFile; fileRef = 632279A72DDC059D00C55901 /* sample_shapes.json */; };
 		632279AB2DDC059D00C55901 /* PlaceShapeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */; };
 		632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A62DDC059D00C55901 /* PlaceShapeStore.swift */; };
-		632279AD2DDC059D00C55901 /* TestShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A82DDC059D00C55901 /* TestShape.swift */; };
 		63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */; };
 		63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A252DDCDA2400F425E9 /* PassThroughView.swift */; };
 		63793A292DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */; };
@@ -59,9 +58,7 @@
 		632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStorage.swift; sourceTree = "<group>"; };
 		632279A62DDC059D00C55901 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
 		632279A72DDC059D00C55901 /* sample_shapes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample_shapes.json; sourceTree = "<group>"; };
-		632279A82DDC059D00C55901 /* TestShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestShape.swift; sourceTree = "<group>"; };
 		63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
-		63793A242DDCD93700F425E9 /* Untitled.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Untitled.swift; sourceTree = "<group>"; };
 		63793A252DDCDA2400F425E9 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
 		63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
@@ -134,7 +131,6 @@
 			children = (
 				632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */,
 				632279A62DDC059D00C55901 /* PlaceShapeStore.swift */,
-				632279A82DDC059D00C55901 /* TestShape.swift */,
 				632279A72DDC059D00C55901 /* sample_shapes.json */,
 			);
 			path = Storage;
@@ -154,13 +150,6 @@
 				63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */,
 			);
 			path = Core;
-			sourceTree = "<group>";
-		};
-		63AFEEF82DDB14D800D8866B /* Overay */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Overay;
 			sourceTree = "<group>";
 		};
 		63C057392DD2F6530044CF9B = {
@@ -187,17 +176,15 @@
 		63C0577D2DD2F8ED0044CF9B /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				63793A252DDCDA2400F425E9 /* PassThroughView.swift */,
-				63793A242DDCD93700F425E9 /* Untitled.swift */,
-				63AFEEF82DDB14D800D8866B /* Overay */,
-				631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */,
 				63C0579C2DD313450044CF9B /* IntroViewController.swift */,
 				63C0579E2DD313F80044CF9B /* MainTabBarController.swift */,
+				63C057962DD310C10044CF9B /* MapViewController.swift */,
 				63C0579A2DD310D90044CF9B /* SettingViewController.swift */,
 				63C057982DD310D00044CF9B /* SavedViewController.swift */,
 				63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */,
-				63C057962DD310C10044CF9B /* MapViewController.swift */,
 				63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */,
+				631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */,
+				63793A252DDCDA2400F425E9 /* PassThroughView.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -233,20 +220,12 @@
 				63C0577E2DD2F8ED0044CF9B /* Model */,
 				63C0577F2DD2F8ED0044CF9B /* View */,
 				63C0577D2DD2F8ED0044CF9B /* Controller */,
-				63C057A82DD320990044CF9B /* Web */,
 				63C057812DD2F8ED0044CF9B /* Assets.xcassets */,
 				63C057822DD2F8ED0044CF9B /* Info.plist */,
 				63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */,
 				63C057862DD2F8ED0044CF9B /* Main.storyboard */,
 			);
 			path = MapSketch;
-			sourceTree = "<group>";
-		};
-		63C057A82DD320990044CF9B /* Web */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Web;
 			sourceTree = "<group>";
 		};
 		63F3F5FE2DD35156004C546F /* Frameworks */ = {
@@ -421,7 +400,6 @@
 				63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */,
 				632279AB2DDC059D00C55901 /* PlaceShapeStorage.swift in Sources */,
 				632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */,
-				632279AD2DDC059D00C55901 /* TestShape.swift in Sources */,
 				63C0579D2DD3134B0044CF9B /* IntroViewController.swift in Sources */,
 				63793A2B2DDCFAED00F425E9 /* ShapeDetailViewController.swift in Sources */,
 				63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */,

@@ -5,31 +5,30 @@
 //  Created by 문주성 on 5/13/25.
 //
 
+// 역할: 저장된 도형 목록을 바텀시트로 보여주는 뷰 컨트롤러
+// 연관기능: 바텀시트 오버레이, 테이블뷰, 제스처, 도형 상세 보기
 
-import UIKit
-import Combine
-
-
+import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
+import Combine // Combine 프레임워크를 가져옵니다. (반응형 프로그래밍)
 
 /// 터치 패스스루 컨테이너 필요 (BottomSheetContainerView.swift)
-final class SavedBottomSheetViewController: UIViewController, UIGestureRecognizerDelegate {
-    
+final class SavedBottomSheetViewController: UIViewController, UIGestureRecognizerDelegate { // 저장된 도형 목록을 바텀시트로 보여주는 뷰 컨트롤러입니다.
     
     // MARK: - UI Components
-    private let tableView = UITableView()
-    private lazy var handleTouchAreaView: UIView = {
+    private let tableView = UITableView() // 도형 목록을 표시할 테이블뷰입니다.
+    private lazy var handleTouchAreaView: UIView = { // 핸들 터치 영역 뷰입니다.
         let view = UIView()
         view.backgroundColor = .clear
         view.isUserInteractionEnabled = true
         return view
     }()
-    private lazy var handleView: UIView = {
+    private lazy var handleView: UIView = { // 바텀시트 핸들 바 뷰입니다.
         let view = UIView()
         view.backgroundColor = .systemGray3
         view.layer.cornerRadius = Metric.handleHeight / 2
         return view
     }()
-    private lazy var contentView: UIView = {
+    private lazy var contentView: UIView = { // 바텀시트 실제 내용 뷰입니다.
         let view = UIView()
         view.backgroundColor = .lightGray
         view.layer.cornerRadius = Metric.cornerRadius
@@ -42,13 +41,13 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         view.isUserInteractionEnabled = true
         return view
     }()
-    private lazy var containerView: BottomSheetContainerView = {
+    private lazy var containerView: BottomSheetContainerView = { // 바텀시트 전체를 감싸는 컨테이너 뷰입니다.
         let view = BottomSheetContainerView(sheetView: contentView)
         return view
     }()
     
     // MARK: - Constants
-    private enum Metric {
+    private enum Metric { // UI 관련 상수 모음입니다.
         static let handleHeight: CGFloat = 9
         static let handleWidth: CGFloat = 40
         static let handleTopPadding: CGFloat = 8
@@ -64,23 +63,23 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     // MARK: - Properties
-    private let viewModel: SavedBottomSheetViewModel
-    private var cancellables = Set<AnyCancellable>()
-    weak var delegate: SavedBottomSheetDelegate?
-    private var sheetHeightConstraint: NSLayoutConstraint!
-    private var initialHeight: CGFloat = 0
-    private var hasSetInitialPosition = false
+    private let viewModel: SavedBottomSheetViewModel // 바텀시트의 뷰모델입니다.
+    private var cancellables = Set<AnyCancellable>() // Combine 구독 해제용
+    weak var delegate: SavedBottomSheetDelegate? // 바텀시트 델리게이트
+    private var sheetHeightConstraint: NSLayoutConstraint! // 시트 높이 제약조건
+    private var initialHeight: CGFloat = 0 // 드래그 시작 시 높이
+    private var hasSetInitialPosition = false // 초기 위치 설정 여부
     
     // MARK: - Sheet Heights
-    private let tabBarHeight: CGFloat
-    private let collapsedHeight: CGFloat
-    private var expandedHeight: CGFloat {
+    private let tabBarHeight: CGFloat // 탭바 높이
+    private let collapsedHeight: CGFloat // 최소 높이
+    private var expandedHeight: CGFloat { // 최대 높이
         view.bounds.height - view.safeAreaInsets.top - tabBarHeight - 8
     }
-    private var midHeight: CGFloat
+    private var midHeight: CGFloat // 중간 높이
     
     // MARK: - Gestures
-    private var panGesture: UIPanGestureRecognizer!
+    private var panGesture: UIPanGestureRecognizer! // 팬 제스처
     
     // MARK: - Initialization
     init(viewModel: SavedBottomSheetViewModel,
@@ -105,7 +104,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     
     // MARK: - Lifecycle
     override func loadView() {
-        self.view = PassThroughView()
+        self.view = PassThroughView() // 터치 패스스루 뷰로 교체
     }
     
     override func viewDidLoad() {
@@ -120,8 +119,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         viewModel.loadData()
     }
     
-    
-    final class PassThroughView: UIView {
+    final class PassThroughView: UIView { // 내부에서만 사용하는 패스스루 뷰입니다.
         weak var passThroughTarget: UIView?
         
         override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -148,7 +146,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     // MARK: - Setup
-    private func setupUI() {
+    private func setupUI() { // UI 전체를 설정하는 메서드입니다.
         setupContainerView()
         setupContentView()
         setupHandleView()
@@ -156,7 +154,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         setupGestures()
     }
     
-    private func setupContainerView() {
+    private func setupContainerView() { // 컨테이너 뷰 설정
         view.addSubview(containerView)
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -170,7 +168,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         sheetHeightConstraint.isActive = true
     }
     
-    private func setupContentView() {
+    private func setupContentView() { // 내용 뷰 제약조건 설정
         contentView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
@@ -181,7 +179,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         ])
     }
     
-    private func setupHandleView() {
+    private func setupHandleView() { // 핸들 바 및 터치 영역 제약조건 설정
         contentView.addSubview(handleTouchAreaView)
         contentView.addSubview(handleView)
         handleTouchAreaView.translatesAutoresizingMaskIntoConstraints = false
@@ -202,7 +200,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         ])
     }
     
-    private func setupTableView() {
+    private func setupTableView() { // 테이블뷰 설정 및 제약조건
         contentView.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.rowHeight = Metric.rowHeight
@@ -223,7 +221,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         ])
     }
     
-    private func setupGestures() {
+    private func setupGestures() { // 제스처(드래그, 탭) 설정
         panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
         panGesture.delegate = self
         panGesture.cancelsTouchesInView = false
@@ -236,7 +234,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         handleTouchAreaView.addGestureRecognizer(tapGesture)
     }
     
-    private func setupInitialPosition() {
+    private func setupInitialPosition() { // 시트의 초기 위치를 설정합니다.
         guard !hasSetInitialPosition else { return }
         hasSetInitialPosition = true
         
@@ -251,7 +249,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     // MARK: - ViewModel Binding
-    private func bindViewModel() {
+    private func bindViewModel() { // 뷰모델과 바인딩하여 데이터 변경 시 UI를 갱신합니다.
         viewModel.$shapes
             .receive(on: DispatchQueue.main)
             .sink { [weak self] (shapes: [PlaceShape]) in
@@ -261,7 +259,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     }
     
     // MARK: - Pan Gesture Handling
-    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) { // 팬 제스처(드래그) 처리 메서드입니다.
         let translation = gesture.translation(in: view).y
         let velocity = gesture.velocity(in: view).y
         
@@ -279,13 +277,13 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         }
     }
     
-    @objc private func handleTap(_ gesture: UITapGestureRecognizer) {
+    @objc private func handleTap(_ gesture: UITapGestureRecognizer) { // 핸들 바를 탭하면 시트 높이 토글
         let currentHeight = sheetHeightConstraint.constant
         let targetHeight = currentHeight == expandedHeight ? midHeight : expandedHeight
         animateToHeight(targetHeight)
     }
     
-    private func handlePanEnd(velocity: CGFloat) {
+    private func handlePanEnd(velocity: CGFloat) { // 드래그 종료 시 처리
         if velocity > Metric.velocityThreshold {
             dismissSheet()
             return
@@ -294,7 +292,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         animateToHeight(targetHeight)
     }
     
-    private func calculateTargetHeight(velocity: CGFloat) -> CGFloat {
+    private func calculateTargetHeight(velocity: CGFloat) -> CGFloat { // 드래그 속도에 따라 목표 높이 계산
         if velocity < -Metric.velocityThreshold {
             return expandedHeight
         }
@@ -307,14 +305,14 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         return distances.min { $0.distance < $1.distance }?.height ?? midHeight
     }
     
-    private func animateToHeight(_ height: CGFloat) {
+    private func animateToHeight(_ height: CGFloat) { // 시트 높이 애니메이션
         UIView.animate(withDuration: Metric.animationDuration) {
             self.sheetHeightConstraint.constant = height
             self.view.layoutIfNeeded()
         }
     }
     
-    private func dismissSheet() {
+    private func dismissSheet() { // 시트 닫기 처리
         viewModel.dismissSheet()
         willMove(toParent: nil)
         view.removeFromSuperview()
@@ -369,7 +367,7 @@ extension SavedBottomSheetViewController: UITableViewDataSource {
         return cell
     }
     
-    private func showShapeDetail(shape: PlaceShape) {
+    private func showShapeDetail(shape: PlaceShape) { // 도형 상세 화면 표시
         let detailVC = ShapeDetailViewController(shape: shape)
         detailVC.modalPresentationStyle = .fullScreen
         if let nav = self.navigationController {

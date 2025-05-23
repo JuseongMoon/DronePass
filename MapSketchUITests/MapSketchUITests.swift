@@ -5,37 +5,40 @@
 //  Created by 문주성 on 5/13/25.
 //
 
-import XCTest
+// 역할: UI 테스트를 위한 테스트 클래스
+// 연관기능: 앱의 UI 동작 검증, 성능 테스트
 
-final class MapSketchUITests: XCTestCase {
+import XCTest // XCTest 프레임워크를 가져옵니다. (UI 테스트를 작성하기 위한 기본 프레임워크)
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+final class MapSketchUITests: XCTestCase { // UI 테스트를 위한 테스트 클래스입니다. XCTestCase를 상속받아 테스트 기능을 사용합니다.
 
-        // In UI tests it is usually best to stop immediately when a failure occurs.
+    override func setUpWithError() throws { // 각 테스트가 실행되기 전에 호출되는 설정 메서드입니다.
+        // 테스트 실행 전 준비 작업을 여기에 작성합니다.
+
+        // 테스트 실패 시 다음 테스트를 계속할지 여부를 설정합니다. false면 실패 시 바로 멈춥니다.
         continueAfterFailure = false
 
-        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+        // 테스트 실행 전 초기 상태(예: 화면 방향 등)를 설정할 수 있습니다.
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    override func tearDownWithError() throws { // 각 테스트가 끝난 후 호출되는 정리 메서드입니다.
+        // 테스트가 끝난 후 정리 작업을 여기에 작성합니다.
     }
 
-    @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
-        let app = XCUIApplication()
-        app.launch()
+    @MainActor // 이 함수는 메인 스레드에서 실행되어야 함을 나타내는 어트리뷰트입니다.
+    func testExample() throws { // 실제 UI 테스트를 작성하는 예시 메서드입니다.
+        // 테스트할 앱을 실행합니다.
+        let app = XCUIApplication() // XCUIApplication 객체를 생성합니다. (앱을 제어할 수 있는 객체)
+        app.launch() // 앱을 실행합니다.
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        // XCTAssert 같은 함수를 사용해 테스트 결과를 확인할 수 있습니다.
     }
 
-    @MainActor
-    func testLaunchPerformance() throws {
-        // This measures how long it takes to launch your application.
-        measure(metrics: [XCTApplicationLaunchMetric()]) {
-            XCUIApplication().launch()
+    @MainActor // 메인 스레드에서 실행되어야 함을 나타내는 어트리뷰트입니다.
+    func testLaunchPerformance() throws { // 앱 실행 속도를 측정하는 테스트 메서드입니다.
+        // 앱 실행 시간을 측정합니다.
+        measure(metrics: [XCTApplicationLaunchMetric()]) { // XCTApplicationLaunchMetric을 사용해 앱 실행 속도를 측정합니다.
+            XCUIApplication().launch() // 앱을 실행합니다.
         }
     }
 }

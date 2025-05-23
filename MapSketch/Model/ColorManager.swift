@@ -5,10 +5,13 @@
 //  Created by 문주성 on 5/19/25.
 //
 
-import UIKit
+// 역할: 색상 팔레트 및 HEX-UIColor 변환 유틸리티
+// 연관기능: 도형 색상 선택, 팔레트 관리, HEX 변환
+
+import UIKit // UIKit 프레임워크를 가져옵니다. (색상 및 UI 관련 기능)
 
 /// HEX로 UIColor 생성 (확장)
-extension UIColor {
+extension UIColor { // UIColor를 HEX 문자열로 초기화하는 확장입니다.
     convenience init(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if hexString.hasPrefix("#") {
@@ -24,7 +27,7 @@ extension UIColor {
 }
 
 /// 팔레트용 컬러 모델
-public enum PaletteColor: String, CaseIterable, Codable {
+public enum PaletteColor: String, CaseIterable, Codable { // 팔레트에서 사용할 색상 열거형입니다.
     // 원하는 색상을 여기에 추가 (10개 예시)
     case red        = "#FF3B30"
     case orange     = "#FF9500"
@@ -45,8 +48,8 @@ public enum PaletteColor: String, CaseIterable, Codable {
 }
 
 /// 팔레트 전체 배열 (색상 선택시 활용)
-struct ColorManager {
-    static let palette: [PaletteColor] = PaletteColor.allCases
+struct ColorManager { // 팔레트 색상 배열 및 유틸리티를 제공하는 구조체입니다.
+    static let palette: [PaletteColor] = PaletteColor.allCases // 전체 팔레트 배열
 
     /// 인덱스로 팔레트 색상 반환
     static func color(at index: Int) -> PaletteColor {

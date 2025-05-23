@@ -5,25 +5,28 @@
 //  Created by 문주성 on 5/13/25.
 //
 
-import UIKit
+// 역할: 앱의 메인 탭바 컨트롤러 (지도, 저장, 설정 탭 관리)
+// 연관기능: 탭 전환, 바텀시트 오버레이, 탭 아이콘 상태 관리
 
-class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
+import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
+
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate { // 메인 탭바 컨트롤러 클래스입니다.
     // MARK: - Properties
-    let mapTabIndex     = 0
-    let savedTabIndex   = 1
-    let settingTabIndex = 2
+    let mapTabIndex     = 0 // 지도 탭 인덱스
+    let savedTabIndex   = 1 // 저장 탭 인덱스
+    let settingTabIndex = 2 // 설정 탭 인덱스
     
-    private var currentBottomSheet: SavedBottomSheetViewController?
-    private var lastSelectedIndex = 0
-    private var isSavedSheetPresented = false
+    private var currentBottomSheet: SavedBottomSheetViewController? // 현재 표시 중인 바텀시트 뷰 컨트롤러
+    private var lastSelectedIndex = 0 // 마지막으로 선택된 탭 인덱스
+    private var isSavedSheetPresented = false // 저장 바텀시트가 표시 중인지 여부
 
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         print("📱 MainTabBarController - viewDidLoad")
-        delegate = self
-        definesPresentationContext = true
-        setupTabBar()
+        delegate = self // 탭바 컨트롤러 델리게이트 설정
+        definesPresentationContext = true // 모달 표시 시 컨텍스트 유지
+        setupTabBar() // 탭바 초기 설정
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,18 +40,18 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     }
     
     // MARK: - TabBar Setup Methods
-    private func setupTabBar() {
+    private func setupTabBar() { // 탭바 UI를 초기화하는 메서드입니다.
         print("📱 MainTabBarController - setupTabBar")
-        tabBar.tintColor = .black
-        tabBar.unselectedItemTintColor = .black
+        tabBar.tintColor = .black // 선택된 아이템 색상
+        tabBar.unselectedItemTintColor = .black // 선택되지 않은 아이템 색상
         
         // 초기 선택 탭 설정
         selectedIndex = mapTabIndex
-        updateTabBarIcons()
+        updateTabBarIcons() // 아이콘 상태 업데이트
     }
     
     // MARK: - Tab Bar Methods
-    private func updateTabBarIcons() {
+    private func updateTabBarIcons() { // 탭바 아이콘을 상태에 따라 업데이트합니다.
         print("📱 MainTabBarController - updateTabBarIcons")
         guard let items = tabBar.items else { return }
         
@@ -76,19 +79,19 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
 
     // MARK: - UITabBarControllerDelegate
     func tabBarController(_ tabBarController: UITabBarController,
-                         shouldSelect viewController: UIViewController) -> Bool {
+                         shouldSelect viewController: UIViewController) -> Bool { // 탭이 선택되기 전에 호출되는 델리게이트 메서드입니다.
         print("📱 MainTabBarController - shouldSelect: \(type(of: viewController))")
         
         // 저장 탭 클릭 시
         if viewController is SavedViewController {
             if isSavedSheetPresented {
                 print("📱 MainTabBarController - 닫기 시도")
-                removeBottomSheet()
+                removeBottomSheet() // 바텀시트 닫기
                 selectedIndex = mapTabIndex
                 return false
             } else {
                 print("📱 MainTabBarController - 열기 시도")
-                presentBottomSheet()
+                presentBottomSheet() // 바텀시트 열기
                 selectedIndex = mapTabIndex
                 return false
             }
@@ -104,13 +107,13 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     }
     
     func tabBarController(_ tabBarController: UITabBarController,
-                         didSelect viewController: UIViewController) {
+                         didSelect viewController: UIViewController) { // 탭이 선택된 후 호출되는 델리게이트 메서드입니다.
         print("📱 MainTabBarController - didSelect: \(type(of: viewController))")
         updateTabBarIcons()
     }
     
     // MARK: - Bottom Sheet Methods
-    private func presentBottomSheet() {
+    private func presentBottomSheet() { // 저장 바텀시트를 표시하는 메서드입니다.
         print("📱 MainTabBarController - presentBottomSheet 시작")
         // 이미 표시된 바텀시트가 있다면 제거
         if let existingSheet = children.first(where: { $0 is SavedBottomSheetViewController }) {
@@ -151,7 +154,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         print("📱 MainTabBarController - presentBottomSheet 완료")
     }
     
-    func removeBottomSheet() {
+    func removeBottomSheet() { // 저장 바텀시트를 닫는 메서드입니다.
         print("📱 MainTabBarController - removeBottomSheet 시작")
         // 하이라이트 해제 Notification 전송
         NotificationCenter.default.post(name: .clearShapeHighlight, object: nil)

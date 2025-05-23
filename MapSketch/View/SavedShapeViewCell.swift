@@ -1,18 +1,21 @@
 //
-//  SavedShapeCell .swift
+//  SavedShapeViewCell.swift
 //  MapSketch
 //
 //  Created by 문주성 on 5/13/25.
 //
 
-import UIKit
+// 역할: 저장된 도형 정보를 표시하는 테이블뷰 셀
+// 연관기능: 저장 목록, 도형 정보, 접근성, 버튼 액션
 
-final class SavedShapeViewCell: UITableViewCell {
+import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
+
+final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 표시하는 테이블뷰 셀 클래스입니다.
     // MARK: - UI Components
-    private let addressLabel = UILabel()
-    private let dateRangeLabel = UILabel()
-    private let statusLabel = UILabel()
-    private let infoButton: UIButton = {
+    private let addressLabel = UILabel() // 주소를 표시하는 레이블
+    private let dateRangeLabel = UILabel() // 날짜 범위를 표시하는 레이블
+    private let statusLabel = UILabel() // 상태(메모 등)를 표시하는 레이블
+    private let infoButton: UIButton = { // 정보 버튼
         let button = UIButton(type: .system)
         if let image = UIImage(systemName: "info.circle") {
             button.setImage(image, for: .normal)
@@ -21,13 +24,13 @@ final class SavedShapeViewCell: UITableViewCell {
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
-    private let stackView = UIStackView()
-    private let dateFormatter: DateFormatter = {
+    private let stackView = UIStackView() // 전체 레이아웃을 위한 스택뷰
+    private let dateFormatter: DateFormatter = { // 날짜 포맷터
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
-    var infoButtonTapped: (() -> Void)?
+    var infoButtonTapped: (() -> Void)? // info 버튼 탭 시 실행될 클로저
     
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -40,7 +43,7 @@ final class SavedShapeViewCell: UITableViewCell {
     }
     
     // MARK: - UI Setup
-    private func setupUI() {
+    private func setupUI() { // UI 구성 및 제약조건 설정
         addressLabel.font = .preferredFont(forTextStyle: .body)
         addressLabel.numberOfLines = 1
         addressLabel.textColor = .label
@@ -95,7 +98,7 @@ final class SavedShapeViewCell: UITableViewCell {
     }
     
     // MARK: - Configuration
-    func configure(with shape: PlaceShape) {
+    func configure(with shape: PlaceShape) { // 셀에 도형 데이터를 설정하는 메서드입니다.
         addressLabel.text = shape.address ?? "주소 없음"
         if let endDate = shape.expireDate {
             let start = dateFormatter.string(from: shape.createdAt)
@@ -108,7 +111,7 @@ final class SavedShapeViewCell: UITableViewCell {
         setupAccessibility(with: shape)
     }
     
-    private func setupAccessibility(with shape: PlaceShape) {
+    private func setupAccessibility(with shape: PlaceShape) { // 접근성 라벨 및 속성 설정
         let address = shape.address ?? "주소 없음"
         let dateRange = "\(dateFormatter.string(from: shape.createdAt)) ~ \(dateFormatter.string(from: shape.expireDate ?? Date()))"
         let status = shape.memo ?? "메모 없음"
@@ -117,14 +120,14 @@ final class SavedShapeViewCell: UITableViewCell {
         isAccessibilityElement = true
     }
     
-    override func prepareForReuse() {
+    override func prepareForReuse() { // 셀이 재사용될 때 호출됩니다.
         super.prepareForReuse()
         addressLabel.text = nil
         dateRangeLabel.text = nil
         statusLabel.text = nil
     }
     
-    func setLightTheme() {
+    func setLightTheme() { // 라이트 테마 색상 적용
         addressLabel.textColor = .black
         dateRangeLabel.textColor = .black
         statusLabel.textColor = .black
@@ -132,17 +135,17 @@ final class SavedShapeViewCell: UITableViewCell {
         contentView.backgroundColor = .white
     }
     
-    override func setSelected(_ selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) { // 셀 선택 시 배경색 변경
         super.setSelected(selected, animated: true)
         contentView.backgroundColor = selected ? UIColor.systemBlue : UIColor.white
     }
 
-    override func setHighlighted(_ highlighted: Bool, animated: Bool) {
+    override func setHighlighted(_ highlighted: Bool, animated: Bool) { // 셀 하이라이트 시 배경색 변경
         super.setHighlighted(highlighted, animated: true)
         contentView.backgroundColor = highlighted ? UIColor.systemBlue : UIColor.white
     }
     
-    @objc private func infoButtonAction() {
+    @objc private func infoButtonAction() { // info 버튼 탭 시 클로저 실행
         infoButtonTapped?()
     }
 }
