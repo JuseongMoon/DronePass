@@ -57,10 +57,8 @@ final class ShapeDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        print("ShapeDetailViewcontroller viewDidLoad 진입")
         setupLayout()
         configureInfo()
-        print("infoStack subviews: \(infoStack.arrangedSubviews.count)")
     }
     
     
@@ -150,29 +148,47 @@ final class ShapeDetailViewController: UIViewController {
         editButton.addTarget(self, action: #selector(editButtonTapped), for: .touchUpInside)
     }
     
-    private func configureInfo() {
-        print("configureInfo 진입")
-        let beforeCount = infoStack.arrangedSubviews.count
-        infoStack.addArrangedSubview(makeInfoLabel("제목: \(shape.title)"))
-        infoStack.addArrangedSubview(makeInfoLabel("도형 타입: \(shape.shapeType.rawValue)"))
-        infoStack.addArrangedSubview(makeInfoLabel("주소: \(shape.address ?? "-")"))
-        if let radius = shape.radius {
-            infoStack.addArrangedSubview(makeInfoLabel("반경: \(Int(radius)) m"))
-        }
-        infoStack.addArrangedSubview(makeInfoLabel("메모: \(shape.memo ?? "-")"))
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd h:mm:ss a"
-        infoStack.addArrangedSubview(makeInfoLabel("생성일: \(dateFormatter.string(from: shape.createdAt))"))
-        if let expire = shape.expireDate {
-            infoStack.addArrangedSubview(makeInfoLabel("종료일: \(dateFormatter.string(from: expire))"))
-        } else {
-            infoStack.addArrangedSubview(makeInfoLabel("종료일: -"))
-        }
-        infoStack.addArrangedSubview(makeInfoLabel("색상: \(shape.color)"))
-        infoStack.addArrangedSubview(makeInfoLabel("ID: \(shape.id.uuidString)"))
-        print("infoStack arrangedSubviews before: \(beforeCount) → after: \(infoStack.arrangedSubviews.count)")
+    private func makeInfoRow(title: String, value: String) -> UIStackView {
+        let label = UILabel()
+        label.text = title
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        let valueLabel = UILabel()
+        valueLabel.text = value
+        valueLabel.font = .systemFont(ofSize: 16)
+        valueLabel.textColor = .label
+        valueLabel.numberOfLines = 0
+        valueLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        valueLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let row = UIStackView(arrangedSubviews: [label, valueLabel])
+        row.axis = .horizontal
+        row.spacing = 12
+        row.alignment = .center
+        row.distribution = .fill
+
+        return row
     }
     
+    private func configureInfo() {
+         infoStack.addArrangedSubview(makeInfoRow(title: "제목", value: shape.title))
+         infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName))
+         infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
+         if let radius = shape.radius {
+             infoStack.addArrangedSubview(makeInfoRow(title: "반경(m)", value: String(format: "%.0f", radius)))
+         }
+         infoStack.addArrangedSubview(makeInfoRow(title: "메모", value: shape.memo ?? "-"))
+         let dateFormatter = DateFormatter()
+         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+         infoStack.addArrangedSubview(makeInfoRow(title: "시작일", value: dateFormatter.string(from: shape.startedAt)))
+         if let expire = shape.expireDate {
+             infoStack.addArrangedSubview(makeInfoRow(title: "종료일", value: dateFormatter.string(from: expire)))
+         }
+        
+    }
     
     // MARK: - 도형 세부정보
 

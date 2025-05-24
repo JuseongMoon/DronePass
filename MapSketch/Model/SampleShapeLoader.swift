@@ -19,7 +19,7 @@ final class SampleShapeLoader { // 샘플 도형 데이터를 로드하는 클�
         do {
             let data = try Data(contentsOf: url) // JSON 파일의 내용을 데이터로 읽어옵니다.
             let decoder = JSONDecoder() // JSON 디코더를 생성합니다.
-            decoder.dateDecodingStrategy = .iso8601 // 날짜 형식을 ISO8601로 설정합니다. (createdAt, expireDate 필드용)
+            decoder.dateDecodingStrategy = .iso8601 // 날짜 형식을 ISO8601로 설정합니다. (startedAt, expireDate 필드용)
             let shapes = try decoder.decode([PlaceShape].self, from: data) // JSON 데이터를 PlaceShape 배열로 디코딩합니다.
             return shapes // 디코딩된 도형 배열을 반환합니다.
         } catch {

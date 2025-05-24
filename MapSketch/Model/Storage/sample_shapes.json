@@ -8,7 +8,7 @@
     "memo": "Circle 01",
     "address": "서울특별시 종로구 세종대로 110",
     "expireDate": "2025-01-14T12:00:00Z",
-    "createdAt": "2024-05-19T12:00:00Z",
+    "startedAt": "2024-05-19T12:00:00Z",
     "color": "#FF3B30"
   },
   {
@@ -20,7 +20,7 @@
     "memo": "Circle 02",
     "address": "서울특별시 강남구 테헤란로 521",
     "expireDate": "2024-09-22T12:01:00Z",
-    "createdAt": "2024-05-19T12:01:00Z",
+    "startedAt": "2024-05-19T12:01:00Z",
     "color": "#FFD700"
   },
   {
@@ -32,7 +32,7 @@
     "memo": "Circle 03",
     "address": "서울특별시 중구 한강대로 405",
     "expireDate": "2024-08-13T12:02:00Z",
-    "createdAt": "2024-05-19T12:02:00Z",
+    "startedAt": "2024-05-19T12:02:00Z",
     "color": "#34C759"
   },
   {
@@ -44,7 +44,7 @@
     "memo": "Circle 04",
     "address": "경기도 성남시 분당구 판교역로 235",
     "expireDate": "2024-07-19T12:03:00Z",
-    "createdAt": "2024-05-19T12:03:00Z",
+    "startedAt": "2024-05-19T12:03:00Z",
     "color": "#FF9500"
   },
   {
@@ -56,7 +56,7 @@
     "memo": "Circle 05",
     "address": "경기도 안양시 동안구 시민대로 180",
     "expireDate": "2025-03-18T12:04:00Z",
-    "createdAt": "2024-05-19T12:04:00Z",
+    "startedAt": "2024-05-19T12:04:00Z",
     "color": "#007AFF"
   },
   {
@@ -68,7 +68,7 @@
     "memo": "Circle 06",
     "address": "서울특별시 노원구",
     "expireDate": "2025-01-10T12:05:00Z",
-    "createdAt": "2024-05-19T12:05:00Z",
+    "startedAt": "2024-05-19T12:05:00Z",
     "color": "#AF52DE"
   },
   {
@@ -80,7 +80,7 @@
     "memo": "Circle 07",
     "address": "경기도 수원시 영통구 광교로 156",
     "expireDate": "2025-01-28T12:06:00Z",
-    "createdAt": "2024-05-19T12:06:00Z",
+    "startedAt": "2024-05-19T12:06:00Z",
     "color": "#FF2D55"
   },
   {
@@ -92,7 +92,7 @@
     "memo": "Circle 08",
     "address": "경기도 성남시 분당구",
     "expireDate": "2025-01-13T12:07:00Z",
-    "createdAt": "2024-05-19T12:07:00Z",
+    "startedAt": "2024-05-19T12:07:00Z",
     "color": "#FFCC00"
   },
   {
@@ -104,7 +104,7 @@
     "memo": "Circle 09",
     "address": "서울특별시 은평구",
     "expireDate": "2024-08-18T12:08:00Z",
-    "createdAt": "2024-05-19T12:08:00Z",
+    "startedAt": "2024-05-19T12:08:00Z",
     "color": "#5856D6"
   },
   {
@@ -116,7 +116,7 @@
     "memo": "Circle 10",
     "address": "서울특별시 도봉구",
     "expireDate": "2025-01-23T12:09:00Z",
-    "createdAt": "2024-05-19T12:09:00Z",
+    "startedAt": "2024-05-19T12:09:00Z",
     "color": "#34C759"
   },
   {
@@ -128,7 +128,7 @@
     "memo": "Circle 11",
     "address": "경기도 부천시 길주로 210",
     "expireDate": "2025-01-18T12:10:00Z",
-    "createdAt": "2024-05-19T12:10:00Z",
+    "startedAt": "2024-05-19T12:10:00Z",
     "color": "#FF3B30"
   },
   {
@@ -140,7 +140,7 @@
     "memo": "Circle 12",
     "address": "경기도 고양시 일산동구",
     "expireDate": "2025-01-25T12:11:00Z",
-    "createdAt": "2024-05-19T12:11:00Z",
+    "startedAt": "2024-05-19T12:11:00Z",
     "color": "#FFD700"
   }
 ]

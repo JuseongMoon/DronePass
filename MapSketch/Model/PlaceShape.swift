@@ -16,6 +16,15 @@ public enum ShapeType: String, Codable { // 도형의 타입을 정의하는 열
     case rectangle // 사각형 도형
     case polygon // 다각형 도형
     case polyline // 선형 도형
+    
+    public var koreanName: String {
+        switch self {
+        case .circle:    return "원"
+        case .rectangle: return "사각형"
+        case .polygon:   return "다각형"
+        case .polyline:  return "선"
+        }
+    }
 }
 
 // ✅ color: PaletteColor(컬러매니저 기반 enum)로 변경
@@ -34,7 +43,7 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
 
     public var memo: String? // 도형에 대한 메모입니다. (선택적)
     public var expireDate: Date? // 도형의 만료 날짜입니다. (선택적)
-    public let createdAt: Date // 도형이 생성된 날짜입니다.
+    public let startedAt: Date // 도형이 생성된 날짜입니다.
 
     /// **팔레트 컬러 (색상 팔레트에서 고름)**
     public var color: String // 도형의 색상입니다. (16진수 색상 코드)
@@ -51,7 +60,7 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
         memo: String? = nil, // 도형에 대한 메모를 설정합니다. (선택적)
         address: String? = nil, // 도형의 주소를 설정합니다. (선택적)
         expireDate: Date? = nil, // 도형의 만료 날짜를 설정합니다. (선택적)
-        createdAt: Date = Date(), // 도형의 생성 날짜를 설정합니다. 기본값은 현재 시간입니다.
+        startedAt: Date = Date(), // 도형의 생성 날짜를 설정합니다. 기본값은 현재 시간입니다.
         color: String = "#007AFF" // 도형의 색상을 설정합니다. 기본값은 파란색입니다.
     ) {
         self.id = id
@@ -65,7 +74,7 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
         self.memo = memo
         self.address = address
         self.expireDate = expireDate
-        self.createdAt = createdAt
+        self.startedAt = startedAt
         self.color = color
     }
 }

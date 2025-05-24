@@ -12,13 +12,14 @@ import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤�
 import NMapsMap // 네이버 지도 SDK를 가져옵니다. (지도 표시 기능)
 import CoreLocation // CoreLocation 프레임워크를 가져옵니다. (위치 관련 기능)
 import Combine
+import MapSketch // NaverGeocodingService 사용을 위해 필요 (모듈명에 따라 조정)
 
 extension Notification.Name {
     static let clearShapeHighlight = Notification.Name("clearShapeHighlight") // 도형 하이라이트 해제 알림 이름 정의
 }
 
 final class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도 및 위치 관리를 담당하는 뷰 컨트롤러입니다.
-    
+
     // MARK: - Properties
     @IBOutlet public var naverMapView: NMFNaverMapView! // 스토리보드에 연결된 네이버 지도 뷰입니다.
     
@@ -27,7 +28,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
     private var highlightedShapeID: UUID? // 하이라이트된 도형의 ID
     private var overlays: [NMFOverlay] = [] // 지도에 표시된 오버레이 배열
     private var cancellables: Set<AnyCancellable> = []
-    
+
     // MARK: - View Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,18 +40,18 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         NotificationCenter.default.addObserver(self, selector: #selector(moveToShape(_:)), name: ShapeSelectionCoordinator.shapeSelectedOnList, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(clearHighlight), name: .clearShapeHighlight, object: nil)
     }
-    
+
     // MARK: - Setup Methods
     private func setupMapView() { // 지도 뷰의 초기 설정을 담당합니다.
         // 현위치 버튼 표시 및 활성화
         naverMapView.showLocationButton = true
         naverMapView.mapView.locationOverlay.hidden = false
-        
+
         // 카메라 초기 위치 설정 (서울 중심 예시)
         let position = NMFCameraPosition(NMGLatLng(lat: 37.575563, lng: 126.976793), zoom: 14)
         naverMapView.mapView.moveCamera(NMFCameraUpdate(position: position))
     }
-    
+
     private func setupLocationManager() { // 위치 매니저의 초기 설정을 담당합니다.
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -66,7 +67,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             break
         }
     }
-    
+
     private func drawSampleShapes() {
         // 샘플 도형 표시
         let sampleShapes = SampleShapeLoader.loadSampleShapes()
@@ -80,7 +81,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             addOverlay(for: shape)
         }
     }
-    
+
     private func setupLongPressGesture() {
         let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         naverMapView.addGestureRecognizer(longPressGesture)
@@ -119,14 +120,14 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             break
         }
     }
-    
+
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
         let latlng = NMGLatLng(lat: location.coordinate.latitude, lng: location.coordinate.longitude)
-        
+
         // 현위치 오버레이 표시
         naverMapView.mapView.locationOverlay.location = latlng
-        
+
         // 최초 한 번만 지도 카메라 이동
         if !hasCenteredOnUser {
             hasCenteredOnUser = true
@@ -139,7 +140,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("Location manager failed with error: \(error.localizedDescription)")
     }
-    
+
     // MARK: - Overlay Drawing
     /// 저장된 PlaceShape를 지도 오버레이로 추가
     func addOverlay(for shape: PlaceShape) { // 도형 데이터를 지도에 오버레이로 추가하는 메서드입니다.
@@ -164,17 +165,17 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
                 highlightOverlay.center = center
                 highlightOverlay.radius = radius + 8
                 highlightOverlay.fillColor = UIColor.clear
-                highlightOverlay.outlineWidth = 6
-                highlightOverlay.outlineColor = .systemBlue
+                highlightOverlay.outlineWidth = 5
+                highlightOverlay.outlineColor = .systemRed
                 highlightOverlay.mapView = naverMapView.mapView
                 overlays.append(highlightOverlay) // 배열에 추가
             }
-            // TODO: 사각형/다각형 등은 여기에 추가
+        // TODO: 사각형/다각형 등은 여기에 추가
         default:
             break
         }
     }
-    
+
     // MARK: - 도형 추가
     
 //    @objc func addShapeButtonTapped() {
@@ -278,10 +279,15 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     
     private let titleField = UITextField()
     private let addressField = UITextField()
-    private let memoField = UITextField()
     private let radiusField = UITextField()
+    private let memoField = UITextField()
+    private let startDatePicker = UIDatePicker()
+    private let endDatePicker = UIDatePicker()
+    private let dateOnlySwitch = UISwitch()
     private let saveButton = UIButton(type: .system)
     private let cancelButton = UIButton(type: .system)
+    
+    private let dateOnlyKey = "isDateOnlyMode"
     
     init(coordinate: Coordinate, onAdd: @escaping (PlaceShape) -> Void) {
         self.coordinate = coordinate
@@ -295,6 +301,60 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         view.backgroundColor = .systemBackground
         setupUI()
         setupTapToDismissKeyboard()
+        setupDatePickers()
+        fetchAddressForCoordinate()
+    }
+    
+    private func fetchAddressForCoordinate() {
+        NaverGeocodingService.shared.fetchAddress(latitude: coordinate.latitude, longitude: coordinate.longitude) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let address):
+                    self?.addressField.text = address
+                case .failure:
+                    self?.addressField.text = "주소를 찾을 수 없음"
+                }
+            }
+        }
+    }
+    
+    private func setupDatePickers() {
+        startDatePicker.datePickerMode = .dateAndTime
+        startDatePicker.preferredDatePickerStyle = .compact
+        startDatePicker.locale = Locale(identifier: "ko_KR")
+        
+        endDatePicker.datePickerMode = .dateAndTime
+        endDatePicker.preferredDatePickerStyle = .compact
+        endDatePicker.locale = Locale(identifier: "ko_KR")
+        
+        // 체크박스 상태에 따라 초기 설정
+        dateOnlySwitch.isOn = UserDefaults.standard.bool(forKey: dateOnlyKey)
+        updateDatePickerMode()
+        
+        // 체크박스 상태 변경 감지
+        dateOnlySwitch.addTarget(self, action: #selector(dateOnlySwitchChanged), for: .valueChanged)
+        
+        // 시작일이 변경되면 종료일의 최소값을 시작일로 설정
+        startDatePicker.addTarget(self, action: #selector(startDateChanged), for: .valueChanged)
+    }
+    
+    @objc private func startDateChanged() {
+        endDatePicker.minimumDate = startDatePicker.date
+        if endDatePicker.date < startDatePicker.date {
+            endDatePicker.date = startDatePicker.date
+        }
+    }
+    
+    @objc private func dateOnlySwitchChanged() {
+        updateDatePickerMode()
+        // 체크박스 상태 저장
+        UserDefaults.standard.set(dateOnlySwitch.isOn, forKey: dateOnlyKey)
+    }
+    
+    private func updateDatePickerMode() {
+        let mode: UIDatePicker.Mode = dateOnlySwitch.isOn ? .date : .dateAndTime
+        startDatePicker.datePickerMode = mode
+        endDatePicker.datePickerMode = mode
     }
     
     private func setupUI() {
@@ -305,16 +365,17 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         view.addSubview(closeButton)
-        NSLayoutConstraint.activate([
-            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
-        ])
         
         // 입력 필드별 가로 스택
         let titleRow = makeInputRow(title: "제목", field: titleField)
         let addressRow = makeInputRow(title: "주소", field: addressField)
-        let memoRow = makeInputRow(title: "메모", field: memoField)
         let radiusRow = makeInputRow(title: "반경(m)", field: radiusField)
+        
+        // 날짜 선택기 스택
+        let dateOnlyRow = makeDateOnlyRow()
+        let startDateRow = makeDatePickerRow(title: "시작일", picker: startDatePicker)
+        let endDateRow = makeDatePickerRow(title: "종료일", picker: endDatePicker)
+        let memoRow = makeInputRow(title: "메모", field: memoField)
         
         // 필드별 설정
         titleField.placeholder = "제목을 입력하세요"
@@ -327,19 +388,30 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         addressField.delegate = self
         addressField.returnKeyType = .next
         
-        memoField.placeholder = "메모를 입력하세요"
-        memoField.borderStyle = .roundedRect
-        memoField.delegate = self
-        memoField.returnKeyType = .next
-        
         radiusField.placeholder = "미터 단위로 입력해주세요"
         radiusField.borderStyle = .roundedRect
         radiusField.keyboardType = .numberPad
         radiusField.delegate = self
-        radiusField.returnKeyType = .done
+        radiusField.returnKeyType = .next
         radiusField.inputAccessoryView = makeKeyboardToolbar()
         
-        let stack = UIStackView(arrangedSubviews: [titleRow, addressRow, memoRow, radiusRow])
+        memoField.placeholder = "메모를 입력하세요"
+        memoField.borderStyle = .roundedRect
+        memoField.delegate = self
+        memoField.returnKeyType = .done
+        
+        
+        // MARK: - 입력창 순서
+
+        let stack = UIStackView(arrangedSubviews: [
+            titleRow,
+            addressRow,
+            radiusRow,
+            startDateRow,
+            endDateRow,
+            dateOnlyRow,
+            memoRow
+        ])
         stack.axis = .vertical
         stack.spacing = 20
         stack.translatesAutoresizingMaskIntoConstraints = false
@@ -369,6 +441,9 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            closeButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            
             stack.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 32),
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
@@ -380,12 +455,40 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         ])
     }
     
-    private func makeInputRow(title: String, field: UITextField) -> UIStackView {
+    private func makeDateOnlyRow() -> UIStackView {
+        let label = UILabel()
+        label.text = "일단위 입력"
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+
+        // 오른쪽 정렬을 위해 spacer(UIView) 추가
+        let spacer = UIView()
+        spacer.translatesAutoresizingMaskIntoConstraints = false
+
+        let row = UIStackView(arrangedSubviews: [label, spacer, dateOnlySwitch])
+        row.axis = .horizontal
+        row.spacing = 8
+        row.alignment = .center
+
+        // spacer가 남은 공간을 모두 차지하도록
+        spacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        spacer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        return row
+    }
+    
+    private func makeDatePickerRow(title: String, picker: UIDatePicker) -> UIStackView {
+        
         let label = UILabel()
         label.text = title
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        let row = UIStackView(arrangedSubviews: [label, field])
+
+        let pickerHeight: CGFloat = 34 // 또는 36, 38 등 적정값 시각적으로 확인 후 조정
+        picker.heightAnchor.constraint(equalToConstant: pickerHeight).isActive = true
+
+        let row = UIStackView(arrangedSubviews: [label, picker])
         row.axis = .horizontal
         row.spacing = 12
         row.alignment = .center
@@ -406,9 +509,9 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         if textField == titleField {
             addressField.becomeFirstResponder()
         } else if textField == addressField {
-            memoField.becomeFirstResponder()
-        } else if textField == memoField {
             radiusField.becomeFirstResponder()
+        } else if textField == radiusField {
+            memoField.becomeFirstResponder()
         } else {
             textField.resignFirstResponder()
         }
@@ -442,13 +545,46 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
             radius: radius,
             memo: memo,
             address: address,
-            color: "#FF3B30"
+            expireDate: endDatePicker.date, startedAt: startDatePicker.date,
+            color: "#007AFF"
         )
         onAdd(newShape)
         dismiss(animated: true)
     }
     
     @objc private func cancelTapped() {
-        dismiss(animated: true)
+        // 하나라도 입력되어 있으면 경고
+        let isEdited =
+            !(titleField.text ?? "").isEmpty ||
+            !(addressField.text ?? "").isEmpty ||
+            !(radiusField.text ?? "").isEmpty ||
+            !(memoField.text ?? "").isEmpty
+        
+        if isEdited {
+            let alert = UIAlertController(
+                title: "작성 중인 정보가 있습니다",
+                message: "작성 중인 내용이 모두 사라집니다. 닫으시겠습니까?",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "닫기", style: .destructive) { [weak self] _ in
+                self?.dismiss(animated: true)
+            })
+            present(alert, animated: true)
+        } else {
+            dismiss(animated: true)
+        }
+    }
+    
+    private func makeInputRow(title: String, field: UITextField) -> UIStackView {
+        let label = UILabel()
+        label.text = title
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        let row = UIStackView(arrangedSubviews: [label, field])
+        row.axis = .horizontal
+        row.spacing = 12
+        row.alignment = .center
+        return row;
     }
 }
