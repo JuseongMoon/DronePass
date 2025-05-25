@@ -16,6 +16,9 @@
 		63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A252DDCDA2400F425E9 /* PassThroughView.swift */; };
 		63793A292DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */; };
 		63793A2B2DDCFAED00F425E9 /* ShapeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */; };
+		6392D8B52DE340AF0016C49D /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B42DE3409C0016C49D /* SettingManager.swift */; };
+		6392D8B72DE345750016C49D /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B62DE345750016C49D /* ShapeManager.swift */; };
+		6392D8B92DE346770016C49D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B82DE346770016C49D /* LocationManager.swift */; };
 		63AFEF062DDB75A600D8866B /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF052DDB75A100D8866B /* ColorManager.swift */; };
 		63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */; };
 		63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C057812DD2F8ED0044CF9B /* Assets.xcassets */; };
@@ -64,6 +67,9 @@
 		63793A252DDCDA2400F425E9 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
 		63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
+		6392D8B42DE3409C0016C49D /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
+		6392D8B62DE345750016C49D /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
+		6392D8B82DE346770016C49D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		63AFEF052DDB75A100D8866B /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* MapSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -198,6 +204,9 @@
 		63C0577E2DD2F8ED0044CF9B /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				6392D8B82DE346770016C49D /* LocationManager.swift */,
+				6392D8B62DE345750016C49D /* ShapeManager.swift */,
+				6392D8B42DE3409C0016C49D /* SettingManager.swift */,
 				632279A92DDC059D00C55901 /* Storage */,
 				63AFEF052DDB75A100D8866B /* ColorManager.swift */,
 				63C057A02DD31F570044CF9B /* PlaceShape.swift */,
@@ -396,6 +405,7 @@
 			files = (
 				63C057992DD310D40044CF9B /* SavedViewController.swift in Sources */,
 				63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */,
+				6392D8B92DE346770016C49D /* LocationManager.swift in Sources */,
 				63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */,
 				63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */,
 				63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */,
@@ -403,6 +413,7 @@
 				63793A292DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift in Sources */,
 				63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */,
 				63C057A32DD31F700044CF9B /* Coordinate.swift in Sources */,
+				6392D8B72DE345750016C49D /* ShapeManager.swift in Sources */,
 				63C057A12DD31F5C0044CF9B /* PlaceShape.swift in Sources */,
 				63C057972DD310CC0044CF9B /* MapViewController.swift in Sources */,
 				63C0579B2DD310DE0044CF9B /* SettingViewController.swift in Sources */,
@@ -414,6 +425,7 @@
 				63793A2B2DDCFAED00F425E9 /* ShapeDetailViewController.swift in Sources */,
 				63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */,
 				63AFEF062DDB75A600D8866B /* ColorManager.swift in Sources */,
+				6392D8B52DE340AF0016C49D /* SettingManager.swift in Sources */,
 				631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */,
 				63F3F5FD2DD34C00004C546F /* AppInfo.swift in Sources */,
 			);
@@ -475,7 +487,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;
@@ -507,7 +519,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;

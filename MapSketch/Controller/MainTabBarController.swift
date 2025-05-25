@@ -16,9 +16,9 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate { // 
     let savedTabIndex   = 1 // 저장 탭 인덱스
     let settingTabIndex = 2 // 설정 탭 인덱스
     
-    private var currentBottomSheet: SavedBottomSheetViewController? // 현재 표시 중인 바텀시트 뷰 컨트롤러
-    private var lastSelectedIndex = 0 // 마지막으로 선택된 탭 인덱스
-    private var isSavedSheetPresented = false // 저장 바텀시트가 표시 중인지 여부
+    var currentBottomSheet: SavedBottomSheetViewController? // 현재 표시 중인 바텀시트 뷰 컨트롤러
+    var lastSelectedIndex = 0 // 마지막으로 선택된 탭 인덱스
+    var isSavedSheetPresented = false // 저장 바텀시트가 표시 중인지 여부
 
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
@@ -113,7 +113,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate { // 
     }
     
     // MARK: - Bottom Sheet Methods
-    private func presentBottomSheet() { // 저장 바텀시트를 표시하는 메서드입니다.
+    func presentBottomSheet() { // 저장 바텀시트를 표시하는 메서드입니다.
         print("📱 MainTabBarController - presentBottomSheet 시작")
         // 이미 표시된 바텀시트가 있다면 제거
         if let existingSheet = children.first(where: { $0 is SavedBottomSheetViewController }) {

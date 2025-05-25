@@ -66,7 +66,7 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
         statusLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         
         radiusLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        radiusLabel.textColor = .systemGray
+        radiusLabel.textColor = .systemGray2
         radiusLabel.numberOfLines = 1
         radiusLabel.textAlignment = .right
         radiusLabel.setContentHuggingPriority(.required, for: .horizontal)

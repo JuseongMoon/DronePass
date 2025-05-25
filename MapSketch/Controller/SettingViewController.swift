@@ -103,36 +103,20 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         setupTableView()         // 테이블뷰 설정
     }
     
-    // MARK: - 날씨데이터 데모
-
-    class WeatherInfo: NSObject {
-        let weatherService = WeatherService()
-        
-        func fetchWeather(for coordinate: CLLocationCoordinate2D) {
-            let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-            Task {
-                do {
-                    let weather = try await weatherService.weather(for: location)
-                    let current = weather.currentWeather
-                    print("기온:", current.temperature.value, current.temperature.unit.symbol)
-                    print("풍속:", current.wind.speed.value, current.wind.speed.unit.symbol)
-                    print("풍향:", current.wind.direction.value)
-                } catch {
-                    print("날씨 데이터 오류:", error.localizedDescription)
-                }
-            }
-        }
-    }
-    
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        locationManager.startUpdatingLocation() // 화면이 보일 때 위치 정보 받기 시작
+        LocationManager.shared.startUpdatingLocation()
+        // 위치 업데이트를 받으면 일출/일몰 정보 업데이트
+        NotificationCenter.default.addObserver(self, 
+                                             selector: #selector(handleLocationUpdate(_:)), 
+                                             name: NSNotification.Name("LocationDidUpdate"), 
+                                             object: nil)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        locationManager.stopUpdatingLocation() // 화면이 사라질 때 위치 정보 받기 중지
+        LocationManager.shared.stopUpdatingLocation()
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup(설정)
@@ -157,27 +141,27 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
             infoContainerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             infoContainerView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             infoContainerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            infoContainerView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.23),
+            infoContainerView.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.11), // 인포박스 상하크기
             
             // 헤더라벨은 infoContainerView의 top에 붙임
-            infoContainerHeaderLabel.topAnchor.constraint(equalTo: infoContainerView.topAnchor, constant: 12),
+            infoContainerHeaderLabel.topAnchor.constraint(equalTo: infoContainerView.topAnchor, constant: 11),
             infoContainerHeaderLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             infoContainerHeaderLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
-            temperatureLabel.topAnchor.constraint(equalTo: infoContainerHeaderLabel.bottomAnchor, constant: 10),
-            temperatureLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
-            temperatureLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
-            
-            windSpeedLabel.topAnchor.constraint(equalTo: temperatureLabel.bottomAnchor, constant: 6),
-            windSpeedLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
-            windSpeedLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
-            
-            windDirectionLabel.topAnchor.constraint(equalTo: windSpeedLabel.bottomAnchor, constant: 6),
-            windDirectionLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
-            windDirectionLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+//            temperatureLabel.topAnchor.constraint(equalTo: infoContainerHeaderLabel.bottomAnchor, constant: 10),
+//            temperatureLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+//            temperatureLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+//            
+//            windSpeedLabel.topAnchor.constraint(equalTo: temperatureLabel.bottomAnchor, constant: 6),
+//            windSpeedLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+//            windSpeedLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
+//            
+//            windDirectionLabel.topAnchor.constraint(equalTo: windSpeedLabel.bottomAnchor, constant: 6),
+//            windDirectionLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
+//            windDirectionLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
             // sunriseLabel(일출 라벨) 위치
-            sunriseLabel.topAnchor.constraint(equalTo: windDirectionLabel.bottomAnchor, constant: 12),
+            sunriseLabel.topAnchor.constraint(equalTo: windDirectionLabel.bottomAnchor, constant: 42), // 높이. 날씨 살리고 여기 줄일것
             sunriseLabel.leadingAnchor.constraint(equalTo: infoContainerView.leadingAnchor, constant: 16),
             sunriseLabel.trailingAnchor.constraint(equalTo: infoContainerView.trailingAnchor, constant: -16),
             
@@ -196,9 +180,9 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     // 위치(GPS) 관련 매니저 설정
     private func setupLocationManager() {
-        locationManager.delegate = self                          // 내 컨트롤러에서 위치 업데이트 콜백 받기
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest // 가장 정확한 위치 정보 요청
-        locationManager.requestWhenInUseAuthorization()           // 앱 실행 중에만 위치 사용 허가 요청
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
     }
     
     // 설정 목록(테이블뷰) 관련 설정
@@ -206,12 +190,23 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         settingsTableView.delegate = self        // 테이블뷰 이벤트 처리 위임
         settingsTableView.dataSource = self      // 테이블뷰 데이터 제공 위임
         settingsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingCell") // 셀 등록
+        
+    }
+    
+    // MARK: - Location Update Handler
+    @objc private func handleLocationUpdate(_ notification: Notification) {
+        if let location = notification.userInfo?["location"] as? CLLocation {
+            updateSunriseSunsetInfo(for: location)
+            
+            // 일출/일몰 알림이 활성화되어 있다면 알림 스케줄링
+            if SettingManager.shared.isSunriseSunsetAlarmEnabled {
+                SettingManager.shared.scheduleSunriseSunsetAlarms(for: location.coordinate)
+            }
+        }
     }
     
     // 현재 위치 기반으로 일출/일몰 시간 계산 및 UI 업데이트
-    private func updateSunriseSunsetInfo() {
-        guard let location = currentLocation else { return } // 위치 정보가 없으면 아무것도 하지 않음
-        
+    private func updateSunriseSunsetInfo(for location: CLLocation) {
         // Solar 라이브러리를 활용해 일출/일몰 계산 (위치, 날짜 기반)
         if let solar = Solar(for: Date(), coordinate: location.coordinate) {
             let dateFormatter = DateFormatter()
@@ -235,26 +230,28 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         }
     }
     
-    private func updateWeatherInfo(for coordinate: CLLocationCoordinate2D) {
-        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
-        Task {
-            do {
-                let weather = try await weatherService.weather(for: location)
-                let current = weather.currentWeather
-                DispatchQueue.main.async {
-                    self.temperatureLabel.text = "기온: \(current.temperature.value)\(current.temperature.unit.symbol)"
-                    self.windSpeedLabel.text = "풍속: \(current.wind.speed.value)\(current.wind.speed.unit.symbol)"
-                    self.windDirectionLabel.text = "풍향: \(Int(current.wind.direction.value))°"
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    self.temperatureLabel.text = "기온: -"
-                    self.windSpeedLabel.text = "풍속: -"
-                    self.windDirectionLabel.text = "풍향: -"
-                }
-            }
-        }
-    }
+    // MARK: - 기상관련 구현 코드 (일단 비활성화중)
+
+//    private func updateWeatherInfo(for coordinate: CLLocationCoordinate2D) {
+//        let location = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
+//        Task {
+//            do {
+//                let weather = try await weatherService.weather(for: location)
+//                let current = weather.currentWeather
+//                DispatchQueue.main.async {
+//                    self.temperatureLabel.text = "기온: \(current.temperature.value)\(current.temperature.unit.symbol)"
+//                    self.windSpeedLabel.text = "풍속: \(current.wind.speed.value)\(current.wind.speed.unit.symbol)"
+//                    self.windDirectionLabel.text = "풍향: \(Int(current.wind.direction.value))°"
+//                }
+//            } catch {
+//                DispatchQueue.main.async {
+//                    self.temperatureLabel.text = "기온: -"
+//                    self.windSpeedLabel.text = "풍속: -"
+//                    self.windDirectionLabel.text = "풍향: -"
+//                }
+//            }
+//        }
+//    }
     
     // MARK: - UITableViewDataSource(테이블뷰 데이터 관련)
     // 섹션 개수 (지도/알림/기타)
@@ -265,7 +262,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     // 각 섹션별 셀 개수
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
-        case 0: return 3 // 알림 설정
+        case 0: return 2 // 알림 설정
         case 1: return 2 // 기타 설정
         default: return 0
         }
@@ -282,20 +279,32 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     // 각 셀(행) 구성
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath)
+        let cellStyle: UITableViewCell.CellStyle = .subtitle
+        let cell = UITableViewCell(style: cellStyle, reuseIdentifier: "SettingCell")
+        
         switch indexPath.section {
-
         case 0: // 알림 설정
             switch indexPath.row {
             case 0:
-                cell.textLabel?.text = "도형 만료 알림"
-                cell.accessoryView = UISwitch()   // 스위치 표시
+                cell.textLabel?.text = "종료일 알림"
+                cell.detailTextLabel?.text = "종료일 7일전 알림을 받습니다."
+                cell.detailTextLabel?.textColor = .secondaryLabel
+                cell.detailTextLabel?.font = .systemFont(ofSize: 13)
+                let endDateSwitch = UISwitch()
+                endDateSwitch.isOn = SettingManager.shared.isEndDateAlarmEnabled
+                endDateSwitch.tag = 0
+                endDateSwitch.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
+                cell.accessoryView = endDateSwitch
             case 1:
                 cell.textLabel?.text = "일출 일몰 알림"
-                cell.accessoryView = UISwitch()
-            case 2:
-                cell.textLabel?.text = "알림음"
-                cell.accessoryView = UISwitch()
+                cell.detailTextLabel?.text = "일출 일몰 30분전, 10분전 알림을 받습니다."
+                cell.detailTextLabel?.textColor = .secondaryLabel
+                cell.detailTextLabel?.font = .systemFont(ofSize: 13)
+                let sunriseSwitch = UISwitch()
+                sunriseSwitch.isOn = SettingManager.shared.isSunriseSunsetAlarmEnabled
+                sunriseSwitch.tag = 1
+                sunriseSwitch.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
+                cell.accessoryView = sunriseSwitch
             default: break
             }
         case 1: // 기타 설정
@@ -319,23 +328,39 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         // TODO: 각 설정 항목 선택 시 처리 추가 예정
     }
     
-    // MARK: - CLLocationManagerDelegate(위치정보 콜백)
-    // 위치 업데이트 이벤트
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }  // 마지막 위치 정보 사용
-        currentLocation = location                            // 저장
-        updateSunriseSunsetInfo()                             // UI 갱신
-        updateWeatherInfo(for: location.coordinate)
-        locationManager.stopUpdatingLocation()                // 한 번만 받으면 중지
+    // MARK: - Switch Action
+    @objc private func switchValueChanged(_ sender: UISwitch) {
+        switch sender.tag {
+        case 0:
+            SettingManager.shared.isEndDateAlarmEnabled = sender.isOn
+            if sender.isOn {
+                // ShapeManager를 통해 저장된 도형 데이터를 가져와서 알림 스케줄링
+                let shapes = ShapeManager.shared.getAllShapes()
+                SettingManager.shared.scheduleEndDateAlarms(for: shapes)
+            }
+        case 1:
+            SettingManager.shared.isSunriseSunsetAlarmEnabled = sender.isOn
+            if sender.isOn, let location = LocationManager.shared.currentLocation {
+                // 현재 위치 기반으로 일출/일몰 알림 스케줄링
+                SettingManager.shared.scheduleSunriseSunsetAlarms(for: location.coordinate)
+            }
+        default:
+            break
+        }
+        settingsTableView.reloadData()
     }
     
-    // 위치 정보 오류 처리
+    // MARK: - CLLocationManagerDelegate(위치정보 콜백)
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        currentLocation = location
+        updateSunriseSunsetInfo(for: location)
+        locationManager.stopUpdatingLocation()
+    }
+    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("위치 업데이트 실패: \(error.localizedDescription)")
         sunriseLabel.text = "일출 시간: 위치 정보 없음"
         sunsetLabel.text = "일몰 시간: 위치 정보 없음"
-        temperatureLabel.text = "기온: -"
-        windSpeedLabel.text = "풍속: -"
-        windDirectionLabel.text = "풍향: -"
     }
 }

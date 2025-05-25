@@ -69,6 +69,7 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     private var sheetHeightConstraint: NSLayoutConstraint! // 시트 높이 제약조건
     private var initialHeight: CGFloat = 0 // 드래그 시작 시 높이
     private var hasSetInitialPosition = false // 초기 위치 설정 여부
+    private var selectedShapeID: UUID? // 선택상태
     
     // MARK: - Sheet Heights
     private let tabBarHeight: CGFloat // 탭바 높이
@@ -107,8 +108,11 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         self.view = PassThroughView() // 터치 패스스루 뷰로 교체
     }
     
+    // MARK: - viewDidLoad
     override func viewDidLoad() {
         super.viewDidLoad()
+        NotificationCenter.default.addObserver(self, selector: #selector(highlightShapeInList(_:)), name: Notification.Name("HighlightShapeInList"), object: nil)
+
         view.backgroundColor = .clear
         if let passView = self.view as? PassThroughView {
             passView.passThroughTarget = containerView
@@ -117,7 +121,17 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
         setupUI()
         bindViewModel()
         viewModel.loadData()
+        
     }
+    
+    // 리스트에서 하이라이트하는 코드
+    @objc private func highlightShapeInList(_ notification: Notification) {
+        guard let shape = notification.object as? PlaceShape else { return }
+        guard let idx = viewModel.shapes.firstIndex(where: { $0.id == shape.id }) else { return }
+        let indexPath = IndexPath(row: idx, section: 0)
+        tableView.selectRow(at: indexPath, animated: true, scrollPosition: .middle)
+    }
+    
     
     final class PassThroughView: UIView { // 내부에서만 사용하는 패스스루 뷰입니다.
         weak var passThroughTarget: UIView?

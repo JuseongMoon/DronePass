@@ -3,7 +3,6 @@
 //  MapSketch
 //
 //  Created by 문주성 on 5/13/25.
-//
 
 // 역할: 네이버 지도를 표시하고 도형 오버레이를 관리하는 뷰 컨트롤러
 // 연관기능: 위치 추적, 도형 표시, 하이라이트, 지도 이동
@@ -194,7 +193,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             if shape.id == highlightedShapeID {
                 let highlightOverlay = NMFCircleOverlay()
                 highlightOverlay.center = center
-                highlightOverlay.radius = radius + 8
+                highlightOverlay.radius = radius + 2
                 highlightOverlay.fillColor = UIColor.clear
                 highlightOverlay.outlineWidth = 5
                 highlightOverlay.outlineColor = .systemRed
@@ -310,10 +309,11 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
 
     @objc private func handleOverlayTapped(_ notification: Notification) {
         guard let shape = notification.object as? PlaceShape else { return }
-        print("[DEBUG] handleOverlayTapped 호출됨! id=\(shape.id)")
         highlightedShapeID = shape.id
         reloadOverlays()
-        NotificationCenter.default.post(name: Notification.Name("HighlightShapeInList"), object: shape)
+        if let tabBarController = self.tabBarController as? MainTabBarController {
+            tabBarController.openSavedTabAndHighlightShape(shape)
+        }
     }
 }
 
@@ -389,6 +389,14 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
                currentExpireDate != initial.expireDate
     }
     
+    private func topMostViewController() -> UIViewController? {
+        var topController = UIApplication.shared.windows.first { $0.isKeyWindow }?.rootViewController
+        while let presentedViewController = topController?.presentedViewController {
+            topController = presentedViewController
+        }
+        return topController
+    }
+    
     @objc private func cancelTapped() {
         if hasChanges() {
             let alert = UIAlertController(
@@ -400,7 +408,7 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
             alert.addAction(UIAlertAction(title: "닫기", style: .destructive) { [weak self] _ in
                 self?.dismiss(animated: true)
             })
-            present(alert, animated: true)
+            self.present(alert, animated: true)
         } else {
             dismiss(animated: true)
         }
@@ -436,6 +444,17 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         setupTapToDismissKeyboard()
         setupDatePickers()
         fetchAddressForCoordinate()
+        // ⭐️ 새 도형 생성 시에도 초기값 저장
+        if initialValues == nil {
+            initialValues = (
+                title: titleField.text,
+                address: addressField.text,
+                memo: memoField.text,
+                radius: Double(radiusField.text ?? ""),
+                startedAt: startDatePicker.date,
+                expireDate: endDatePicker.date
+            )
+        }
     }
     
     private func fetchAddressForCoordinate() {
@@ -706,5 +725,19 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     
     public func setInitialAddress(_ address: String?) {
         addressField.text = address
+    }
+}
+
+extension MainTabBarController {
+    func openSavedTabAndHighlightShape(_ shape: PlaceShape) {
+        if !isSavedSheetPresented {
+            presentBottomSheet()
+            // 바텀시트가 완전히 준비된 뒤에 알림 전송 (0.5초 정도로 충분)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                NotificationCenter.default.post(name: Notification.Name("HighlightShapeInList"), object: shape)
+            }
+        } else {
+            NotificationCenter.default.post(name: Notification.Name("HighlightShapeInList"), object: shape)
+        }
     }
 }
