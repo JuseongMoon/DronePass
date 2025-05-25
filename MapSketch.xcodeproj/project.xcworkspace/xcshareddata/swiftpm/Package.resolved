@@ -1,6 +1,15 @@
 {
-  "originHash" : "7e776a9f5c59beffd508fcaf65913b75c78f8867da469e517125a03b839d1f0b",
+  "originHash" : "87b4cf56d362a5a0f48c31fee9a3bd44527feeab5119b9e2dff49453c9acdfa7",
   "pins" : [
+    {
+      "identity" : "solar",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ceeK/Solar.git",
+      "state" : {
+        "revision" : "c2b96f2d5fb7f835b91cefac5e83101f54643901",
+        "version" : "3.0.1"
+      }
+    },
     {
       "identity" : "spm-nmapsgeometry",
       "kind" : "remoteSourceControl",

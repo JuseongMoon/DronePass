@@ -39,6 +39,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         drawSampleShapes()
         NotificationCenter.default.addObserver(self, selector: #selector(moveToShape(_:)), name: ShapeSelectionCoordinator.shapeSelectedOnList, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(clearHighlight), name: .clearShapeHighlight, object: nil)
+        // ⭐️ 오버레이 터치 알림 옵저버 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(handleOverlayTapped(_:)), name: Notification.Name("ShapeOverlayTapped"), object: nil)
     }
 
     // MARK: - Setup Methods
@@ -68,12 +70,15 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         }
     }
 
+    
+    // MARK: - 도형 표시
+
     private func drawSampleShapes() {
-        // 샘플 도형 표시
-        let sampleShapes = SampleShapeLoader.loadSampleShapes()
-        for shape in sampleShapes {
-            addOverlay(for: shape)
-        }
+//        // 샘플 도형 표시
+//        let sampleShapes = SampleShapeLoader.loadSampleShapes()
+//        for shape in sampleShapes {
+//            addOverlay(for: shape)
+//        }
         
         // PlaceShapeStore의 도형들도 표시
         let savedShapes = PlaceShapeStore.shared.shapes
@@ -92,12 +97,39 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             let point = gesture.location(in: naverMapView)
             let latLng = naverMapView.mapView.projection.latlng(from: point)
             let coordinate = Coordinate(latitude: latLng.lat, longitude: latLng.lng)
-            let addVC = AddShapePopupViewController(coordinate: coordinate) { [weak self] newShape in
-                PlaceShapeStore.shared.addShape(newShape)
-                self?.addOverlay(for: newShape)
+            
+            // 리버스 지오코딩으로 주소 조회
+            NaverGeocodingService.shared.fetchAddress(latitude: coordinate.latitude, longitude: coordinate.longitude) { [weak self] result in
+                DispatchQueue.main.async {
+                    let addVC = AddShapePopupViewController(coordinate: coordinate) { [weak self] newShape in
+                        PlaceShapeStore.shared.addShape(newShape)
+                        self?.addOverlay(for: newShape)
+                    }
+                    addVC.modalPresentationStyle = .fullScreen
+                    
+                    switch result {
+                    case .success(let address):
+                        addVC.setInitialAddress(address)
+                    case .failure:
+                        addVC.setInitialAddress(nil)
+                    }
+                    
+                    self?.present(addVC, animated: true)
+                }
             }
-            addVC.modalPresentationStyle = .fullScreen
-            present(addVC, animated: true)
+        }
+    }
+    
+    // MARK: - Geocoding
+    private func fetchAddressForCoordinate(_ coordinate: Coordinate, completion: @escaping (String?) -> Void) {
+        NaverGeocodingService.shared.fetchAddress(latitude: coordinate.latitude, longitude: coordinate.longitude) { result in
+            switch result {
+            case .success(let address):
+                completion(address)
+            case .failure(let error):
+                print("주소 조회 실패:", error.localizedDescription)
+                completion(nil)
+            }
         }
     }
     
@@ -148,7 +180,6 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         case .circle:
             guard let radius = shape.radius else { return }
             let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
-            // 기본 원
             let circleOverlay = NMFCircleOverlay()
             circleOverlay.center = center
             circleOverlay.radius = radius
@@ -157,8 +188,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             circleOverlay.outlineWidth = 2
             circleOverlay.outlineColor = mainColor
             circleOverlay.mapView = naverMapView.mapView
-            overlays.append(circleOverlay) // 배열에 추가
-            
+            overlays.append(circleOverlay)
+
             // 하이라이트 대상이면 두 번째(더 진한) 원 추가
             if shape.id == highlightedShapeID {
                 let highlightOverlay = NMFCircleOverlay()
@@ -168,7 +199,15 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
                 highlightOverlay.outlineWidth = 5
                 highlightOverlay.outlineColor = .systemRed
                 highlightOverlay.mapView = naverMapView.mapView
-                overlays.append(highlightOverlay) // 배열에 추가
+                overlays.append(highlightOverlay)
+            }
+
+            // ⭐️ 오버레이 터치 이벤트 등록 및 추적 로그
+            print("[DEBUG] addOverlay: 도형 오버레이 등록됨, id=\(shape.id)")
+            circleOverlay.touchHandler = { [weak self] _ in
+                print("[DEBUG] 오버레이 터치됨! id=\(shape.id)")
+                NotificationCenter.default.post(name: Notification.Name("ShapeOverlayTapped"), object: shape)
+                return true
             }
         // TODO: 사각형/다각형 등은 여기에 추가
         default:
@@ -244,10 +283,10 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         overlays.removeAll()
         
         // 샘플 도형 다시 그리기
-        let sampleShapes = SampleShapeLoader.loadSampleShapes()
-        for shape in sampleShapes {
-            addOverlay(for: shape)
-        }
+//        let sampleShapes = SampleShapeLoader.loadSampleShapes()
+//        for shape in sampleShapes {
+//            addOverlay(for: shape)
+//        }
         
         // PlaceShapeStore의 도형들 다시 그리기
         let savedShapes = PlaceShapeStore.shared.shapes
@@ -268,6 +307,14 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
     private func dismissSheet() { // 바텀시트 닫기 시 호출되는 메서드입니다.
         NotificationCenter.default.post(name: .clearShapeHighlight, object: nil)
     }
+
+    @objc private func handleOverlayTapped(_ notification: Notification) {
+        guard let shape = notification.object as? PlaceShape else { return }
+        print("[DEBUG] handleOverlayTapped 호출됨! id=\(shape.id)")
+        highlightedShapeID = shape.id
+        reloadOverlays()
+        NotificationCenter.default.post(name: Notification.Name("HighlightShapeInList"), object: shape)
+    }
 }
 
 
@@ -276,6 +323,8 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
 final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     private let coordinate: Coordinate
     private let onAdd: (PlaceShape) -> Void
+    private var isEditMode: Bool = false
+    private var originalShapeId: UUID?
     
     private let titleField = UITextField()
     private let addressField = UITextField()
@@ -289,12 +338,96 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     
     private let dateOnlyKey = "isDateOnlyMode"
     
+    // 초기값 저장용 프로퍼티
+    private var initialValues: (title: String?, address: String?, memo: String?, radius: Double?, startedAt: Date?, expireDate: Date?)?
+    
     init(coordinate: Coordinate, onAdd: @escaping (PlaceShape) -> Void) {
         self.coordinate = coordinate
         self.onAdd = onAdd
         super.init(nibName: nil, bundle: nil)
     }
+    
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    public func setInitialValues(title: String?, address: String?, memo: String?, radius: Double?, startedAt: Date?, expireDate: Date?, shapeId: UUID? = nil) {
+        isEditMode = true
+        originalShapeId = shapeId
+        
+        // 초기값 저장
+        initialValues = (title, address, memo, radius, startedAt, expireDate)
+        
+        // UI에 값 설정
+        titleField.text = title
+        addressField.text = address
+        memoField.text = memo
+        if let radius = radius {
+            radiusField.text = String(format: "%.0f", radius)
+        }
+        if let startedAt = startedAt {
+            startDatePicker.date = startedAt
+        }
+        if let expireDate = expireDate {
+            endDatePicker.date = expireDate
+        }
+    }
+    
+    private func hasChanges() -> Bool {
+        guard let initial = initialValues else { return false }
+        
+        let currentTitle = titleField.text
+        let currentAddress = addressField.text
+        let currentMemo = memoField.text
+        let currentRadius = Double(radiusField.text ?? "")
+        let currentStartedAt = startDatePicker.date
+        let currentExpireDate = endDatePicker.date
+        
+        return currentTitle != initial.title ||
+               currentAddress != initial.address ||
+               currentMemo != initial.memo ||
+               currentRadius != initial.radius ||
+               currentStartedAt != initial.startedAt ||
+               currentExpireDate != initial.expireDate
+    }
+    
+    @objc private func cancelTapped() {
+        if hasChanges() {
+            let alert = UIAlertController(
+                title: "수정 중인 정보가 있습니다",
+                message: "수정 중인 내용이 모두 사라집니다. 닫으시겠습니까?",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "취소", style: .cancel))
+            alert.addAction(UIAlertAction(title: "닫기", style: .destructive) { [weak self] _ in
+                self?.dismiss(animated: true)
+            })
+            present(alert, animated: true)
+        } else {
+            dismiss(animated: true)
+        }
+    }
+    
+    @objc private func saveTapped() {
+        let title = titleField.text?.isEmpty == false ? titleField.text! : "새 도형"
+        let address = addressField.text?.isEmpty == false ? addressField.text : nil
+        let memo = memoField.text
+        let radius = Double(radiusField.text ?? "") ?? 200
+        
+        let newShape = PlaceShape(
+            id: originalShapeId ?? UUID(),  // 수정 모드면 기존 ID 사용
+            title: title,
+            shapeType: .circle,
+            baseCoordinate: coordinate,
+            radius: radius,
+            memo: memo,
+            address: address,
+            expireDate: endDatePicker.date,
+            startedAt: startDatePicker.date,
+            color: "#007AFF"
+        )
+        
+        onAdd(newShape)
+        dismiss(animated: true)
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -306,6 +439,11 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     }
     
     private func fetchAddressForCoordinate() {
+        // 수정 모드에서는 주소 자동 조회를 하지 않음
+        if addressField.text != nil {
+            return
+        }
+        
         NaverGeocodingService.shared.fetchAddress(latitude: coordinate.latitude, longitude: coordinate.longitude) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
@@ -347,6 +485,27 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
     
     @objc private func dateOnlySwitchChanged() {
         updateDatePickerMode()
+        
+        if dateOnlySwitch.isOn {
+            // 시작일을 오전 12:00으로 설정
+            let calendar = Calendar.current
+            var components = calendar.dateComponents([.year, .month, .day], from: startDatePicker.date)
+            components.hour = 0
+            components.minute = 0
+            if let newDate = calendar.date(from: components) {
+                startDatePicker.date = newDate
+            }
+            
+            // 종료일을 오후 11:59로 설정
+            components = calendar.dateComponents([.year, .month, .day], from: endDatePicker.date)
+            components.hour = 23
+            components.minute = 59
+            components.second = 59
+            if let newDate = calendar.date(from: components) {
+                endDatePicker.date = newDate
+            }
+        }
+        
         // 체크박스 상태 저장
         UserDefaults.standard.set(dateOnlySwitch.isOn, forKey: dateOnlyKey)
     }
@@ -533,49 +692,6 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         view.endEditing(true)
     }
     
-    @objc private func saveTapped() {
-        let title = titleField.text?.isEmpty == false ? titleField.text! : "새 도형"
-        let address = addressField.text?.isEmpty == false ? addressField.text : nil
-        let memo = memoField.text
-        let radius = Double(radiusField.text ?? "") ?? 200
-        let newShape = PlaceShape(
-            title: title,
-            shapeType: .circle,
-            baseCoordinate: coordinate,
-            radius: radius,
-            memo: memo,
-            address: address,
-            expireDate: endDatePicker.date, startedAt: startDatePicker.date,
-            color: "#007AFF"
-        )
-        onAdd(newShape)
-        dismiss(animated: true)
-    }
-    
-    @objc private func cancelTapped() {
-        // 하나라도 입력되어 있으면 경고
-        let isEdited =
-            !(titleField.text ?? "").isEmpty ||
-            !(addressField.text ?? "").isEmpty ||
-            !(radiusField.text ?? "").isEmpty ||
-            !(memoField.text ?? "").isEmpty
-        
-        if isEdited {
-            let alert = UIAlertController(
-                title: "작성 중인 정보가 있습니다",
-                message: "작성 중인 내용이 모두 사라집니다. 닫으시겠습니까?",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "닫기", style: .destructive) { [weak self] _ in
-                self?.dismiss(animated: true)
-            })
-            present(alert, animated: true)
-        } else {
-            dismiss(animated: true)
-        }
-    }
-    
     private func makeInputRow(title: String, field: UITextField) -> UIStackView {
         let label = UILabel()
         label.text = title
@@ -586,5 +702,9 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         row.spacing = 12
         row.alignment = .center
         return row;
+    }
+    
+    public func setInitialAddress(_ address: String?) {
+        addressField.text = address
     }
 }

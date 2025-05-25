@@ -13,6 +13,17 @@ final class SavedBottomSheetViewController: UIViewController {
         super.viewDidLoad()
         setupTableView()
         setupBindings()
+        // ⭐️ 지도 오버레이 하이라이트 알림 옵저버 등록
+        NotificationCenter.default.addObserver(self, selector: #selector(handleHighlightShape(_:)), name: Notification.Name("HighlightShapeInList"), object: nil)
+    }
+    
+    @objc private func handleHighlightShape(_ notification: Notification) {
+        guard let shape = notification.object as? PlaceShape else { return }
+        print("[DEBUG] handleHighlightShape 호출됨! id=\(shape.id)")
+        if let idx = viewModel.shapes.firstIndex(where: { $0.id == shape.id }) {
+            let indexPath = IndexPath(row: idx, section: 0)
+            tableView.selectRow(at: indexPath, animated: true, scrollPosition: .middle)
+        }
     }
     
     // MARK: - Setup

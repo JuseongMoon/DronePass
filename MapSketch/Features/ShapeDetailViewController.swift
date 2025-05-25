@@ -14,6 +14,7 @@ final class ShapeDetailViewController: UIViewController { // 도형 상세 정�
     private let colorLabel = UILabel() // 색상을 표시할 레이블
     private let idLabel = UILabel() // ID를 표시할 레이블
     private let stackView = UIStackView() // 레이블들을 수직으로 배치할 스택뷰
+    private let editButton = UIButton(type: .system)
     
     init(shape: PlaceShape) { // 초기화 메서드입니다.
         self.shape = shape // 전달받은 도형 데이터를 저장합니다.
@@ -30,6 +31,7 @@ final class ShapeDetailViewController: UIViewController { // 도형 상세 정�
         setupLabels() // 레이블들의 기본 설정을 합니다.
         setupStackView() // 스택뷰를 설정합니다.
         setupCloseButton() // 닫기 버튼을 설정합니다.
+        setupEditButton() // 수정하기 버튼을 설정합니다.
         fillData() // 도형 데이터를 UI에 표시합니다.
     }
     
@@ -71,12 +73,56 @@ final class ShapeDetailViewController: UIViewController { // 도형 상세 정�
         ])
     }
     
+    private func setupEditButton() {
+        editButton.setTitle("수정하기", for: .normal)
+        editButton.setTitleColor(.white, for: .normal)
+        editButton.backgroundColor = .systemBlue
+        editButton.titleLabel?.font = .boldSystemFont(ofSize: 18)
+        editButton.layer.cornerRadius = 12
+        editButton.layer.masksToBounds = true
+        editButton.translatesAutoresizingMaskIntoConstraints = false
+        editButton.addTarget(self, action: #selector(editTapped), for: .touchUpInside)
+        view.addSubview(editButton)
+        NSLayoutConstraint.activate([
+            editButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            editButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            editButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            editButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
     @objc private func closeTapped() { // 닫기 버튼이 탭되었을 때 호출되는 메서드입니다.
         if let nav = navigationController { // 네비게이션 컨트롤러가 있다면
             nav.popViewController(animated: true) // 이전 화면으로 돌아갑니다.
         } else { // 네비게이션 컨트롤러가 없다면
             dismiss(animated: true, completion: nil) // 모달을 닫습니다.
         }
+    }
+    
+    @objc private func editTapped() {
+        let editVC = AddShapePopupViewController(
+            coordinate: shape.baseCoordinate,
+            onAdd: { [weak self] newShape in
+                // 기존 도형을 삭제하고 새 도형으로 교체 (ID 유지)
+                PlaceShapeStore.shared.removeShape(id: self?.shape.id ?? newShape.id)
+                PlaceShapeStore.shared.addShape(newShape)
+                self?.dismiss(animated: true)
+            }
+        )
+        // 기존 값 전달 (AddShapePopupViewController에 프로퍼티 추가 필요)
+        editVC.modalPresentationStyle = .fullScreen
+        // 아래는 AddShapePopupViewController에 public 프로퍼티로 선언되어 있어야 함
+        if let vc = editVC as? AddShapePopupViewController {
+            vc.setInitialValues(
+                title: shape.title,
+                address: shape.address,
+                memo: shape.memo,
+                radius: shape.radius,
+                startedAt: shape.startedAt,
+                expireDate: shape.expireDate
+            )
+        }
+        present(editVC, animated: true)
     }
     
     private func fillData() { // 도형 데이터를 UI에 표시하는 메서드입니다.

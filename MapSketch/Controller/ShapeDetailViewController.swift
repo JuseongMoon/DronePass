@@ -5,9 +5,13 @@
 //  Created by 문주성 on 5/13/25.
 //
 import UIKit
+import CoreLocation
 
 final class ShapeDetailViewController: UIViewController {
-    private let shape: PlaceShape
+    private let shapeId: UUID
+    private var shape: PlaceShape? {
+        return PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeId })
+    }
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -45,7 +49,7 @@ final class ShapeDetailViewController: UIViewController {
     private let buttonStack = UIStackView()
     
     init(shape: PlaceShape) {
-        self.shape = shape
+        self.shapeId = shape.id
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) {
@@ -61,7 +65,12 @@ final class ShapeDetailViewController: UIViewController {
         configureInfo()
     }
     
-    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // infoStack 초기화 후 최신 데이터로 다시 구성
+        infoStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        configureInfo()
+    }
     
     // MARK: - viewDidLayoutSubviews에서 각 뷰의 frame 찍기
     override func viewDidLayoutSubviews() {
@@ -174,20 +183,21 @@ final class ShapeDetailViewController: UIViewController {
     }
     
     private func configureInfo() {
-         infoStack.addArrangedSubview(makeInfoRow(title: "제목", value: shape.title))
-         infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName))
-         infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
-         if let radius = shape.radius {
-             infoStack.addArrangedSubview(makeInfoRow(title: "반경(m)", value: String(format: "%.0f", radius)))
-         }
-         infoStack.addArrangedSubview(makeInfoRow(title: "메모", value: shape.memo ?? "-"))
-         let dateFormatter = DateFormatter()
-         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-         infoStack.addArrangedSubview(makeInfoRow(title: "시작일", value: dateFormatter.string(from: shape.startedAt)))
-         if let expire = shape.expireDate {
-             infoStack.addArrangedSubview(makeInfoRow(title: "종료일", value: dateFormatter.string(from: expire)))
-         }
-        
+        guard let shape = self.shape else { return }
+        infoStack.addArrangedSubview(makeInfoRow(title: "제목", value: shape.title))
+        infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName))
+        infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
+        if let radius = shape.radius {
+            infoStack.addArrangedSubview(makeInfoRow(title: "반경(m)", value: String(format: "%.0f", radius)))
+        }
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        infoStack.addArrangedSubview(makeInfoRow(title: "시작일", value: dateFormatter.string(from: shape.startedAt)))
+        if let expire = shape.expireDate {
+            infoStack.addArrangedSubview(makeInfoRow(title: "종료일", value: dateFormatter.string(from: expire)))
+        }
+        infoStack.addArrangedSubview(makeInfoRow(title: "메모", value: shape.memo ?? "-"))
+
     }
     
     // MARK: - 도형 세부정보
@@ -205,19 +215,41 @@ final class ShapeDetailViewController: UIViewController {
     @objc private func deleteButtonTapped() {
         let alert = UIAlertController(
             title: "도형 삭제",
-            message: "'\(shape.title)' 도형을 삭제하시겠습니까?",
+            message: "'\(shape?.title ?? "")' 도형을 삭제하시겠습니까?",
             preferredStyle: .alert
         )
         alert.addAction(UIAlertAction(title: "취소", style: .cancel))
         alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
-            PlaceShapeStore.shared.removeShape(id: self.shape.id)
+            PlaceShapeStore.shared.removeShape(id: self.shapeId)
             self.dismiss(animated: true)
         })
         present(alert, animated: true)
     }
     @objc private func editButtonTapped() {
-        // TODO: 수정 화면 이동 구현
+        let editVC = AddShapePopupViewController(
+            coordinate: shape?.baseCoordinate ?? Coordinate(latitude: 0, longitude: 0)
+        ) { [weak self] newShape in
+            guard let self = self else { return }
+            // 기존 도형을 삭제하고 새 도형으로 교체
+            PlaceShapeStore.shared.removeShape(id: self.shapeId)
+            PlaceShapeStore.shared.addShape(newShape)
+            self.dismiss(animated: true)
+        }
+        editVC.modalPresentationStyle = UIModalPresentationStyle.fullScreen
+        
+        // 기존 값과 ID 전달
+        editVC.setInitialValues(
+            title: shape?.title ?? "",
+            address: shape?.address,
+            memo: shape?.memo,
+            radius: shape?.radius,
+            startedAt: shape?.startedAt ?? Date(),
+            expireDate: shape?.expireDate,
+            shapeId: self.shapeId  // 기존 도형의 ID 전달
+        )
+        
+        present(editVC, animated: true)
     }
     @objc private func closeTapped() {
         if let nav = navigationController {

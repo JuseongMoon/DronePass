@@ -74,13 +74,16 @@ public final class PlaceShapeStore {
     }
     
     public func updateShape(_ shape: PlaceShape) {
-        if let index = shapes.firstIndex(where: { $0.id == shape.id }) {
-            shapes[index] = shape
+        if let idx = shapes.firstIndex(where: { $0.id == shape.id }) {
+            var newShapes = shapes
+            newShapes[idx] = shape
+            shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
             do {
                 try saveShapes()
             } catch {
-                print("도형 업데이트 실패: \(error)")
+                print("도형 수정 실패: \(error)")
             }
         }
     }
 }
+
