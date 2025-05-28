@@ -27,7 +27,7 @@ class BottomSheetContainerView: UIView { // 바텀시트의 터치 패스스루�
     required init?(coder: NSCoder) { // 스토리보드 초기화는 지원하지 않습니다.
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Setup
     private func setupView() { // 뷰의 초기 설정을 담당합니다.
         backgroundColor = .clear // 배경색을 투명하게 설정합니다.

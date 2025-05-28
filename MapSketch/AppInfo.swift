@@ -19,9 +19,10 @@ struct AppInfo { // AppInfo 구조체를 정의합니다. 앱 전체에서 사�
     // MARK: - App Description
     struct Description { // 앱 설명과 관련된 정보를 담는 구조체입니다.
         static let intro: String = """
-  MapSketch는 드론 비행 허가지를 시각화하고,
+  MapSketch는 
+  드론 비행 허가지를 시각화하고
   반경 기반 도형을 지도 위에 생성·저장하는
-  개인용 지도 메모 플랫폼입니다.
+  개인용 지도 메모 어플입니다.
   """ // 앱의 소개 문구입니다.
 
         static let features: [String] = [ // 앱의 주요 기능들을 배열로 정의합니다.
@@ -30,6 +31,11 @@ struct AppInfo { // AppInfo 구조체를 정의합니다. 앱 전체에서 사�
             "지도 메모 저장", // 지도에 메모를 저장하는 기능
             "개인용 데이터 관리" // 사용자의 데이터를 관리하는 기능
         ]
+        
+        static let contact: String = """
+        Science Fiction Inc.
+        hisnote@me.com
+        """
     }
     
     // MARK: - Version Info

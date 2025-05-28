@@ -13,6 +13,11 @@ import CoreLocation  // 위치(GPS) 관련 기능을 사용하기 위한 프레�
 import Solar         // 일출/일몰 계산 라이브러리
 import WeatherKit    // 날씨 라이브러리
 
+
+
+
+
+
 // UIViewController: 화면의 한 페이지(뷰 컨트롤러) 역할을 하는 클래스
 // CLLocationManagerDelegate: 위치 정보 업데이트 이벤트를 받을 수 있게 해주는 프로토콜
 // UITableViewDelegate, UITableViewDataSource: 테이블뷰(목록) 구성에 필요한 프로토콜
@@ -21,6 +26,10 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     private let locationManager = CLLocationManager()   // 위치(GPS) 정보를 얻기 위한 객체
     private var currentLocation: CLLocation?            // 현재 위치 정보 저장용 (옵셔널: 값이 없을 수 있음)
     private let weatherService = WeatherService()
+    
+    // 타이머 생성
+    private var timer: Timer?
+
     
     // infoContainerView에 들어갈 섹션 헤더 라벨 선언
     private let infoContainerHeaderLabel: UILabel = {
@@ -55,6 +64,44 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
+    
+    
+    // MARK: - 전역 타이머
+    private func startTimer() {
+        stopTimer()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self, let location = self.currentLocation else {
+                print("currentLocation이 없음")
+                return
+            }
+            self.updateSunriseSunsetInfo(for: location)
+        }
+    }
+    
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
+    func formatTimeString(hour: Int, minute: Int, suffix: String) -> String {
+        if hour > 0 {
+            return "\(hour)시간 \(minute)분 \(suffix)"
+        } else {
+            return "\(minute)분 \(suffix)"
+        }
+    }
+    
+    
+    // MARK: - 일출/일몰 함수
+
+    func colorForSuffix(_ suffix: String) -> UIColor {
+        if suffix.contains("남았습니다") {
+            return UIColor.systemRed
+        } else if suffix.contains("지났습니다") {
+            return UIColor.systemBlue
+        }
+        return UIColor.label
+    }
     
     // MARK: - UI Components(화면 구성 요소)
     // 일출/일몰 정보를 담는 박스(UIView)
@@ -96,15 +143,18 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     }()
     
     // MARK: - Lifecycle(생명주기 메서드)
-    override func viewDidLoad() {
-        super.viewDidLoad()
+  override func viewDidLoad() {
+    super.viewDidLoad()
         setupUI()                // UI(화면 요소) 구성
         setupLocationManager()   // 위치 매니저 설정
         setupTableView()         // 테이블뷰 설정
+        // ✅ 만료 도형 삭제 등 데이터 변경 시 테이블뷰 갱신
+        NotificationCenter.default.addObserver(self, selector: #selector(handleShapesDidChange), name: .shapesDidChange, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        startTimer()
         LocationManager.shared.startUpdatingLocation()
         // 위치 업데이트를 받으면 일출/일몰 정보 업데이트
         NotificationCenter.default.addObserver(self, 
@@ -113,8 +163,16 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
                                              object: nil)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let location = self.currentLocation {
+            self.updateSunriseSunsetInfo(for: location)
+        }
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        stopTimer()
         LocationManager.shared.stopUpdatingLocation()
         NotificationCenter.default.removeObserver(self)
     }
@@ -183,6 +241,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
     
     // 설정 목록(테이블뷰) 관련 설정
@@ -192,6 +251,13 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         settingsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingCell") // 셀 등록
         
     }
+    
+    // MARK: - 일반 설정 메서드 - 만료된 도형 전부 삭제
+    
+    
+
+    
+    
     
     // MARK: - Location Update Handler
     @objc private func handleLocationUpdate(_ notification: Notification) {
@@ -207,26 +273,126 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     // 현재 위치 기반으로 일출/일몰 시간 계산 및 UI 업데이트
     private func updateSunriseSunsetInfo(for location: CLLocation) {
-        // Solar 라이브러리를 활용해 일출/일몰 계산 (위치, 날짜 기반)
-        if let solar = Solar(for: Date(), coordinate: location.coordinate) {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "HH:mm"     // 시간:분 형식
-            dateFormatter.timeZone = TimeZone.current // 현재 내 타임존 기준
-            
-            if let sunrise = solar.sunrise {
-                sunriseLabel.text = "일출 시간: \(dateFormatter.string(from: sunrise))"
-            } else {
-                sunriseLabel.text = "일출 시간: 계산 불가"
-            }
-            
-            if let sunset = solar.sunset {
-                sunsetLabel.text = "일몰 시간: \(dateFormatter.string(from: sunset))"
-            } else {
-                sunsetLabel.text = "일몰 시간: 계산 불가"
-            }
-        } else {
+        let now = Date()
+        let calendar = Calendar.current
+
+        guard let solarToday = Solar(for: now, coordinate: location.coordinate),
+              let tomorrow = calendar.date(byAdding: .day, value: 1, to: now),
+              let solarTomorrow = Solar(for: tomorrow, coordinate: location.coordinate)
+        else {
             sunriseLabel.text = "일출 시간: 계산 불가"
             sunsetLabel.text = "일몰 시간: 계산 불가"
+            return
+        }
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.amSymbol = "오전"
+        dateFormatter.pmSymbol = "오후"
+        dateFormatter.dateFormat = "a h시 m분"
+        dateFormatter.timeZone = TimeZone.current
+
+        guard let sunriseToday = solarToday.sunrise,
+              let sunsetToday = solarToday.sunset,
+              let sunriseTomorrow = solarTomorrow.sunrise else {
+            sunriseLabel.text = "일출 시간: 계산 불가"
+            sunsetLabel.text = "일몰 시간: 계산 불가"
+            return
+        }
+
+        // Helper: 색상 선택
+        func colorForSuffix(_ suffix: String) -> UIColor {
+            if suffix.contains("남았습니다") {
+                return UIColor.systemRed
+            } else if suffix.contains("지났습니다") {
+                return UIColor.systemBlue
+            }
+            return UIColor.label
+        }
+
+        // 1. 자정 이후 ~ 일출 전
+        if now < sunriseToday {
+            // 일출
+            let diff = Int(sunriseToday.timeIntervalSince(now))
+            let hour = diff / 3600
+            let minute = (diff % 3600) / 60
+            let suffix = "남았습니다"
+            let redText = formatTimeString(hour: hour, minute: minute, suffix: suffix)
+            let sunriseText = "일출 시간: \(dateFormatter.string(from: sunriseToday)) - \(redText)"
+            let sunriseAttr = NSMutableAttributedString(string: sunriseText)
+            if let range = sunriseText.range(of: redText) {
+                sunriseAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffix), range: NSRange(range, in: sunriseText))
+            }
+            sunriseLabel.attributedText = sunriseAttr
+
+            // 일몰
+            let diffSunset = Int(sunsetToday.timeIntervalSince(now))
+            let hourSunset = diffSunset / 3600
+            let minuteSunset = (diffSunset % 3600) / 60
+            let suffixSunset = "남았습니다"
+            let redTextSunset = formatTimeString(hour: hourSunset, minute: minuteSunset, suffix: suffixSunset)
+            let sunsetText = "일몰 시간: \(dateFormatter.string(from: sunsetToday)) - \(redTextSunset)"
+            let sunsetAttr = NSMutableAttributedString(string: sunsetText)
+            if let range = sunsetText.range(of: redTextSunset) {
+                sunsetAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffixSunset), range: NSRange(range, in: sunsetText))
+            }
+            sunsetLabel.attributedText = sunsetAttr
+
+        // 2. 일출 이후 ~ 일몰 전
+        } else if now < sunsetToday {
+            // 일출
+            let diff = Int(now.timeIntervalSince(sunriseToday))
+            let hour = diff / 3600
+            let minute = (diff % 3600) / 60
+            let suffix = "지났습니다"
+            let blueText = formatTimeString(hour: hour, minute: minute, suffix: suffix)
+            let sunriseText = "일출 시간: \(dateFormatter.string(from: sunriseToday)) - \(blueText)"
+            let sunriseAttr = NSMutableAttributedString(string: sunriseText)
+            if let range = sunriseText.range(of: blueText) {
+                sunriseAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffix), range: NSRange(range, in: sunriseText))
+            }
+            sunriseLabel.attributedText = sunriseAttr
+
+            // 일몰
+            let diffSunset = Int(sunsetToday.timeIntervalSince(now))
+            let hourSunset = diffSunset / 3600
+            let minuteSunset = (diffSunset % 3600) / 60
+            let suffixSunset = "남았습니다"
+            let redTextSunset = formatTimeString(hour: hourSunset, minute: minuteSunset, suffix: suffixSunset)
+            let sunsetText = "일몰 시간: \(dateFormatter.string(from: sunsetToday)) - \(redTextSunset)"
+            let sunsetAttr = NSMutableAttributedString(string: sunsetText)
+            if let range = sunsetText.range(of: redTextSunset) {
+                sunsetAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffixSunset), range: NSRange(range, in: sunsetText))
+            }
+            sunsetLabel.attributedText = sunsetAttr
+
+        // 3. 일몰 이후 ~ 자정 전
+        } else {
+            // 일출 (내일)
+            let diff = Int(sunriseTomorrow.timeIntervalSince(now))
+            let hour = diff / 3600
+            let minute = (diff % 3600) / 60
+            let suffix = "남았습니다"
+            let redText = formatTimeString(hour: hour, minute: minute, suffix: suffix)
+            let sunriseText = "일출 시간: \(dateFormatter.string(from: sunriseTomorrow)) - \(redText)"
+            let sunriseAttr = NSMutableAttributedString(string: sunriseText)
+            if let range = sunriseText.range(of: redText) {
+                sunriseAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffix), range: NSRange(range, in: sunriseText))
+            }
+            sunriseLabel.attributedText = sunriseAttr
+
+            // 일몰 (오늘)
+            let diffSunset = Int(now.timeIntervalSince(sunsetToday))
+            let hourSunset = diffSunset / 3600
+            let minuteSunset = (diffSunset % 3600) / 60
+            let suffixSunset = "지났습니다"
+            let blueTextSunset = formatTimeString(hour: hourSunset, minute: minuteSunset, suffix: suffixSunset)
+            let sunsetText = "일몰 시간: \(dateFormatter.string(from: sunsetToday)) - \(blueTextSunset)"
+            let sunsetAttr = NSMutableAttributedString(string: sunsetText)
+            if let range = sunsetText.range(of: blueTextSunset) {
+                sunsetAttr.addAttribute(.foregroundColor, value: colorForSuffix(suffixSunset), range: NSRange(range, in: sunsetText))
+            }
+            sunsetLabel.attributedText = sunsetAttr
         }
     }
     
@@ -256,14 +422,15 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     // MARK: - UITableViewDataSource(테이블뷰 데이터 관련)
     // 섹션 개수 (지도/알림/기타)
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return 3
     }
     
     // 각 섹션별 셀 개수
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         switch section {
         case 0: return 2 // 알림 설정
-        case 1: return 2 // 기타 설정
+        case 1: return 2 // 일반 설정
+        case 2: return 1 // 기타 설정
         default: return 0
         }
     }
@@ -272,7 +439,8 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0: return "알림 설정"
-        case 1: return "기타 설정"
+        case 1: return "일반 설정"
+        case 2: return "기타 설정"
         default: return nil
         }
     }
@@ -307,12 +475,20 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 cell.accessoryView = sunriseSwitch
             default: break
             }
-        case 1: // 기타 설정
+        case 1: // 일반 설정
             switch indexPath.row {
             case 0:
-                cell.textLabel?.text = "iCloud 데이터 백업"
-                cell.accessoryView = UISwitch()
+                cell.textLabel?.text = "도형 색 바꾸기"
+                cell.accessoryType = .disclosureIndicator
             case 1:
+                cell.textLabel?.text = "만료된 도형 전부 삭제"
+                cell.accessoryType = .disclosureIndicator
+      
+            default: break
+            }
+        case 2: // 기타 설정
+            switch indexPath.row {
+            case 0:
                 cell.textLabel?.text = "앱 정보"
                 cell.accessoryType = .disclosureIndicator
             default: break
@@ -324,9 +500,38 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
     
     // 셀 클릭 이벤트 처리 (예: 상세 설정 화면 이동)
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true) // 클릭 효과 제거
-        // TODO: 각 설정 항목 선택 시 처리 추가 예정
+        tableView.deselectRow(at: indexPath, animated: true)
+        switch indexPath.section {
+        case 1: // 일반 설정
+            switch indexPath.row {
+            case 0:
+                showColorPicker()
+            case 1:
+                let alert = UIAlertController(
+                    title: "확인",
+                    message: "종료일이 지난 도형을 모두 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+                    preferredStyle: .alert
+                )
+                alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+                alert.addAction(UIAlertAction(title: "삭제", style: .destructive) { _ in
+                    SettingManager.shared.deleteExpiredShapes()
+                    PlaceShapeStore.shared.deleteExpiredShapes()
+                    self.settingsTableView.reloadData()
+                })
+                present(alert, animated: true)
+            default: break
+            }
+        case 2: // 기타 설정
+            switch indexPath.row {
+            case 0: // 앱 정보
+                showAppInfo()
+            default: break
+            }
+        default: break
+        }
     }
+
+            
     
     // MARK: - Switch Action
     @objc private func switchValueChanged(_ sender: UISwitch) {
@@ -350,17 +555,96 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         settingsTableView.reloadData()
     }
     
+    // MARK: - App Info
+    private func showAppInfo() {
+        // 앱 소개 문구와 기능 목록을 하나의 문자열로 만듭니다
+        let features = AppInfo.Description.features.map { "• \($0)" }.joined(separator: "\n")
+        let message = """
+        Ver. \(AppInfo.Version.current)
+
+        \(AppInfo.Description.intro)
+        
+        [주요 기능]
+        \(features)
+        
+        \(AppInfo.Description.contact)
+        """
+        
+        let alert = UIAlertController(
+            title: "MapSketch",
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        // 확인 버튼 추가
+        alert.addAction(UIAlertAction(
+            title: "확인",
+            style: .default
+        ))
+        
+        // 알림창 표시
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Color Picker
+    private func showColorPicker() {
+        let colorPicker = ColorPickerViewController()
+        colorPicker.onColorSelected = { [weak self] selectedColor in
+            // 선택된 색상 처리
+            self?.handleColorSelection(selectedColor)
+        }
+        
+        // 모달로 표시
+        let navController = UINavigationController(rootViewController: colorPicker)
+        navController.modalPresentationStyle = .pageSheet
+        
+        // 닫기 버튼 추가
+        let closeButton = UIBarButtonItem(
+            title: "닫기",
+            style: .plain,
+            target: self,
+            action: #selector(dismissColorPicker)
+        )
+        colorPicker.navigationItem.leftBarButtonItem = closeButton
+        
+        present(navController, animated: true)
+    }
+    
+    @objc private func dismissColorPicker() {
+        dismiss(animated: true)
+    }
+    
+    private func handleColorSelection(_ color: PaletteColor) {
+        // ColorManager를 통해 기본 색상 변경
+        ColorManager.shared.defaultColor = color
+        
+        // 변경 알림
+        let alert = UIAlertController(
+            title: "색상 변경",
+            message: "새로 생성되는 도형의 기본 색상이 변경되었습니다.",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "확인", style: .default))
+        present(alert, animated: true)
+    }
+    
     // MARK: - CLLocationManagerDelegate(위치정보 콜백)
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+        guard let location = locations.last else {
+            print("didUpdateLocations: location 없음")
+            return
+        }
         currentLocation = location
         updateSunriseSunsetInfo(for: location)
-        locationManager.stopUpdatingLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print("위치 업데이트 실패: \(error.localizedDescription)")
         sunriseLabel.text = "일출 시간: 위치 정보 없음"
         sunsetLabel.text = "일몰 시간: 위치 정보 없음"
+  }
+
+    @objc private func handleShapesDidChange() {
+        settingsTableView.reloadData()
     }
 }

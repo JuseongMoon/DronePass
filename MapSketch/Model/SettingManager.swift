@@ -155,6 +155,13 @@ final class SettingManager {
     private func removeSunriseSunsetAlarms() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["sunrise", "sunset"])
     }
+    
+    // MARK: - 종료일 지난 도형 일괄 삭제
+
+    func deleteExpiredShapes() {
+        ShapeManager.shared.deleteExpiredShapes()
+    }
+    
 
     // MARK: - 알림 스케줄링 헬퍼
     private func scheduleNotification(id: String, title: String, body: String, date: Date) {

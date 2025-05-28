@@ -8,6 +8,7 @@ import UIKit
 import CoreLocation
 
 final class ShapeDetailViewController: UIViewController {
+    
     private let shapeId: UUID
     private var shape: PlaceShape? {
         return PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeId })
@@ -183,20 +184,27 @@ final class ShapeDetailViewController: UIViewController {
     }
     
     private func configureInfo() {
+        
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        
         guard let shape = self.shape else { return }
         infoStack.addArrangedSubview(makeInfoRow(title: "제목", value: shape.title))
         infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName))
         infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
         if let radius = shape.radius {
-            infoStack.addArrangedSubview(makeInfoRow(title: "반경(m)", value: String(format: "%.0f", radius)))
+            let numberFormatter = NumberFormatter()
+            numberFormatter.numberStyle = .decimal
+            let radiusString = numberFormatter.string(from: NSNumber(value: radius)) ?? "-"
+            infoStack.addArrangedSubview(makeInfoRow(title: "반경", value: "\(radiusString) m"))
         }
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let dateFormatter = DateFormatter.koreanDateTime
         infoStack.addArrangedSubview(makeInfoRow(title: "시작일", value: dateFormatter.string(from: shape.startedAt)))
         if let expire = shape.expireDate {
             infoStack.addArrangedSubview(makeInfoRow(title: "종료일", value: dateFormatter.string(from: expire)))
         }
         infoStack.addArrangedSubview(makeInfoRow(title: "메모", value: shape.memo ?? "-"))
+        
 
     }
     

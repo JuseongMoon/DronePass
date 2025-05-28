@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */; };
-		632279AA2DDC059D00C55901 /* sample_shapes.json in Resources */ = {isa = PBXBuildFile; fileRef = 632279A72DDC059D00C55901 /* sample_shapes.json */; };
-		632279AB2DDC059D00C55901 /* PlaceShapeStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */; };
 		632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A62DDC059D00C55901 /* PlaceShapeStore.swift */; };
 		63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */; };
 		63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A252DDCDA2400F425E9 /* PassThroughView.swift */; };
@@ -19,6 +17,9 @@
 		6392D8B52DE340AF0016C49D /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B42DE3409C0016C49D /* SettingManager.swift */; };
 		6392D8B72DE345750016C49D /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B62DE345750016C49D /* ShapeManager.swift */; };
 		6392D8B92DE346770016C49D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B82DE346770016C49D /* LocationManager.swift */; };
+		6392D8BB2DE37BD80016C49D /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */; };
+		6392D8BD2DE389A00016C49D /* NotiName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BC2DE389970016C49D /* NotiName.swift */; };
+		6392D8BF2DE393750016C49D /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */; };
 		63AFEF062DDB75A600D8866B /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF052DDB75A100D8866B /* ColorManager.swift */; };
 		63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */; };
 		63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C057812DD2F8ED0044CF9B /* Assets.xcassets */; };
@@ -60,9 +61,7 @@
 
 /* Begin PBXFileReference section */
 		631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
-		632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStorage.swift; sourceTree = "<group>"; };
 		632279A62DDC059D00C55901 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
-		632279A72DDC059D00C55901 /* sample_shapes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample_shapes.json; sourceTree = "<group>"; };
 		63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
 		63793A252DDCDA2400F425E9 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
@@ -70,6 +69,9 @@
 		6392D8B42DE3409C0016C49D /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
 		6392D8B62DE345750016C49D /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
 		6392D8B82DE346770016C49D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
+		6392D8BC2DE389970016C49D /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
+		6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63AFEF052DDB75A100D8866B /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* MapSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -140,9 +142,7 @@
 		632279A92DDC059D00C55901 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
-				632279A52DDC059D00C55901 /* PlaceShapeStorage.swift */,
 				632279A62DDC059D00C55901 /* PlaceShapeStore.swift */,
-				632279A72DDC059D00C55901 /* sample_shapes.json */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
@@ -158,6 +158,7 @@
 		63793A282DDCE6D300F425E9 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */,
 				63C8059D2DE20B0F00F3428B /* NaverGeocodingService.swift */,
 				63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */,
 			);
@@ -188,6 +189,7 @@
 		63C0577D2DD2F8ED0044CF9B /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */,
 				63C0579C2DD313450044CF9B /* IntroViewController.swift */,
 				63C0579E2DD313F80044CF9B /* MainTabBarController.swift */,
 				63C057962DD310C10044CF9B /* MapViewController.swift */,
@@ -204,6 +206,7 @@
 		63C0577E2DD2F8ED0044CF9B /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				6392D8BC2DE389970016C49D /* NotiName.swift */,
 				6392D8B82DE346770016C49D /* LocationManager.swift */,
 				6392D8B62DE345750016C49D /* ShapeManager.swift */,
 				6392D8B42DE3409C0016C49D /* SettingManager.swift */,
@@ -378,7 +381,6 @@
 				63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */,
 				63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */,
 				63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */,
-				632279AA2DDC059D00C55901 /* sample_shapes.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,9 +405,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6392D8BB2DE37BD80016C49D /* ColorPickerViewController.swift in Sources */,
 				63C057992DD310D40044CF9B /* SavedViewController.swift in Sources */,
 				63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */,
+				6392D8BD2DE389A00016C49D /* NotiName.swift in Sources */,
 				6392D8B92DE346770016C49D /* LocationManager.swift in Sources */,
+				6392D8BF2DE393750016C49D /* DateFormatter+Korean.swift in Sources */,
 				63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */,
 				63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */,
 				63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */,
@@ -418,7 +423,6 @@
 				63C057972DD310CC0044CF9B /* MapViewController.swift in Sources */,
 				63C0579B2DD310DE0044CF9B /* SettingViewController.swift in Sources */,
 				63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */,
-				632279AB2DDC059D00C55901 /* PlaceShapeStorage.swift in Sources */,
 				63C8059E2DE20B0F00F3428B /* NaverGeocodingService.swift in Sources */,
 				632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */,
 				63C0579D2DD3134B0044CF9B /* IntroViewController.swift in Sources */,
@@ -487,7 +491,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;
@@ -519,7 +523,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 12;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MapSketch/Info.plist;

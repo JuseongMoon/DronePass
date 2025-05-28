@@ -108,6 +108,7 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
     
     // MARK: - Configuration
     func configure(with shape: PlaceShape) { // 셀에 도형 데이터를 설정하는 메서드입니다.
+        
         addressLabel.text = shape.title // 제목
         dateRangeLabel.text = shape.address ?? "주소 없음" // 주소
         if let endDate = shape.expireDate {
@@ -118,7 +119,10 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
             statusLabel.text = dateFormatter.string(from: shape.startedAt) // 날짜
         }
         if let radius = shape.radius {
-            radiusLabel.text = "반경: \(Int(radius)) m"
+            let numberFormatter = NumberFormatter()
+            numberFormatter.numberStyle = .decimal
+            let formattedRadius = numberFormatter.string(from: NSNumber(value: Int(radius))) ?? "-"
+            radiusLabel.text = "반경: \(formattedRadius) m"
         } else {
             radiusLabel.text = "반경: - m"
         }

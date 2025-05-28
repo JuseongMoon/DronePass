@@ -13,7 +13,7 @@ import Combine // Combine 프레임워크를 가져옵니다. (반응형 프로�
 class AppDelegate: UIResponder, UIApplicationDelegate { // AppDelegate 클래스를 정의합니다. UIResponder와 UIApplicationDelegate 프로토콜을 준수합니다.
     // MARK: - Properties
     private var cancellables = Set<AnyCancellable>() // Combine 구독을 저장하고 관리하기 위한 Set입니다.
-    
+
     // MARK: - Core Data stack
     lazy var persistentContainer: NSPersistentContainer = { // CoreData의 영구 저장소를 관리하는 컨테이너입니다.
         let container = NSPersistentContainer(name: "MapSketch") // "MapSketch"라는 이름의 CoreData 모델을 사용하는 컨테이너를 생성합니다.
@@ -44,10 +44,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate { // AppDelegate 클래스
     func saveContext() { // CoreData의 변경사항을 저장하는 메서드입니다.
         let context = persistentContainer.viewContext // CoreData의 메인 컨텍스트를 가져옵니다.
         guard context.hasChanges else { return } // 변경사항이 없다면 저장하지 않고 리턴합니다.
-        
-        do {
+
+            do {
             try context.save() // 변경사항을 저장합니다.
-        } catch {
+            } catch {
             handleCoreDataError(error as NSError) // 저장 중 에러가 발생하면 에러 처리 함수를 호출합니다.
         }
     }

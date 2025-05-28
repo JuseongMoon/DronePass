@@ -1,5 +1,6 @@
 import Foundation
 import CoreLocation
+import Combine
 
 // 도형 데이터를 저장하기 위한 모델
 struct Shape: Codable {
@@ -46,8 +47,9 @@ final class ShapeManager {
         loadShapes()
     }
     
-    private var shapes: [Shape] = []
+    @Published private(set) var shapes: [Shape] = []
     private let shapesKey = "savedShapes"
+    private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Public Methods
     
@@ -72,6 +74,24 @@ final class ShapeManager {
         }
     }
     
+    func deleteExpiredShapes() {
+        let now = Date()
+        shapes.removeAll { shape in
+            if let endDate = shape.endDate {
+                return endDate < now
+            }
+            return false
+        }
+        saveShapes()
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+    }
+    
+    func clearAll() {
+        shapes.removeAll()
+        saveShapes()
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+    }
+    
     // MARK: - Private Methods
     
     private func saveShapes() {
@@ -91,4 +111,8 @@ final class ShapeManager {
             print("도형 데이터 로드 실패: \(error.localizedDescription)")
         }
     }
+}
+
+extension Notification.Name {
+    static let shapesDidChange = Notification.Name("shapesDidChange")
 } 

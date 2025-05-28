@@ -15,6 +15,7 @@ import MapSketch // NaverGeocodingService 사용을 위해 필요 (모듈명에 
 
 extension Notification.Name {
     static let clearShapeHighlight = Notification.Name("clearShapeHighlight") // 도형 하이라이트 해제 알림 이름 정의
+    static let shapeColorDidChange = Notification.Name("shapeColorDidChange")
 }
 
 final class MapViewController: UIViewController, CLLocationManagerDelegate { // 지도 및 위치 관리를 담당하는 뷰 컨트롤러입니다.
@@ -40,6 +41,7 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         NotificationCenter.default.addObserver(self, selector: #selector(clearHighlight), name: .clearShapeHighlight, object: nil)
         // ⭐️ 오버레이 터치 알림 옵저버 등록
         NotificationCenter.default.addObserver(self, selector: #selector(handleOverlayTapped(_:)), name: Notification.Name("ShapeOverlayTapped"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleShapeColorChange(_:)), name: .shapeColorDidChange, object: nil)
     }
 
     // MARK: - Setup Methods
@@ -68,7 +70,6 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             break
         }
     }
-
     
     // MARK: - 도형 표시
 
@@ -183,9 +184,9 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             circleOverlay.center = center
             circleOverlay.radius = radius
             let mainColor = UIColor(hex: shape.color)
-            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
+            circleOverlay.fillColor = mainColor?.withAlphaComponent(0.3) ?? .black
             circleOverlay.outlineWidth = 2
-            circleOverlay.outlineColor = mainColor
+            circleOverlay.outlineColor = mainColor ?? .black
             circleOverlay.mapView = naverMapView.mapView
             overlays.append(circleOverlay)
 
@@ -315,6 +316,12 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             tabBarController.openSavedTabAndHighlightShape(shape)
         }
     }
+
+    @objc private func handleShapeColorChange(_ notification: Notification) {
+        guard let newColor = notification.object as? PaletteColor else { return }
+        PlaceShapeStore.shared.updateAllShapesColor(to: newColor.rawValue)
+        reloadOverlays()
+    }
 }
 
 
@@ -430,7 +437,7 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
             address: address,
             expireDate: endDatePicker.date,
             startedAt: startDatePicker.date,
-            color: "#007AFF"
+            color: ColorManager.shared.defaultColor.rawValue
         )
         
         onAdd(newShape)
@@ -488,6 +495,25 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
         dateOnlySwitch.isOn = UserDefaults.standard.bool(forKey: dateOnlyKey)
         updateDatePickerMode()
         
+        // ⭐️ 일단위 입력이 켜져 있으면 시작/종료 시간을 오전 12:00, 오후 11:59로 자동 설정
+        if dateOnlySwitch.isOn {
+            let calendar = Calendar.current
+            var startComponents = calendar.dateComponents([.year, .month, .day], from: Date())
+            startComponents.hour = 0
+            startComponents.minute = 0
+            startComponents.second = 0
+            if let newStart = calendar.date(from: startComponents) {
+                startDatePicker.date = newStart
+            }
+            var endComponents = calendar.dateComponents([.year, .month, .day], from: Date())
+            endComponents.hour = 23
+            endComponents.minute = 59
+            endComponents.second = 0
+            if let newEnd = calendar.date(from: endComponents) {
+                endDatePicker.date = newEnd
+            }
+        }
+        
         // 체크박스 상태 변경 감지
         dateOnlySwitch.addTarget(self, action: #selector(dateOnlySwitchChanged), for: .valueChanged)
         
@@ -519,7 +545,6 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate {
             components = calendar.dateComponents([.year, .month, .day], from: endDatePicker.date)
             components.hour = 23
             components.minute = 59
-            components.second = 59
             if let newDate = calendar.date(from: components) {
                 endDatePicker.date = newDate
             }
@@ -741,3 +766,4 @@ extension MainTabBarController {
         }
     }
 }
+

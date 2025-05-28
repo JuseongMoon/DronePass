@@ -7,9 +7,9 @@
 
 // 역할: 앱 첫 실행 시 소개 화면을 보여주는 뷰 컨트롤러
 // 연관기능: 앱 소개, 버전 정보, 메인 화면 진입
-
+    
 import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
-
+    
 class IntroViewController: UIViewController { // 앱 소개 화면을 담당하는 뷰 컨트롤러입니다.
     // MARK: - IBOutlets
     @IBOutlet private weak var descriptionLabel: UILabel! // 앱 설명을 표시하는 레이블입니다.
@@ -60,5 +60,5 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
         }
         tabBarVC.modalPresentationStyle = .fullScreen // 전체 화면으로 표시
         present(tabBarVC, animated: animated) // 화면 전환
-    }
+        }
 }

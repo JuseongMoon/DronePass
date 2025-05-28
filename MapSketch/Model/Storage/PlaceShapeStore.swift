@@ -9,10 +9,9 @@
 // 연관기능: 도형 추가, 삭제, 저장, 불러오기
 
 import Foundation
-import Combine
 
 // PlaceShape 모델 직접 import
-import MapSketch
+//import MapSketch
 
 public final class PlaceShapeStore {
     public static let shared = PlaceShapeStore()
@@ -72,6 +71,28 @@ public final class PlaceShapeStore {
             print("도형 삭제 실패: \(error)")
         }
     }
+
+    
+    public func updateAllShapesColor(to newColor: String) {
+
+        
+        do {
+            // 1. 파일에서 도형 전체 불러오기
+            let data = try Data(contentsOf: shapesFileURL)
+            var loadedShapes = try decoder.decode([PlaceShape].self, from: data)
+            // 2. 모든 도형의 color 필드 변경
+            for i in 0..<loadedShapes.count {
+                loadedShapes[i].color = newColor
+            }
+            // 3. 파일에 저장
+            let newData = try encoder.encode(loadedShapes)
+            try newData.write(to: shapesFileURL)
+            // 4. 메모리의 shapes도 동기화 (여기서 @Published가 UI에 반영)
+            self.shapes = loadedShapes
+        } catch {
+            print("모든 도형 색상 일괄 변경 실패: \(error)")
+        }
+    }
     
     public func updateShape(_ shape: PlaceShape) {
         if let idx = shapes.firstIndex(where: { $0.id == shape.id }) {
@@ -85,5 +106,27 @@ public final class PlaceShapeStore {
             }
         }
     }
+    
+    public func deleteExpiredShapes() {
+        let now = Date()
+        let filtered = shapes.filter { shape in
+            if let expire = shape.expireDate {
+                return expire >= now
+            }
+            return true
+        }
+        self.shapes = filtered
+        do {
+            try saveShapes()
+        } catch {
+            print("만료 도형 삭제 실패: \(error)")
+        }
+        // UI 갱신을 위해 Notification 전송
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+    }
 }
 
+extension PlaceShapeStore {
+    /// 저장된 모든 도형의 색상을 새로운 색상(hex)으로 변경하고 저장/갱신
+
+}
