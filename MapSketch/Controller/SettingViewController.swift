@@ -646,5 +646,5 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
 
     @objc private func handleShapesDidChange() {
         settingsTableView.reloadData()
-    }
+  }
 }
