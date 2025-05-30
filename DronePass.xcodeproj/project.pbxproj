@@ -76,9 +76,9 @@
 		6392D8C02DE720B90016C49D /* AddShapePopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShapePopupViewController.swift; sourceTree = "<group>"; };
 		63AFEF052DDB75A100D8866B /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
-		63C057422DD2F6530044CF9B /* MapSketch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapSketch.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		63C0575B2DD2F6540044CF9B /* MapSketchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		63C057652DD2F6540044CF9B /* MapSketchUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MapSketchUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		63C057652DD2F6540044CF9B /* DronePassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C057802DD2F8ED0044CF9B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		63C057812DD2F8ED0044CF9B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		63C057822DD2F8ED0044CF9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -181,9 +181,9 @@
 		63C057432DD2F6530044CF9B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				63C057422DD2F6530044CF9B /* MapSketch.app */,
-				63C0575B2DD2F6540044CF9B /* MapSketchTests.xctest */,
-				63C057652DD2F6540044CF9B /* MapSketchUITests.xctest */,
+				63C057422DD2F6530044CF9B /* DronePass.app */,
+				63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */,
+				63C057652DD2F6540044CF9B /* DronePassUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -261,9 +261,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		63C057412DD2F6530044CF9B /* MapSketch */ = {
+		63C057412DD2F6530044CF9B /* DronePass */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 63C0576E2DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketch" */;
+			buildConfigurationList = 63C0576E2DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePass" */;
 			buildPhases = (
 				63C0573E2DD2F6530044CF9B /* Sources */,
 				63C0573F2DD2F6530044CF9B /* Frameworks */,
@@ -273,18 +273,18 @@
 			);
 			dependencies = (
 			);
-			name = MapSketch;
+			name = DronePass;
 			packageProductDependencies = (
 				631AB35A2DD389FC005AA749 /* NMapsMap */,
 				63C805A02DE30E9000F3428B /* Solar */,
 			);
 			productName = MapSketch;
-			productReference = 63C057422DD2F6530044CF9B /* MapSketch.app */;
+			productReference = 63C057422DD2F6530044CF9B /* DronePass.app */;
 			productType = "com.apple.product-type.application";
 		};
-		63C0575A2DD2F6540044CF9B /* MapSketchTests */ = {
+		63C0575A2DD2F6540044CF9B /* DronePassTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketchTests" */;
+			buildConfigurationList = 63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassTests" */;
 			buildPhases = (
 				63C057572DD2F6540044CF9B /* Sources */,
 				63C057582DD2F6540044CF9B /* Frameworks */,
@@ -298,16 +298,16 @@
 			fileSystemSynchronizedGroups = (
 				63C0575E2DD2F6540044CF9B /* MapSketchTests */,
 			);
-			name = MapSketchTests;
+			name = DronePassTests;
 			packageProductDependencies = (
 			);
 			productName = MapSketchTests;
-			productReference = 63C0575B2DD2F6540044CF9B /* MapSketchTests.xctest */;
+			productReference = 63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		63C057642DD2F6540044CF9B /* MapSketchUITests */ = {
+		63C057642DD2F6540044CF9B /* DronePassUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketchUITests" */;
+			buildConfigurationList = 63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassUITests" */;
 			buildPhases = (
 				63C057612DD2F6540044CF9B /* Sources */,
 				63C057622DD2F6540044CF9B /* Frameworks */,
@@ -321,11 +321,11 @@
 			fileSystemSynchronizedGroups = (
 				63C057682DD2F6540044CF9B /* MapSketchUITests */,
 			);
-			name = MapSketchUITests;
+			name = DronePassUITests;
 			packageProductDependencies = (
 			);
 			productName = MapSketchUITests;
-			productReference = 63C057652DD2F6540044CF9B /* MapSketchUITests.xctest */;
+			productReference = 63C057652DD2F6540044CF9B /* DronePassUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -351,7 +351,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 63C0573D2DD2F6530044CF9B /* Build configuration list for PBXProject "MapSketch" */;
+			buildConfigurationList = 63C0573D2DD2F6530044CF9B /* Build configuration list for PBXProject "DronePass" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -369,9 +369,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				63C057412DD2F6530044CF9B /* MapSketch */,
-				63C0575A2DD2F6540044CF9B /* MapSketchTests */,
-				63C057642DD2F6540044CF9B /* MapSketchUITests */,
+				63C057412DD2F6530044CF9B /* DronePass */,
+				63C0575A2DD2F6540044CF9B /* DronePassTests */,
+				63C057642DD2F6540044CF9B /* DronePassUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -458,12 +458,12 @@
 /* Begin PBXTargetDependency section */
 		63C0575D2DD2F6540044CF9B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 63C057412DD2F6530044CF9B /* MapSketch */;
+			target = 63C057412DD2F6530044CF9B /* DronePass */;
 			targetProxy = 63C0575C2DD2F6540044CF9B /* PBXContainerItemProxy */;
 		};
 		63C057672DD2F6540044CF9B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 63C057412DD2F6530044CF9B /* MapSketch */;
+			target = 63C057412DD2F6530044CF9B /* DronePass */;
 			targetProxy = 63C057662DD2F6540044CF9B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -694,7 +694,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MapSketch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MapSketch";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DronePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DronePass";
 			};
 			name = Debug;
 		};
@@ -713,7 +713,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MapSketch.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MapSketch";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DronePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DronePass";
 			};
 			name = Release;
 		};
@@ -754,7 +754,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		63C0573D2DD2F6530044CF9B /* Build configuration list for PBXProject "MapSketch" */ = {
+		63C0573D2DD2F6530044CF9B /* Build configuration list for PBXProject "DronePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				63C057712DD2F6540044CF9B /* Debug */,
@@ -763,7 +763,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		63C0576E2DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketch" */ = {
+		63C0576E2DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				63C0576F2DD2F6540044CF9B /* Debug */,
@@ -772,7 +772,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketchTests" */ = {
+		63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				63C057742DD2F6540044CF9B /* Debug */,
@@ -781,7 +781,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "MapSketchUITests" */ = {
+		63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				63C057772DD2F6540044CF9B /* Debug */,
