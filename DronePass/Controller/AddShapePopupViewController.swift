@@ -6,10 +6,119 @@
 //
 
 import UIKit
+import CoreLocation
+
+// MARK: - Coordinate Parser
+final class CoordinateParser {
+    enum CoordinateFormat {
+        case degreesMinutesSeconds // 37° 38′ 55″ N 126° 41′ 12″ E
+        case decimalDegrees // 37.648611°, 126.686667°
+        case mgrs // 52S DF 24174 67282
+        case geo // geo:37.648611,126.686667
+        case plusCode // 8Q98FXC7+M2
+        case simpleDecimal // 37.3855 126.4142
+    }
+    
+    static func parse(_ input: String) -> CLLocationCoordinate2D? {
+        // 입력 문자열 정리
+        let cleanedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 각 형식별 파싱 시도
+        if let coordinate = parseDegreesMinutesSeconds(cleanedInput) { return coordinate }
+        if let coordinate = parseDecimalDegrees(cleanedInput) { return coordinate }
+        if let coordinate = parseSimpleDecimal(cleanedInput) { return coordinate }
+        if let coordinate = parseGeo(cleanedInput) { return coordinate }
+        if let coordinate = parseMGRS(cleanedInput) { return coordinate }
+        if let coordinate = parsePlusCode(cleanedInput) { return coordinate }
+        
+        return nil
+    }
+    
+    private static func parseDegreesMinutesSeconds(_ input: String) -> CLLocationCoordinate2D? {
+        let pattern = #"(\d+)°\s*(\d+)′\s*(\d+)″\s*([NS])\s*(\d+)°\s*(\d+)′\s*(\d+)″\s*([EW])"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) else {
+            return nil
+        }
+        
+        let groups = (1...8).map { index -> String in
+            let range = match.range(at: index)
+            return String(input[Range(range, in: input)!])
+        }
+        
+        let latDegrees = Double(groups[0])!
+        let latMinutes = Double(groups[1])!
+        let latSeconds = Double(groups[2])!
+        let latDirection = groups[3]
+        
+        let lonDegrees = Double(groups[4])!
+        let lonMinutes = Double(groups[5])!
+        let lonSeconds = Double(groups[6])!
+        let lonDirection = groups[7]
+        
+        let latitude = (latDegrees + latMinutes/60 + latSeconds/3600) * (latDirection == "N" ? 1 : -1)
+        let longitude = (lonDegrees + lonMinutes/60 + lonSeconds/3600) * (lonDirection == "E" ? 1 : -1)
+        
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+    
+    private static func parseDecimalDegrees(_ input: String) -> CLLocationCoordinate2D? {
+        let pattern = #"(-?\d+\.?\d*)°?\s*,\s*(-?\d+\.?\d*)°?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) else {
+            return nil
+        }
+        
+        let latRange = match.range(at: 1)
+        let lonRange = match.range(at: 2)
+        
+        guard let lat = Double(input[Range(latRange, in: input)!]),
+              let lon = Double(input[Range(lonRange, in: input)!]) else {
+            return nil
+        }
+        
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+    
+    private static func parseSimpleDecimal(_ input: String) -> CLLocationCoordinate2D? {
+        let components = input.split(separator: " ").map(String.init)
+        guard components.count == 2,
+              let lat = Double(components[0]),
+              let lon = Double(components[1]) else {
+            return nil
+        }
+        
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+    
+    private static func parseGeo(_ input: String) -> CLLocationCoordinate2D? {
+        guard input.hasPrefix("geo:") else { return nil }
+        let components = input.dropFirst(4).split(separator: ",").map(String.init)
+        guard components.count == 2,
+              let lat = Double(components[0]),
+              let lon = Double(components[1]) else {
+            return nil
+        }
+        
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+    
+    private static func parseMGRS(_ input: String) -> CLLocationCoordinate2D? {
+        // MGRS 파싱은 복잡하므로 여기서는 간단한 예시만 구현
+        // 실제 구현은 MGRS 라이브러리 사용 권장
+        return nil
+    }
+    
+    private static func parsePlusCode(_ input: String) -> CLLocationCoordinate2D? {
+        // Plus Code 파싱은 복잡하므로 여기서는 간단한 예시만 구현
+        // 실제 구현은 OpenLocationCode 라이브러리 사용 권장
+        return nil
+    }
+}
 
 final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, UITextViewDelegate {
     // MARK: - Properties
-    private let coordinate: Coordinate
+    private var coordinate: Coordinate
     private let onAdd: (PlaceShape) -> Void
     private var isEditMode: Bool = false
     private var originalShapeId: UUID?
@@ -24,6 +133,8 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
     private let dateOnlySwitch = UISwitch()
     private let saveButton = UIButton(type: .system)
     private let cancelButton = UIButton(type: .system)
+    private let coordinateField = UITextField()
+    private let coordinateLabel = UILabel()
     
     // Layout
     private var memoHeightConstraint: NSLayoutConstraint!
@@ -37,6 +148,8 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
     
     // Constants
     private let dateOnlyKey = "isDateOnlyMode"
+    private let lastStartDateKey = "lastStartDate"
+    private let lastEndDateKey = "lastEndDate"
     
     // State
     private var initialValues: (title: String?, address: String?, memo: String?, radius: Double?, startedAt: Date?, expireDate: Date?)?
@@ -66,6 +179,7 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         memoView.isScrollEnabled = false
         setupKeyboardObservers()
         adjustMemoHeight()
+        updateCoordinateDisplay()
     }
     
     override func viewDidLayoutSubviews() {
@@ -145,6 +259,7 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         let titleRow = makeInputRow(title: "제목", field: titleField)
         let addressRow = makeInputRow(title: "주소", field: addressField)
         let radiusRow = makeInputRow(title: "반경(m)", field: radiusField)
+        let coordinateRow = makeCoordinateRow()
         let dateOnlyRow = makeDateOnlyRow()
         let startDateRow = makeDatePickerRow(title: "시작일", picker: startDatePicker)
         let endDateRow = makeDatePickerRow(title: "종료일", picker: endDatePicker)
@@ -156,6 +271,7 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         
         let stack = UIStackView(arrangedSubviews: [
             titleRow,
+            coordinateRow,
             addressRow,
             radiusRow,
             startDateRow,
@@ -181,30 +297,31 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
     
     private func setupInputFields() {
         titleField.placeholder = "제목을 입력하세요"
+        
         titleField.borderStyle = .roundedRect
-        titleField.layer.borderColor = UIColor.systemGray4.cgColor
-        titleField.layer.borderWidth = 1
         titleField.delegate = self
-        titleField.layer.cornerRadius = 8
         titleField.returnKeyType = .next
+        titleField.clearButtonMode = .whileEditing
         
         addressField.placeholder = "해당 장소의 주소를 입력하세요"
         addressField.borderStyle = .roundedRect
-        addressField.layer.borderColor = UIColor.systemGray4.cgColor
-        addressField.layer.borderWidth = 1
         addressField.delegate = self
-        addressField.layer.cornerRadius = 8
         addressField.returnKeyType = .next
+        addressField.clearButtonMode = .whileEditing
         
         radiusField.placeholder = "미터 단위로 입력해주세요"
         radiusField.borderStyle = .roundedRect
-        radiusField.layer.borderColor = UIColor.systemGray4.cgColor
-        radiusField.layer.borderWidth = 1
         radiusField.keyboardType = .numberPad
         radiusField.delegate = self
-        radiusField.layer.cornerRadius = 8
         radiusField.returnKeyType = .next
         radiusField.inputAccessoryView = makeKeyboardToolbar()
+        radiusField.clearButtonMode = .whileEditing
+        
+        coordinateField.placeholder = "예시: 37° 38′ 55″ N 126° 41′ 12″ E"
+        coordinateField.font = .systemFont(ofSize: 16)
+        coordinateField.borderStyle = .roundedRect
+        coordinateField.delegate = self
+        coordinateField.clearButtonMode = .whileEditing
         
         memoView.delegate = self
         memoView.returnKeyType = .default
@@ -273,10 +390,12 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         memoView.font = .systemFont(ofSize: 16)
         memoView.dataDetectorTypes = [.link, .phoneNumber]
         memoView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-        memoView.layer.borderWidth = 1
-        memoView.layer.borderColor = UIColor.systemGray4.cgColor
-        memoView.layer.cornerRadius = 8
         memoView.translatesAutoresizingMaskIntoConstraints = false
+        memoView.layer.borderColor = UIColor.systemGray5.cgColor
+        memoView.layer.borderWidth = 1
+        memoView.layer.cornerRadius = 8
+        memoView.layer.masksToBounds = true
+
         let row = UIStackView(arrangedSubviews: [label, memoView])
         row.axis = .horizontal
         row.spacing = 12
@@ -326,14 +445,23 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         endDatePicker.locale = Locale(identifier: "ko_KR")
         dateOnlySwitch.isOn = UserDefaults.standard.bool(forKey: dateOnlyKey)
         updateDatePickerMode()
+        
+        // 마지막으로 저장된 날짜 불러오기
+        if let lastStartDate = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
+            startDatePicker.date = lastStartDate
+        }
+        if let lastEndDate = UserDefaults.standard.object(forKey: lastEndDateKey) as? Date {
+            endDatePicker.date = lastEndDate
+        }
+        
         if dateOnlySwitch.isOn {
             let calendar = Calendar.current
-            var startComponents = calendar.dateComponents([.year, .month, .day], from: Date())
+            var startComponents = calendar.dateComponents([.year, .month, .day], from: startDatePicker.date)
             startComponents.hour = 0; startComponents.minute = 0; startComponents.second = 0
             if let newStart = calendar.date(from: startComponents) {
                 startDatePicker.date = newStart
             }
-            var endComponents = calendar.dateComponents([.year, .month, .day], from: Date())
+            var endComponents = calendar.dateComponents([.year, .month, .day], from: endDatePicker.date)
             endComponents.hour = 23; endComponents.minute = 59; endComponents.second = 0
             if let newEnd = calendar.date(from: endComponents) {
                 endDatePicker.date = newEnd
@@ -419,6 +547,11 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
             startedAt: startDatePicker.date,
             color: ColorManager.shared.defaultColor.rawValue
         )
+        
+        // 날짜 값 저장
+        UserDefaults.standard.set(startDatePicker.date, forKey: lastStartDateKey)
+        UserDefaults.standard.set(endDatePicker.date, forKey: lastEndDateKey)
+        
         onAdd(newShape)
         dismiss(animated: true)
     }
@@ -484,6 +617,9 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         if let expireDate = expireDate {
             endDatePicker.date = expireDate
         }
+        
+        // 초기 좌표 표시
+        coordinateField.text = coordinate.formattedCoordinate
     }
     public func setInitialAddress(_ address: String?) {
         addressField.text = address
@@ -516,6 +652,71 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+    }
+
+    private func makeCoordinateRow() -> UIStackView {
+        let label = UILabel()
+        label.text = "좌표"
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        
+        coordinateField.placeholder = "예시: 37° 38′ 55″ N 126° 41′ 12″ E"
+        coordinateField.font = .systemFont(ofSize: 16)
+        coordinateField.borderStyle = .roundedRect
+        coordinateField.delegate = self
+        coordinateField.clearButtonMode = .whileEditing
+        
+        // 가이드 텍스트 레이블 추가
+        let guideLabel = UILabel()
+        guideLabel.text = "※드론원스탑에서 승인받은 좌표를 그대로 복사붙여넣기 하세요"
+        guideLabel.font = .systemFont(ofSize: 11)
+        guideLabel.textColor = .secondaryLabel
+        guideLabel.numberOfLines = 0
+        guideLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        coordinateLabel.font = .systemFont(ofSize: 14)
+        coordinateLabel.textColor = .secondaryLabel
+        coordinateLabel.numberOfLines = 0
+        coordinateLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        let container = UIStackView(arrangedSubviews: [coordinateField, guideLabel, coordinateLabel])
+        container.axis = .vertical
+        container.spacing = 4
+        
+        let row = UIStackView(arrangedSubviews: [label, container])
+        row.axis = .horizontal
+        row.spacing = 12
+        row.alignment = .center // 중앙 정렬로 변경
+        row.distribution = .fill
+        return row
+    }
+
+    // MARK: - UITextFieldDelegate
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if textField == coordinateField {
+            if let input = textField.text, !input.isEmpty {
+                if let newCoordinate = Coordinate.parse(input) {
+                    // 좌표가 유효한 경우
+                    coordinateLabel.text = "유효한 좌표 형식입니다"
+                    coordinateLabel.textColor = .systemGreen
+                    // coordinate 객체 업데이트
+                    self.coordinate = newCoordinate
+                    // 입력 필드에 포맷된 좌표 표시
+                    coordinateField.text = newCoordinate.formattedCoordinate
+                } else {
+                    // 좌표가 유효하지 않은 경우
+                    coordinateLabel.text = "잘못된 좌표 형식입니다"
+                    coordinateLabel.textColor = .systemRed
+                }
+            } else {
+                coordinateLabel.text = ""
+            }
+        }
+    }
+
+    private func updateCoordinateDisplay() {
+        coordinateField.text = coordinate.formattedCoordinate
     }
 }
 

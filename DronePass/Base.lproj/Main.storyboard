@@ -11,7 +11,7 @@
         <!--Intro View Controller-->
         <scene sceneID="Nhd-Gw-kST">
             <objects>
-                <viewController id="LKY-6k-OE0" customClass="IntroViewController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="LKY-6k-OE0" customClass="IntroViewController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="AWw-UX-f6W">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -34,7 +34,7 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="Lfe-ZI-uuB">
                                 <rect key="frame" x="20" y="369" width="353" height="114.33333333333331"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Map Sketch" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="atB-bZ-ur1">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="DronePass" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="atB-bZ-ur1">
                                         <rect key="frame" x="0.0" y="0.0" width="353" height="39.666666666666664"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="33"/>
                                         <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -93,7 +93,7 @@
         <!--Main Tab Bar Controller-->
         <scene sceneID="5Rb-y5-ivc">
             <objects>
-                <tabBarController storyboardIdentifier="MainTabBarController" automaticallyAdjustsScrollViewInsets="NO" id="rAA-Ra-NYw" customClass="MainTabBarController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <tabBarController storyboardIdentifier="MainTabBarController" automaticallyAdjustsScrollViewInsets="NO" id="rAA-Ra-NYw" customClass="MainTabBarController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <toolbarItems/>
                     <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="fsH-6h-yFY">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
@@ -115,7 +115,7 @@
         <!--지도-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="MapViewController" id="BYZ-38-t0r" customClass="MapViewController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="MapViewController" id="BYZ-38-t0r" customClass="MapViewController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" restorationIdentifier="MapViewController" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -146,7 +146,7 @@
         <!--설정-->
         <scene sceneID="ffg-ih-AWN">
             <objects>
-                <viewController storyboardIdentifier="SettingViewController" id="Zmn-2P-ZkK" customClass="SettingViewController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SettingViewController" id="Zmn-2P-ZkK" customClass="SettingViewController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" restorationIdentifier="SettingViewController" id="mVX-U3-5Lw">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -162,7 +162,7 @@
         <!--저장-->
         <scene sceneID="hcp-Mu-iUw">
             <objects>
-                <viewController storyboardIdentifier="SavedViewController" id="DSk-qz-lRk" customClass="SavedViewController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SavedViewController" id="DSk-qz-lRk" customClass="SavedViewController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="MTP-7K-m9x">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -178,7 +178,7 @@
         <!--Saved Bottom Sheet View Controller-->
         <scene sceneID="SFg-cf-CQQ">
             <objects>
-                <viewController storyboardIdentifier="SavedBottomSheetViewController" id="FrC-LC-xYa" customClass="SavedBottomSheetViewController" customModule="MapSketch" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="SavedBottomSheetViewController" id="FrC-LC-xYa" customClass="SavedBottomSheetViewController" customModule="DronePass" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="6u2-pJ-FN4">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

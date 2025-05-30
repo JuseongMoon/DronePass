@@ -237,7 +237,15 @@ final class ShapeDetailViewController: UIViewController {
         
         guard let shape = self.shape else { return }
         infoStack.addArrangedSubview(makeInfoRow(title: "제목", value: shape.title))
-        infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName))
+//        infoStack.addArrangedSubview(makeInfoRow(title: "도형 타입", value: shape.shapeType.koreanName)) -> 도형타입 잠시 꺼놓음
+        
+        // 좌표 정보 추가
+        let coordinate = CLLocationCoordinate2D(
+            latitude: shape.baseCoordinate.latitude,
+            longitude: shape.baseCoordinate.longitude
+        )
+        infoStack.addArrangedSubview(makeInfoRow(title: "좌표", value: coordinate.formattedCoordinate))
+        
         infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
         if let radius = shape.radius {
             let radiusString = numberFormatter.string(from: NSNumber(value: radius)) ?? "-"
@@ -307,5 +315,28 @@ extension String {
             context: nil
         )
         return ceil(boundingBox.height)
+    }
+}
+
+// MARK: - Coordinate Formatting Extension
+extension CLLocationCoordinate2D {
+    var formattedCoordinate: String {
+        let latAbs = abs(self.latitude)
+        let latDegrees = Int(latAbs)
+        let latMinutesDecimal = (latAbs - Double(latDegrees)) * 60
+        let latMinutes = Int(latMinutesDecimal)
+        let latSeconds = Int((latMinutesDecimal - Double(latMinutes)) * 60)
+        let latDirection = self.latitude >= 0 ? "N" : "S"
+        
+        let lonAbs = abs(self.longitude)
+        let lonDegrees = Int(lonAbs)
+        let lonMinutesDecimal = (lonAbs - Double(lonDegrees)) * 60
+        let lonMinutes = Int(lonMinutesDecimal)
+        let lonSeconds = Int((lonMinutesDecimal - Double(lonMinutes)) * 60)
+        let lonDirection = self.longitude >= 0 ? "E" : "W"
+        
+        let latString = "\(latDegrees)° \(latMinutes)′ \(latSeconds)″ \(latDirection)"
+        let lonString = "\(lonDegrees)° \(lonMinutes)′ \(lonSeconds)″ \(lonDirection)"
+        return "\(latString) \(lonString)"
     }
 }

@@ -565,7 +565,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         """
         
         let alert = UIAlertController(
-            title: "Flight Plans",
+            title: "DronePass",
             message: message,
             preferredStyle: .alert
         )
