@@ -8,38 +8,39 @@
 
 /* Begin PBXBuildFile section */
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
-		631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */; };
-		632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632279A62DDC059D00C55901 /* PlaceShapeStore.swift */; };
-		63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */; };
-		63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A252DDCDA2400F425E9 /* PassThroughView.swift */; };
-		63793A292DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */; };
-		63793A2B2DDCFAED00F425E9 /* ShapeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */; };
-		6392D8B52DE340AF0016C49D /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B42DE3409C0016C49D /* SettingManager.swift */; };
-		6392D8B72DE345750016C49D /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B62DE345750016C49D /* ShapeManager.swift */; };
-		6392D8B92DE346770016C49D /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8B82DE346770016C49D /* LocationManager.swift */; };
-		6392D8BB2DE37BD80016C49D /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */; };
-		6392D8BD2DE389A00016C49D /* NotiName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BC2DE389970016C49D /* NotiName.swift */; };
-		6392D8BF2DE393750016C49D /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */; };
-		6392D8C12DE720BB0016C49D /* AddShapePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6392D8C02DE720B90016C49D /* AddShapePopupViewController.swift */; };
-		63AFEF062DDB75A600D8866B /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF052DDB75A100D8866B /* ColorManager.swift */; };
-		63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */; };
-		63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63C057812DD2F8ED0044CF9B /* Assets.xcassets */; };
-		63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */; };
-		63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63C057862DD2F8ED0044CF9B /* Main.storyboard */; };
-		63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057802DD2F8ED0044CF9B /* AppDelegate.swift */; };
-		63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */; };
-		63C057972DD310CC0044CF9B /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057962DD310C10044CF9B /* MapViewController.swift */; };
-		63C057992DD310D40044CF9B /* SavedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057982DD310D00044CF9B /* SavedViewController.swift */; };
-		63C0579B2DD310DE0044CF9B /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C0579A2DD310D90044CF9B /* SettingViewController.swift */; };
-		63C0579D2DD3134B0044CF9B /* IntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C0579C2DD313450044CF9B /* IntroViewController.swift */; };
-		63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C0579E2DD313F80044CF9B /* MainTabBarController.swift */; };
-		63C057A12DD31F5C0044CF9B /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A02DD31F570044CF9B /* PlaceShape.swift */; };
-		63C057A32DD31F700044CF9B /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A22DD31F680044CF9B /* Coordinate.swift */; };
-		63C057AA2DD320B00044CF9B /* SavedShapeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */; };
-		63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */; };
-		63C8059E2DE20B0F00F3428B /* NaverGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C8059D2DE20B0F00F3428B /* NaverGeocodingService.swift */; };
+		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
+		63970D402DE9C93400E11238 /* sample_shapes.json in Resources */ = {isa = PBXBuildFile; fileRef = 63970D1B2DE9C93400E11238 /* sample_shapes.json */; };
+		63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D332DE9C93400E11238 /* LaunchScreen.storyboard */; };
+		63970D432DE9C93400E11238 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D352DE9C93400E11238 /* Main.storyboard */; };
+		63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */; };
+		63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* PlaceShape.swift */; };
+		63970D482DE9C93400E11238 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1F2DE9C93400E11238 /* LocationManager.swift */; };
+		63970D492DE9C93400E11238 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1D2DE9C93400E11238 /* ColorManager.swift */; };
+		63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2E2DE9C93400E11238 /* AppDelegate.swift */; };
+		63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */; };
+		63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */; };
+		63970D4F2DE9C93400E11238 /* SampleShapeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D232DE9C93400E11238 /* SampleShapeLoader.swift */; };
+		63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D052DE9C93400E11238 /* ColorPickerViewController.swift */; };
+		63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0C2DE9C93400E11238 /* SettingViewController.swift */; };
+		63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */; };
+		63970D572DE9C93400E11238 /* SavedBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */; };
+		63970D582DE9C93400E11238 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2F2DE9C93400E11238 /* AppInfo.swift */; };
+		63970D592DE9C93400E11238 /* IntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D062DE9C93400E11238 /* IntroViewController.swift */; };
+		63970D5A2DE9C93400E11238 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D072DE9C93400E11238 /* MainTabBarController.swift */; };
+		63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1E2DE9C93400E11238 /* Coordinate.swift */; };
+		63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */; };
+		63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D242DE9C93400E11238 /* SettingManager.swift */; };
+		63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D102DE9C93400E11238 /* NaverGeocodingService.swift */; };
+		63970D5F2DE9C93400E11238 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D092DE9C93400E11238 /* PassThroughView.swift */; };
+		63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0B2DE9C93400E11238 /* SavedViewController.swift */; };
+		63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D252DE9C93400E11238 /* ShapeManager.swift */; };
+		63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */; };
+		63970D642DE9C93400E11238 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D382DE9C93400E11238 /* SceneDelegate.swift */; };
+		63970D662DE9C93400E11238 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D082DE9C93400E11238 /* MapViewController.swift */; };
+		63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */; };
+		63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */; };
+		63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D212DE9C93400E11238 /* NotiName.swift */; };
 		63C805A12DE30E9000F3428B /* Solar in Frameworks */ = {isa = PBXBuildFile; productRef = 63C805A02DE30E9000F3428B /* Solar */; };
-		63F3F5FD2DD34C00004C546F /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63F3F5FC2DD34BFE004C546F /* AppInfo.swift */; };
 		63F3F6012DD3525A004C546F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63F3F5FF2DD35156004C546F /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -61,57 +62,56 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
-		632279A62DDC059D00C55901 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
-		63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
-		63793A252DDCDA2400F425E9 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
-		63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
-		63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
-		6392D8B42DE3409C0016C49D /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
-		6392D8B62DE345750016C49D /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
-		6392D8B82DE346770016C49D /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
-		6392D8BC2DE389970016C49D /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
-		6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
-		6392D8C02DE720B90016C49D /* AddShapePopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShapePopupViewController.swift; sourceTree = "<group>"; };
-		63AFEF052DDB75A100D8866B /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
-		63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
+		63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShapePopupViewController.swift; sourceTree = "<group>"; };
+		63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
+		63970D052DE9C93400E11238 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
+		63970D062DE9C93400E11238 /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
+		63970D072DE9C93400E11238 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		63970D082DE9C93400E11238 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		63970D092DE9C93400E11238 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
+		63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
+		63970D0B2DE9C93400E11238 /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
+		63970D0C2DE9C93400E11238 /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
+		63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
+		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
+		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
+		63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
+		63970D132DE9C93400E11238 /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
+		63970D142DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
+		63970D152DE9C93400E11238 /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
+		63970D162DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
+		63970D182DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
+		63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
+		63970D1B2DE9C93400E11238 /* sample_shapes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample_shapes.json; sourceTree = "<group>"; };
+		63970D1D2DE9C93400E11238 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
+		63970D1E2DE9C93400E11238 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		63970D1F2DE9C93400E11238 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		63970D202DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
+		63970D212DE9C93400E11238 /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
+		63970D222DE9C93400E11238 /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
+		63970D232DE9C93400E11238 /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
+		63970D242DE9C93400E11238 /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
+		63970D252DE9C93400E11238 /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
+		63970D272DE9C93400E11238 /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
+		63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShapeViewCell.swift; sourceTree = "<group>"; };
+		63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
+		63970D2E2DE9C93400E11238 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		63970D2F2DE9C93400E11238 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
+		63970D302DE9C93400E11238 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		63970D312DE9C93400E11238 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		63970D322DE9C93400E11238 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		63970D342DE9C93400E11238 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		63970D372DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
+		63970D382DE9C93400E11238 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		63970D3A2DE9C93400E11238 /* DronePassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassTests.swift; sourceTree = "<group>"; };
+		63970D3C2DE9C93400E11238 /* DronePassUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITests.swift; sourceTree = "<group>"; };
+		63970D3D2DE9C93400E11238 /* DronePassUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		63970D6B2DE9CCA400E11238 /* DronePass.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DronePass.entitlements; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C057652DD2F6540044CF9B /* DronePassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		63C057802DD2F8ED0044CF9B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		63C057812DD2F8ED0044CF9B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		63C057822DD2F8ED0044CF9B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		63C057832DD2F8ED0044CF9B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		63C057852DD2F8ED0044CF9B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		63C057962DD310C10044CF9B /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
-		63C057982DD310D00044CF9B /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
-		63C0579A2DD310D90044CF9B /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
-		63C0579C2DD313450044CF9B /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
-		63C0579E2DD313F80044CF9B /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
-		63C057A02DD31F570044CF9B /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
-		63C057A22DD31F680044CF9B /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
-		63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShapeViewCell.swift; sourceTree = "<group>"; };
-		63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
-		63C8059D2DE20B0F00F3428B /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
-		63C805A22DE3203E00F3428B /* MapSketch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MapSketch.entitlements; sourceTree = "<group>"; };
-		63F3F5FC2DD34BFE004C546F /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		63F3F5FF2DD35156004C546F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		63C0575E2DD2F6540044CF9B /* MapSketchTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MapSketchTests;
-			sourceTree = "<group>";
-		};
-		63C057682DD2F6540044CF9B /* MapSketchUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MapSketchUITests;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		63C0573F2DD2F6530044CF9B /* Frameworks */ = {
@@ -141,38 +141,158 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		632279A92DDC059D00C55901 /* Storage */ = {
+		63970D0E2DE9C93400E11238 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				632279A62DDC059D00C55901 /* PlaceShapeStore.swift */,
+				63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */,
+				63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */,
+				63970D052DE9C93400E11238 /* ColorPickerViewController.swift */,
+				63970D062DE9C93400E11238 /* IntroViewController.swift */,
+				63970D072DE9C93400E11238 /* MainTabBarController.swift */,
+				63970D082DE9C93400E11238 /* MapViewController.swift */,
+				63970D092DE9C93400E11238 /* PassThroughView.swift */,
+				63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */,
+				63970D0B2DE9C93400E11238 /* SavedViewController.swift */,
+				63970D0C2DE9C93400E11238 /* SettingViewController.swift */,
+				63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		63970D122DE9C93400E11238 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */,
+				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
+				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		63970D172DE9C93400E11238 /* Saved */ = {
+			isa = PBXGroup;
+			children = (
+				63970D132DE9C93400E11238 /* SavedBottomSheetViewController.swift */,
+				63970D142DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
+				63970D152DE9C93400E11238 /* SavedViewController.swift */,
+				63970D162DE9C93400E11238 /* ShapeDetailViewController.swift */,
+			);
+			path = Saved;
+			sourceTree = "<group>";
+		};
+		63970D192DE9C93400E11238 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				63970D172DE9C93400E11238 /* Saved */,
+				63970D182DE9C93400E11238 /* ShapeDetailViewController.swift */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		63970D1C2DE9C93400E11238 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
+				63970D1B2DE9C93400E11238 /* sample_shapes.json */,
 			);
 			path = Storage;
 			sourceTree = "<group>";
 		};
-		63793A212DDCC36F00F425E9 /* ViewModel */ = {
+		63970D262DE9C93400E11238 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				63793A222DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift */,
+				63970D1C2DE9C93400E11238 /* Storage */,
+				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
+				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
+				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
+				63970D202DE9C93400E11238 /* NaverGeocodingService.swift */,
+				63970D212DE9C93400E11238 /* NotiName.swift */,
+				63970D222DE9C93400E11238 /* PlaceShape.swift */,
+				63970D232DE9C93400E11238 /* SampleShapeLoader.swift */,
+				63970D242DE9C93400E11238 /* SettingManager.swift */,
+				63970D252DE9C93400E11238 /* ShapeManager.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		63970D282DE9C93400E11238 /* Service */ = {
+			isa = PBXGroup;
+			children = (
+				63970D272DE9C93400E11238 /* SampleShapeLoader.swift */,
+			);
+			path = Service;
+			sourceTree = "<group>";
+		};
+		63970D292DE9C93400E11238 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		63970D2B2DE9C93400E11238 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		63970D2D2DE9C93400E11238 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
 		};
-		63793A282DDCE6D300F425E9 /* Core */ = {
+		63970D392DE9C93400E11238 /* DronePass */ = {
 			isa = PBXGroup;
 			children = (
-				6392D8BE2DE393730016C49D /* DateFormatter+Korean.swift */,
-				63C8059D2DE20B0F00F3428B /* NaverGeocodingService.swift */,
-				63793A272DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift */,
+				63970D6B2DE9CCA400E11238 /* DronePass.entitlements */,
+				63970D0E2DE9C93400E11238 /* Controller */,
+				63970D122DE9C93400E11238 /* Core */,
+				63970D192DE9C93400E11238 /* Features */,
+				63970D262DE9C93400E11238 /* Model */,
+				63970D282DE9C93400E11238 /* Service */,
+				63970D292DE9C93400E11238 /* UI */,
+				63970D2B2DE9C93400E11238 /* View */,
+				63970D2D2DE9C93400E11238 /* ViewModel */,
+				63970D2E2DE9C93400E11238 /* AppDelegate.swift */,
+				63970D2F2DE9C93400E11238 /* AppInfo.swift */,
+				63970D302DE9C93400E11238 /* Assets.xcassets */,
+				63970D312DE9C93400E11238 /* Info.plist */,
+				63970D332DE9C93400E11238 /* LaunchScreen.storyboard */,
+				63970D352DE9C93400E11238 /* Main.storyboard */,
+				63970D372DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
+				63970D382DE9C93400E11238 /* SceneDelegate.swift */,
 			);
-			path = Core;
+			path = DronePass;
+			sourceTree = "<group>";
+		};
+		63970D3B2DE9C93400E11238 /* DronePassTests */ = {
+			isa = PBXGroup;
+			children = (
+				63970D3A2DE9C93400E11238 /* DronePassTests.swift */,
+			);
+			path = DronePassTests;
+			sourceTree = "<group>";
+		};
+		63970D3E2DE9C93400E11238 /* DronePassUITests */ = {
+			isa = PBXGroup;
+			children = (
+				63970D3C2DE9C93400E11238 /* DronePassUITests.swift */,
+				63970D3D2DE9C93400E11238 /* DronePassUITestsLaunchTests.swift */,
+			);
+			path = DronePassUITests;
 			sourceTree = "<group>";
 		};
 		63C057392DD2F6530044CF9B = {
 			isa = PBXGroup;
 			children = (
-				63C0578A2DD2F8ED0044CF9B /* MapSketch */,
-				63C0575E2DD2F6540044CF9B /* MapSketchTests */,
-				63C057682DD2F6540044CF9B /* MapSketchUITests */,
+				63970D392DE9C93400E11238 /* DronePass */,
+				63970D3B2DE9C93400E11238 /* DronePassTests */,
+				63970D3E2DE9C93400E11238 /* DronePassUITests */,
 				63F3F5FE2DD35156004C546F /* Frameworks */,
 				63C057432DD2F6530044CF9B /* Products */,
 			);
@@ -186,68 +306,6 @@
 				63C057652DD2F6540044CF9B /* DronePassUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		63C0577D2DD2F8ED0044CF9B /* Controller */ = {
-			isa = PBXGroup;
-			children = (
-				6392D8C02DE720B90016C49D /* AddShapePopupViewController.swift */,
-				6392D8BA2DE37BCD0016C49D /* ColorPickerViewController.swift */,
-				63C0579C2DD313450044CF9B /* IntroViewController.swift */,
-				63C0579E2DD313F80044CF9B /* MainTabBarController.swift */,
-				63C057962DD310C10044CF9B /* MapViewController.swift */,
-				63C0579A2DD310D90044CF9B /* SettingViewController.swift */,
-				63C057982DD310D00044CF9B /* SavedViewController.swift */,
-				63C057AF2DD3255F0044CF9B /* SavedBottomSheetViewController.swift */,
-				63793A2A2DDCFAED00F425E9 /* ShapeDetailViewController.swift */,
-				631AB3602DD5B311005AA749 /* BottomSheetContainerView.swift */,
-				63793A252DDCDA2400F425E9 /* PassThroughView.swift */,
-			);
-			path = Controller;
-			sourceTree = "<group>";
-		};
-		63C0577E2DD2F8ED0044CF9B /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				6392D8BC2DE389970016C49D /* NotiName.swift */,
-				6392D8B82DE346770016C49D /* LocationManager.swift */,
-				6392D8B62DE345750016C49D /* ShapeManager.swift */,
-				6392D8B42DE3409C0016C49D /* SettingManager.swift */,
-				632279A92DDC059D00C55901 /* Storage */,
-				63AFEF052DDB75A100D8866B /* ColorManager.swift */,
-				63C057A02DD31F570044CF9B /* PlaceShape.swift */,
-				63C057A22DD31F680044CF9B /* Coordinate.swift */,
-				63AFEF072DDB7B8B00D8866B /* SampleShapeLoader.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
-		63C0577F2DD2F8ED0044CF9B /* View */ = {
-			isa = PBXGroup;
-			children = (
-				63C057A92DD320AE0044CF9B /* SavedShapeViewCell.swift */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
-		63C0578A2DD2F8ED0044CF9B /* MapSketch */ = {
-			isa = PBXGroup;
-			children = (
-				63C805A22DE3203E00F3428B /* MapSketch.entitlements */,
-				63793A282DDCE6D300F425E9 /* Core */,
-				63793A212DDCC36F00F425E9 /* ViewModel */,
-				63F3F5FC2DD34BFE004C546F /* AppInfo.swift */,
-				63C057802DD2F8ED0044CF9B /* AppDelegate.swift */,
-				63C057882DD2F8ED0044CF9B /* SceneDelegate.swift */,
-				63C0577E2DD2F8ED0044CF9B /* Model */,
-				63C0577F2DD2F8ED0044CF9B /* View */,
-				63C0577D2DD2F8ED0044CF9B /* Controller */,
-				63C057812DD2F8ED0044CF9B /* Assets.xcassets */,
-				63C057822DD2F8ED0044CF9B /* Info.plist */,
-				63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */,
-				63C057862DD2F8ED0044CF9B /* Main.storyboard */,
-			);
-			path = MapSketch;
 			sourceTree = "<group>";
 		};
 		63F3F5FE2DD35156004C546F /* Frameworks */ = {
@@ -295,9 +353,6 @@
 			dependencies = (
 				63C0575D2DD2F6540044CF9B /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				63C0575E2DD2F6540044CF9B /* MapSketchTests */,
-			);
 			name = DronePassTests;
 			packageProductDependencies = (
 			);
@@ -317,9 +372,6 @@
 			);
 			dependencies = (
 				63C057672DD2F6540044CF9B /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				63C057682DD2F6540044CF9B /* MapSketchUITests */,
 			);
 			name = DronePassUITests;
 			packageProductDependencies = (
@@ -381,9 +433,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63C0578C2DD2F8ED0044CF9B /* Assets.xcassets in Resources */,
-				63C0578E2DD2F8ED0044CF9B /* LaunchScreen.storyboard in Resources */,
-				63C0578F2DD2F8ED0044CF9B /* Main.storyboard in Resources */,
+				63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */,
+				63970D402DE9C93400E11238 /* sample_shapes.json in Resources */,
+				63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */,
+				63970D432DE9C93400E11238 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,34 +461,34 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6392D8BB2DE37BD80016C49D /* ColorPickerViewController.swift in Sources */,
-				63C057992DD310D40044CF9B /* SavedViewController.swift in Sources */,
-				63C057902DD2F8ED0044CF9B /* AppDelegate.swift in Sources */,
-				6392D8BD2DE389A00016C49D /* NotiName.swift in Sources */,
-				6392D8B92DE346770016C49D /* LocationManager.swift in Sources */,
-				6392D8BF2DE393750016C49D /* DateFormatter+Korean.swift in Sources */,
-				63C057B02DD325610044CF9B /* SavedBottomSheetViewController.swift in Sources */,
-				63793A262DDCDA2400F425E9 /* PassThroughView.swift in Sources */,
-				63C0579F2DD314030044CF9B /* MainTabBarController.swift in Sources */,
-				63C057AA2DD320B00044CF9B /* SavedShapeViewCell.swift in Sources */,
-				63793A292DDCE6D300F425E9 /* ShapeSelectionCoordinator.swift in Sources */,
-				63C057922DD2F8ED0044CF9B /* SceneDelegate.swift in Sources */,
-				63C057A32DD31F700044CF9B /* Coordinate.swift in Sources */,
-				6392D8B72DE345750016C49D /* ShapeManager.swift in Sources */,
-				63C057A12DD31F5C0044CF9B /* PlaceShape.swift in Sources */,
-				63C057972DD310CC0044CF9B /* MapViewController.swift in Sources */,
-				63C0579B2DD310DE0044CF9B /* SettingViewController.swift in Sources */,
-				63AFEF082DDB7B9300D8866B /* SampleShapeLoader.swift in Sources */,
-				63C8059E2DE20B0F00F3428B /* NaverGeocodingService.swift in Sources */,
-				6392D8C12DE720BB0016C49D /* AddShapePopupViewController.swift in Sources */,
-				632279AC2DDC059D00C55901 /* PlaceShapeStore.swift in Sources */,
-				63C0579D2DD3134B0044CF9B /* IntroViewController.swift in Sources */,
-				63793A2B2DDCFAED00F425E9 /* ShapeDetailViewController.swift in Sources */,
-				63793A232DDCC37A00F425E9 /* SavedBottomSheetViewModel.swift in Sources */,
-				63AFEF062DDB75A600D8866B /* ColorManager.swift in Sources */,
-				6392D8B52DE340AF0016C49D /* SettingManager.swift in Sources */,
-				631AB3612DD5B312005AA749 /* BottomSheetContainerView.swift in Sources */,
-				63F3F5FD2DD34C00004C546F /* AppInfo.swift in Sources */,
+				63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */,
+				63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */,
+				63970D482DE9C93400E11238 /* LocationManager.swift in Sources */,
+				63970D492DE9C93400E11238 /* ColorManager.swift in Sources */,
+				63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */,
+				63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */,
+				63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */,
+				63970D4F2DE9C93400E11238 /* SampleShapeLoader.swift in Sources */,
+				63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */,
+				63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */,
+				63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */,
+				63970D572DE9C93400E11238 /* SavedBottomSheetViewModel.swift in Sources */,
+				63970D582DE9C93400E11238 /* AppInfo.swift in Sources */,
+				63970D592DE9C93400E11238 /* IntroViewController.swift in Sources */,
+				63970D5A2DE9C93400E11238 /* MainTabBarController.swift in Sources */,
+				63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */,
+				63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */,
+				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
+				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
+				63970D5F2DE9C93400E11238 /* PassThroughView.swift in Sources */,
+				63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */,
+				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
+				63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */,
+				63970D642DE9C93400E11238 /* SceneDelegate.swift in Sources */,
+				63970D662DE9C93400E11238 /* MapViewController.swift in Sources */,
+				63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */,
+				63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */,
+				63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -469,18 +522,18 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		63C057842DD2F8ED0044CF9B /* LaunchScreen.storyboard */ = {
+		63970D332DE9C93400E11238 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				63C057832DD2F8ED0044CF9B /* Base */,
+				63970D322DE9C93400E11238 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
-		63C057862DD2F8ED0044CF9B /* Main.storyboard */ = {
+		63970D352DE9C93400E11238 /* Main.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				63C057852DD2F8ED0044CF9B /* Base */,
+				63970D342DE9C93400E11238 /* Base */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -494,12 +547,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MapSketch/Info.plist;
+				INFOPLIST_FILE = DronePass/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DronePass;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
@@ -515,7 +568,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.MapSketch;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -529,12 +582,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = MapSketch/MapSketch.entitlements;
+				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = MapSketch/Info.plist;
+				INFOPLIST_FILE = DronePass/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = DronePass;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "";
@@ -689,7 +742,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.MapSketchTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -725,7 +778,7 @@
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.MapSketchUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
