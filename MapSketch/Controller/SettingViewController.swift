@@ -251,13 +251,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         settingsTableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingCell") // 셀 등록
         
     }
-    
-    // MARK: - 일반 설정 메서드 - 만료된 도형 전부 삭제
-    
-    
 
-    
-    
     
     // MARK: - Location Update Handler
     @objc private func handleLocationUpdate(_ notification: Notification) {
@@ -455,7 +449,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
             switch indexPath.row {
             case 0:
                 cell.textLabel?.text = "종료일 알림"
-                cell.detailTextLabel?.text = "종료일 7일전 알림을 받습니다."
+                cell.detailTextLabel?.text = "도형 종료일 7일전 알림을 받습니다."
                 cell.detailTextLabel?.textColor = .secondaryLabel
                 cell.detailTextLabel?.font = .systemFont(ofSize: 13)
                 let endDateSwitch = UISwitch()
@@ -464,8 +458,8 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
                 endDateSwitch.addTarget(self, action: #selector(switchValueChanged(_:)), for: .valueChanged)
                 cell.accessoryView = endDateSwitch
             case 1:
-                cell.textLabel?.text = "일출 일몰 알림"
-                cell.detailTextLabel?.text = "일출 일몰 30분전, 10분전 알림을 받습니다."
+                cell.textLabel?.text = "일출/일몰 알림"
+                cell.detailTextLabel?.text = "일출/일몰 30분전, 10분전 알림을 받습니다."
                 cell.detailTextLabel?.textColor = .secondaryLabel
                 cell.detailTextLabel?.font = .systemFont(ofSize: 13)
                 let sunriseSwitch = UISwitch()
@@ -571,7 +565,7 @@ class SettingViewController: UIViewController, CLLocationManagerDelegate, UITabl
         """
         
         let alert = UIAlertController(
-            title: "MapSketch",
+            title: "Flight Plans",
             message: message,
             preferredStyle: .alert
         )

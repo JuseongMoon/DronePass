@@ -19,7 +19,7 @@ struct AppInfo { // AppInfo 구조체를 정의합니다. 앱 전체에서 사�
     // MARK: - App Description
     struct Description { // 앱 설명과 관련된 정보를 담는 구조체입니다.
         static let intro: String = """
-  MapSketch는 
+  Flight Plans는 
   드론 비행 허가지를 시각화하고
   반경 기반 도형을 지도 위에 생성·저장하는
   개인용 지도 메모 어플입니다.
