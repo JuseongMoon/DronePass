@@ -15,6 +15,8 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
     @IBOutlet private weak var descriptionLabel: UILabel! // 앱 설명을 표시하는 레이블입니다.
     @IBOutlet private weak var versionLabel: UILabel! // 앱 버전 정보를 표시하는 레이블입니다.
     
+    @IBOutlet weak var startButton: UIButton!
+    
     // MARK: - Properties
     private let userDefaults = UserDefaults.standard // 사용자 기본 설정을 저장하는 객체입니다.
     private let hasSeenIntroKey = "hasSeenIntro" // 인트로 화면을 본 적이 있는지 저장하는 키입니다.
@@ -24,6 +26,8 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
         super.viewDidLoad()
         print("📱 IntroViewController - viewDidLoad")
         setupUI()
+        startButton.layer.cornerRadius = 14   // 원하면 값 조정
+        startButton.layer.masksToBounds = true
     }
     
     override func viewWillAppear(_ animated: Bool) {

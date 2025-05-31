@@ -182,10 +182,21 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
             let circleOverlay = NMFCircleOverlay()
             circleOverlay.center = center
             circleOverlay.radius = radius
-            let mainColor = UIColor(hex: shape.color)
-            circleOverlay.fillColor = mainColor?.withAlphaComponent(0.3) ?? .black
+            
+            // 만료 여부 확인
+            let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
+            
+            // 만료된 경우 회색으로, 아닌 경우 원래 색상 사용
+            let mainColor: UIColor
+            if isExpired {
+                mainColor = .systemGray
+            } else {
+                mainColor = UIColor(hex: shape.color) ?? .black
+            }
+            
+            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
             circleOverlay.outlineWidth = 2
-            circleOverlay.outlineColor = mainColor ?? .black
+            circleOverlay.outlineColor = mainColor
             circleOverlay.mapView = naverMapView.mapView
             overlays.append(circleOverlay)
 

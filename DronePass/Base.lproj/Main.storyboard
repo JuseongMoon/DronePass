@@ -83,6 +83,7 @@
                     </view>
                     <connections>
                         <outlet property="descriptionLabel" destination="BXE-9T-EtE" id="zcv-5u-eAc"/>
+                        <outlet property="startButton" destination="Rxj-SG-Wg1" id="JFz-WT-XHM"/>
                         <outlet property="versionLabel" destination="d4B-36-9RZ" id="F85-gk-q2I"/>
                     </connections>
                 </viewController>

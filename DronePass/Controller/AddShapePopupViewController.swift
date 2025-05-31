@@ -446,12 +446,14 @@ final class AddShapePopupViewController: UIViewController, UITextFieldDelegate, 
         dateOnlySwitch.isOn = UserDefaults.standard.bool(forKey: dateOnlyKey)
         updateDatePickerMode()
         
-        // 마지막으로 저장된 날짜 불러오기
-        if let lastStartDate = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
-            startDatePicker.date = lastStartDate
-        }
-        if let lastEndDate = UserDefaults.standard.object(forKey: lastEndDateKey) as? Date {
-            endDatePicker.date = lastEndDate
+        // 수정 모드가 아닐 때만 마지막으로 저장된 날짜 불러오기
+        if !isEditMode {
+            if let lastStartDate = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
+                startDatePicker.date = lastStartDate
+            }
+            if let lastEndDate = UserDefaults.standard.object(forKey: lastEndDateKey) as? Date {
+                endDatePicker.date = lastEndDate
+            }
         }
         
         if dateOnlySwitch.isOn {

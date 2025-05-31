@@ -34,36 +34,6 @@
             endingLineNumber = "429"
             landmarkName = "height(withConstrainedWidth:font:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "AC3D5DFA-046C-4796-BFB3-12D56ABEB4BB - d5b07c812643c5b6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Swift.String.height(withConstrainedWidth: CoreGraphics.CGFloat, font: __C.UIFont) -&gt; CoreGraphics.CGFloat"
-                  moduleName = "DronePass.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/david/Development/Swift/myProjects/DronePass/DronePass/Controller/ShapeDetailViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "430"
-                  endingLineNumber = "430">
-               </Location>
-               <Location
-                  uuid = "AC3D5DFA-046C-4796-BFB3-12D56ABEB4BB - d5b07c812643c591"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Swift.String.height(withConstrainedWidth: CoreGraphics.CGFloat, font: __C.UIFont) -&gt; CoreGraphics.CGFloat"
-                  moduleName = "DronePass.debug.dylib"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/david/Development/Swift/myProjects/DronePass/DronePass/Controller/ShapeDetailViewController.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "431"
-                  endingLineNumber = "431">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

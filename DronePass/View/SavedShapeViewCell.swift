@@ -29,12 +29,36 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
     }()
     
     private let stackView = UIStackView() // 전체 레이아웃을 위한 스택뷰
+    
+    // stackView에 버튼을 옆에 붙일 수 있도록 dateRangeLabel + 버튼을 감싸는 horizontal stack
+    private let dateRangeContainer = UIStackView()
     private let dateFormatter: DateFormatter = { // 날짜 포맷터
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
     var infoButtonTapped: (() -> Void)? // info 버튼 탭 시 실행될 클로저
+    
+    // 곧 만료, 만료버튼 설정용
+    private let expireStatusButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 13, weight: .semibold)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemGray
+        button.layer.cornerRadius = 8
+        button.layer.masksToBounds = true
+        button.isHidden = true // 기본값: 숨김
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.plain()
+            config.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8)
+            button.configuration = config
+        } else {
+            button.contentEdgeInsets = UIEdgeInsets(top: 2, left: 8, bottom: 2, right: 8)
+        }
+        return button
+    }()
     
     // MARK: - Init
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -61,8 +85,8 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
         
         statusLabel.font = .preferredFont(forTextStyle: .caption1)
         statusLabel.textColor = .tertiaryLabel
-        statusLabel.numberOfLines = 0 // 여러 줄 허용
-        statusLabel.textAlignment = .left // 날짜 왼쪽 정렬
+        statusLabel.numberOfLines = 0
+        statusLabel.textAlignment = .left
         statusLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
         
         radiusLabel.font = .systemFont(ofSize: 13, weight: .regular)
@@ -80,16 +104,13 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
         contentView.addSubview(radiusLabel)
         contentView.addSubview(stackView)
         NSLayoutConstraint.activate([
-            // info 버튼 오른쪽 상단
             infoButton.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             infoButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
             infoButton.widthAnchor.constraint(equalToConstant: 30),
             infoButton.heightAnchor.constraint(equalToConstant: 30),
-            // 반경 오른쪽 하단
             radiusLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
             radiusLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
             radiusLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 50),
-            // stackView는 contentView의 오른쪽까지(반경과 겹치지 않게 충분한 패딩)
             stackView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
             stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -80),
@@ -98,26 +119,41 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
 
         stackView.axis = .vertical
         stackView.spacing = 4
-        stackView.alignment = .leading // 왼쪽 정렬
+        stackView.alignment = .leading
         stackView.distribution = .fill
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.addArrangedSubview(addressLabel) // 제목
-        stackView.addArrangedSubview(dateRangeLabel) // 주소
-        stackView.addArrangedSubview(statusLabel) // 날짜
+        
+        // dateRangeContainer: 수평 스택
+        dateRangeContainer.axis = .horizontal
+        dateRangeContainer.spacing = 6
+        dateRangeContainer.alignment = .center
+        dateRangeContainer.distribution = .fill
+        dateRangeContainer.translatesAutoresizingMaskIntoConstraints = false
+        dateRangeContainer.addArrangedSubview(dateRangeLabel)
+        dateRangeContainer.addArrangedSubview(expireStatusButton)
+        
+        // 스택뷰에 컴포넌트 추가
+        stackView.addArrangedSubview(addressLabel)
+        stackView.addArrangedSubview(statusLabel)
+        stackView.addArrangedSubview(dateRangeContainer)
+
     }
     
     // MARK: - Configuration
-    func configure(with shape: PlaceShape) { // 셀에 도형 데이터를 설정하는 메서드입니다.
+    func configure(with shape: PlaceShape) {
+        addressLabel.text = shape.title
         
-        addressLabel.text = shape.title // 제목
-        dateRangeLabel.text = shape.address ?? "주소 없음" // 주소
+        // 시작~종료일 표시
         if let endDate = shape.expireDate {
             let start = dateFormatter.string(from: shape.startedAt)
             let end = dateFormatter.string(from: endDate)
-            statusLabel.text = "\(start) ~ \(end)" // 날짜
+            dateRangeLabel.text = "\(start) ~ \(end)"
         } else {
-            statusLabel.text = dateFormatter.string(from: shape.startedAt) // 날짜
+            dateRangeLabel.text = dateFormatter.string(from: shape.startedAt)
         }
+        
+        statusLabel.text = shape.address ?? "주소 없음"
+        
         if let radius = shape.radius {
             let numberFormatter = NumberFormatter()
             numberFormatter.numberStyle = .decimal
@@ -126,7 +162,75 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
         } else {
             radiusLabel.text = "반경: - m"
         }
+        
         setupAccessibility(with: shape)
+        
+        // 만료버튼 로직
+        expireStatusButton.isHidden = true
+        
+        if let expireDate = shape.expireDate {
+            let now = Date()
+            let calendar = Calendar.current
+            let daysLeft = calendar.dateComponents([.day], from: now.startOfDay, to: expireDate.startOfDay).day ?? 0
+
+            let font = UIFont.boldSystemFont(ofSize: 11)
+            let color = UIColor.white
+
+            // 만료된 경우 셀의 색상을 회색으로 변경
+            if daysLeft < 0 {
+                contentView.backgroundColor = .systemGray6
+                addressLabel.textColor = .systemGray
+                dateRangeLabel.textColor = .systemGray
+                statusLabel.textColor = .systemGray
+                radiusLabel.textColor = .systemGray
+            } else {
+                contentView.backgroundColor = .systemBackground
+                addressLabel.textColor = .label
+                dateRangeLabel.textColor = .secondaryLabel
+                statusLabel.textColor = .tertiaryLabel
+                radiusLabel.textColor = .systemGray2
+            }
+
+            if #available(iOS 15.0, *) {
+                var config = UIButton.Configuration.plain()
+                config.contentInsets = NSDirectionalEdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8)
+                
+                if daysLeft < 0 {
+                    expireStatusButton.isHidden = false
+                    config.attributedTitle = AttributedString("만료", attributes: AttributeContainer([
+                        .font: font,
+                        .foregroundColor: color
+                    ]))
+                    expireStatusButton.backgroundColor = .systemGray
+                } else if daysLeft <= 7 {
+                    expireStatusButton.isHidden = false
+                    config.attributedTitle = AttributedString("곧 만료", attributes: AttributeContainer([
+                        .font: font,
+                        .foregroundColor: color
+                    ]))
+                    expireStatusButton.backgroundColor = .systemRed
+                } else {
+                    expireStatusButton.isHidden = true
+                }
+                expireStatusButton.configuration = config
+            } else {
+                if daysLeft < 0 {
+                    expireStatusButton.isHidden = false
+                    expireStatusButton.setTitle("만료", for: .normal)
+                    expireStatusButton.titleLabel?.font = font
+                    expireStatusButton.setTitleColor(color, for: .normal)
+                    expireStatusButton.backgroundColor = .systemGray
+                } else if daysLeft <= 7 {
+                    expireStatusButton.isHidden = false
+                    expireStatusButton.setTitle("곧 만료", for: .normal)
+                    expireStatusButton.titleLabel?.font = font
+                    expireStatusButton.setTitleColor(color, for: .normal)
+                    expireStatusButton.backgroundColor = .systemRed
+                } else {
+                    expireStatusButton.isHidden = true
+                }
+            }
+        }
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
@@ -175,4 +279,9 @@ final class SavedShapeViewCell: UITableViewCell { // 저장된 도형 정보를 
     @objc private func infoButtonAction() { // info 버튼 탭 시 클로저 실행
         infoButtonTapped?()
     }
+}
+
+// startOfDay 확장
+extension Date {
+    var startOfDay: Date { Calendar.current.startOfDay(for: self) }
 }
