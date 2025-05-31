@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
-		63970D402DE9C93400E11238 /* sample_shapes.json in Resources */ = {isa = PBXBuildFile; fileRef = 63970D1B2DE9C93400E11238 /* sample_shapes.json */; };
 		63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D332DE9C93400E11238 /* LaunchScreen.storyboard */; };
 		63970D432DE9C93400E11238 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D352DE9C93400E11238 /* Main.storyboard */; };
 		63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */; };
@@ -19,7 +18,6 @@
 		63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2E2DE9C93400E11238 /* AppDelegate.swift */; };
 		63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */; };
 		63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */; };
-		63970D4F2DE9C93400E11238 /* SampleShapeLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D232DE9C93400E11238 /* SampleShapeLoader.swift */; };
 		63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D052DE9C93400E11238 /* ColorPickerViewController.swift */; };
 		63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0C2DE9C93400E11238 /* SettingViewController.swift */; };
 		63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */; };
@@ -31,7 +29,6 @@
 		63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */; };
 		63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D242DE9C93400E11238 /* SettingManager.swift */; };
 		63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D102DE9C93400E11238 /* NaverGeocodingService.swift */; };
-		63970D5F2DE9C93400E11238 /* PassThroughView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D092DE9C93400E11238 /* PassThroughView.swift */; };
 		63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0B2DE9C93400E11238 /* SavedViewController.swift */; };
 		63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D252DE9C93400E11238 /* ShapeManager.swift */; };
 		63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */; };
@@ -68,7 +65,6 @@
 		63970D062DE9C93400E11238 /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
 		63970D072DE9C93400E11238 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		63970D082DE9C93400E11238 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
-		63970D092DE9C93400E11238 /* PassThroughView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassThroughView.swift; sourceTree = "<group>"; };
 		63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
 		63970D0B2DE9C93400E11238 /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
 		63970D0C2DE9C93400E11238 /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
@@ -76,20 +72,13 @@
 		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
 		63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
-		63970D132DE9C93400E11238 /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
-		63970D142DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
-		63970D152DE9C93400E11238 /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
-		63970D162DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
-		63970D182DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
 		63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
-		63970D1B2DE9C93400E11238 /* sample_shapes.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample_shapes.json; sourceTree = "<group>"; };
 		63970D1D2DE9C93400E11238 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		63970D1E2DE9C93400E11238 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		63970D1F2DE9C93400E11238 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		63970D202DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
+		63970D202DE9C93400E11238 /* NaverGeocodingService 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NaverGeocodingService 2.swift"; sourceTree = "<group>"; };
 		63970D212DE9C93400E11238 /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
 		63970D222DE9C93400E11238 /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
-		63970D232DE9C93400E11238 /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
 		63970D242DE9C93400E11238 /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
 		63970D252DE9C93400E11238 /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
 		63970D272DE9C93400E11238 /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
@@ -150,7 +139,6 @@
 				63970D062DE9C93400E11238 /* IntroViewController.swift */,
 				63970D072DE9C93400E11238 /* MainTabBarController.swift */,
 				63970D082DE9C93400E11238 /* MapViewController.swift */,
-				63970D092DE9C93400E11238 /* PassThroughView.swift */,
 				63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */,
 				63970D0B2DE9C93400E11238 /* SavedViewController.swift */,
 				63970D0C2DE9C93400E11238 /* SettingViewController.swift */,
@@ -165,52 +153,22 @@
 				63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */,
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
+				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
+				63970D202DE9C93400E11238 /* NaverGeocodingService 2.swift */,
 			);
 			path = Core;
-			sourceTree = "<group>";
-		};
-		63970D172DE9C93400E11238 /* Saved */ = {
-			isa = PBXGroup;
-			children = (
-				63970D132DE9C93400E11238 /* SavedBottomSheetViewController.swift */,
-				63970D142DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
-				63970D152DE9C93400E11238 /* SavedViewController.swift */,
-				63970D162DE9C93400E11238 /* ShapeDetailViewController.swift */,
-			);
-			path = Saved;
-			sourceTree = "<group>";
-		};
-		63970D192DE9C93400E11238 /* Features */ = {
-			isa = PBXGroup;
-			children = (
-				63970D172DE9C93400E11238 /* Saved */,
-				63970D182DE9C93400E11238 /* ShapeDetailViewController.swift */,
-			);
-			path = Features;
-			sourceTree = "<group>";
-		};
-		63970D1C2DE9C93400E11238 /* Storage */ = {
-			isa = PBXGroup;
-			children = (
-				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
-				63970D1B2DE9C93400E11238 /* sample_shapes.json */,
-			);
-			path = Storage;
 			sourceTree = "<group>";
 		};
 		63970D262DE9C93400E11238 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				63970D1C2DE9C93400E11238 /* Storage */,
 				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
-				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
 				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
-				63970D202DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D212DE9C93400E11238 /* NotiName.swift */,
 				63970D222DE9C93400E11238 /* PlaceShape.swift */,
-				63970D232DE9C93400E11238 /* SampleShapeLoader.swift */,
 				63970D242DE9C93400E11238 /* SettingManager.swift */,
 				63970D252DE9C93400E11238 /* ShapeManager.swift */,
+				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -221,13 +179,6 @@
 				63970D272DE9C93400E11238 /* SampleShapeLoader.swift */,
 			);
 			path = Service;
-			sourceTree = "<group>";
-		};
-		63970D292DE9C93400E11238 /* UI */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = UI;
 			sourceTree = "<group>";
 		};
 		63970D2B2DE9C93400E11238 /* View */ = {
@@ -252,10 +203,8 @@
 				63970D6B2DE9CCA400E11238 /* DronePass.entitlements */,
 				63970D0E2DE9C93400E11238 /* Controller */,
 				63970D122DE9C93400E11238 /* Core */,
-				63970D192DE9C93400E11238 /* Features */,
 				63970D262DE9C93400E11238 /* Model */,
 				63970D282DE9C93400E11238 /* Service */,
-				63970D292DE9C93400E11238 /* UI */,
 				63970D2B2DE9C93400E11238 /* View */,
 				63970D2D2DE9C93400E11238 /* ViewModel */,
 				63970D2E2DE9C93400E11238 /* AppDelegate.swift */,
@@ -434,7 +383,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */,
-				63970D402DE9C93400E11238 /* sample_shapes.json in Resources */,
 				63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */,
 				63970D432DE9C93400E11238 /* Main.storyboard in Resources */,
 			);
@@ -468,7 +416,6 @@
 				63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */,
 				63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */,
 				63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */,
-				63970D4F2DE9C93400E11238 /* SampleShapeLoader.swift in Sources */,
 				63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */,
 				63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */,
 				63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */,
@@ -480,7 +427,6 @@
 				63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
-				63970D5F2DE9C93400E11238 /* PassThroughView.swift in Sources */,
 				63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
 				63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */,
