@@ -12,9 +12,11 @@ final class ShapeDetailViewController: UIViewController {
     private var shape: PlaceShape? {
         return PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeId })
     }
-        
+      
+    // 지도 앱 연결을 위한 속성
+    private var destinationCoordinate: CLLocationCoordinate2D?
+    private var destinationName: String?
     
-
     private let infoStack = UIStackView()
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
@@ -121,41 +123,69 @@ final class ShapeDetailViewController: UIViewController {
     }
     
     // 일반 정보 행(제목, 타입, 주소 등)
-    private func makeInfoRow(title: String, value: String) -> UIStackView {
+    private func makeInfoRow(title: String, value: String, coordinate: CLLocationCoordinate2D? = nil) -> UIStackView {
         let label = UILabel()
         label.text = title
         label.font = .systemFont(ofSize: 16, weight: .medium)
         label.widthAnchor.constraint(equalToConstant: 80).isActive = true
         label.setContentHuggingPriority(.required, for: .horizontal)
-        label.setContentCompressionResistancePriority(.required, for: .horizontal)
         label.textAlignment = .left
         label.translatesAutoresizingMaskIntoConstraints = false
 
-        let valueLabel = UILabel()
-        valueLabel.text = value
-        valueLabel.font = .systemFont(ofSize: 16)
-        valueLabel.textColor = .label
-        valueLabel.numberOfLines = 0
-        valueLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        valueLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        valueLabel.translatesAutoresizingMaskIntoConstraints = false
-
         let valueContainer = UIView()
         valueContainer.translatesAutoresizingMaskIntoConstraints = false
-        valueContainer.addSubview(valueLabel)
-        NSLayoutConstraint.activate([
-            valueLabel.topAnchor.constraint(equalTo: valueContainer.topAnchor, constant: 8),
-            valueLabel.bottomAnchor.constraint(equalTo: valueContainer.bottomAnchor, constant: -8),
-            valueLabel.leadingAnchor.constraint(equalTo: valueContainer.leadingAnchor, constant: 8),
-            valueLabel.trailingAnchor.constraint(equalTo: valueContainer.trailingAnchor, constant: -8),
-            valueContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 30)
-        ])
+
+        if title == "주소" {
+            let addressLabel = UILabel()
+            addressLabel.text = value.isEmpty ? "-" : value
+            addressLabel.font = .systemFont(ofSize: 16)
+            addressLabel.textColor = .systemBlue
+            addressLabel.numberOfLines = 0
+            addressLabel.isUserInteractionEnabled = true // 터치 가능
+            addressLabel.lineBreakMode = .byWordWrapping
+            addressLabel.translatesAutoresizingMaskIntoConstraints = false
+            addressLabel.setContentHuggingPriority(.required, for: .vertical)
+            addressLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+
+            // 좌표 정보 저장
+            self.destinationCoordinate = coordinate
+            self.destinationName = value
+
+            let tap = UITapGestureRecognizer(target: self, action: #selector(addressTapped))
+            addressLabel.addGestureRecognizer(tap)
+
+            valueContainer.addSubview(addressLabel)
+            NSLayoutConstraint.activate([
+                addressLabel.topAnchor.constraint(equalTo: valueContainer.topAnchor, constant: 8),
+                addressLabel.bottomAnchor.constraint(equalTo: valueContainer.bottomAnchor, constant: -8),
+                addressLabel.leadingAnchor.constraint(equalTo: valueContainer.leadingAnchor, constant: 8),
+                addressLabel.trailingAnchor.constraint(equalTo: valueContainer.trailingAnchor, constant: -8)
+            ])
+        } else {
+            let valueLabel = UILabel()
+            valueLabel.text = value
+            valueLabel.font = .systemFont(ofSize: 16)
+            valueLabel.textColor = .label
+            valueLabel.numberOfLines = 0
+            valueLabel.translatesAutoresizingMaskIntoConstraints = false
+            valueLabel.lineBreakMode = .byWordWrapping
+
+            valueLabel.setContentHuggingPriority(.required, for: .vertical)
+            valueLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+
+            valueContainer.addSubview(valueLabel)
+            NSLayoutConstraint.activate([
+                valueLabel.topAnchor.constraint(equalTo: valueContainer.topAnchor, constant: 8),
+                valueLabel.bottomAnchor.constraint(equalTo: valueContainer.bottomAnchor, constant: -8),
+                valueLabel.leadingAnchor.constraint(equalTo: valueContainer.leadingAnchor, constant: 8),
+                valueLabel.trailingAnchor.constraint(equalTo: valueContainer.trailingAnchor, constant: -8)
+            ])
+        }
+
         valueContainer.layer.borderWidth = 1
         valueContainer.layer.borderColor = UIColor.systemGray5.cgColor
         valueContainer.layer.cornerRadius = 8
         valueContainer.backgroundColor = .clear
-        valueContainer.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        valueContainer.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
 
         let row = UIStackView(arrangedSubviews: [label, valueContainer])
         row.axis = .horizontal
@@ -246,7 +276,7 @@ final class ShapeDetailViewController: UIViewController {
         )
         infoStack.addArrangedSubview(makeInfoRow(title: "좌표", value: coordinate.formattedCoordinate))
         
-        infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-"))
+        infoStack.addArrangedSubview(makeInfoRow(title: "주소", value: shape.address ?? "-", coordinate: coordinate))
         if let radius = shape.radius {
             let radiusString = numberFormatter.string(from: NSNumber(value: radius)) ?? "-"
             infoStack.addArrangedSubview(makeInfoRow(title: "반경", value: "\(radiusString) m"))
@@ -257,6 +287,7 @@ final class ShapeDetailViewController: UIViewController {
             infoStack.addArrangedSubview(makeInfoRow(title: "종료일", value: dateFormatter.string(from: expire)))
         }
         infoStack.addArrangedSubview(makeMemoRow(memo: shape.memo ?? ""))
+        
     }
 
     @objc private func deleteButtonTapped() {
@@ -299,6 +330,89 @@ final class ShapeDetailViewController: UIViewController {
             nav.popViewController(animated: true)
         } else {
             dismiss(animated: true, completion: nil)
+        }
+    }
+    
+    
+    // MARK: - 지도 앱 연결 메서드
+
+    //makeAddressRow 함수로 UIButton 생성 & 액션 연결
+    private func makeAddressRow(address: String, coordinate: CLLocationCoordinate2D) -> UIStackView {
+        let label = UILabel()
+        label.text = "주소"
+        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        label.setContentHuggingPriority(.required, for: .horizontal)
+        label.textAlignment = .left
+
+        let button = UIButton(type: .system)
+        button.setTitle(address.isEmpty ? "-" : address, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16)
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.contentHorizontalAlignment = .left
+        button.titleLabel?.numberOfLines = 0
+        button.addTarget(self, action: #selector(addressTapped), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        self.destinationCoordinate = coordinate
+        self.destinationName = address
+
+        let valueContainer = UIView()
+        valueContainer.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: valueContainer.topAnchor, constant: 8),
+            button.bottomAnchor.constraint(equalTo: valueContainer.bottomAnchor, constant: -8),
+            button.leadingAnchor.constraint(equalTo: valueContainer.leadingAnchor, constant: 8),
+            button.trailingAnchor.constraint(equalTo: valueContainer.trailingAnchor, constant: -8),
+            valueContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 30)
+        ])
+
+        let row = UIStackView(arrangedSubviews: [label, valueContainer])
+        row.axis = .horizontal
+        row.spacing = 12
+        row.alignment = .fill
+        row.distribution = .fill
+        NSLayoutConstraint.activate([
+            label.centerYAnchor.constraint(equalTo: valueContainer.centerYAnchor)
+        ])
+        return row
+    }
+    
+    // 주소 버튼 터치시 액션시트 띄우기 & 각 맵 실행
+    @objc private func addressTapped() {
+        guard let coordinate = destinationCoordinate else { return }
+        let name = (shape?.title ?? "목적지").addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "목적지"
+        let address = (destinationName ?? "목적지").addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "목적지"
+
+        let alert = UIAlertController(title: "길찾기 앱 선택", message: "아래 앱으로 길찾기를 시작합니다.", preferredStyle: .actionSheet)
+
+        // 네이버지도
+        alert.addAction(UIAlertAction(title: "네이버지도", style: .default) { _ in
+            let urlStr = "nmap://route/public?dlat=\(coordinate.latitude)&dlng=\(coordinate.longitude)&dname=\(name)"
+            self.openMapApp(urlScheme: urlStr, appStoreURL: "itms-apps://itunes.apple.com/app/id311867728")
+        })
+        // 카카오맵
+        alert.addAction(UIAlertAction(title: "카카오맵", style: .default) { _ in
+            let urlStr = "kakaomap://route?ep=\(coordinate.latitude),\(coordinate.longitude)&by=CAR"
+            self.openMapApp(urlScheme: urlStr, appStoreURL: "itms-apps://itunes.apple.com/app/id304608425")
+        })
+        // 티맵
+        alert.addAction(UIAlertAction(title: "티맵", style: .default) { _ in
+            let urlStr = "tmap://route?goalname=\(name)&goalx=\(coordinate.longitude)&goaly=\(coordinate.latitude)"
+            self.openMapApp(urlScheme: urlStr, appStoreURL: "itms-apps://itunes.apple.com/app/id431589174")
+        })
+        // 취소
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+
+        present(alert, animated: true, completion: nil)
+    }
+
+    // 공통 맵앱 실행 함수
+    private func openMapApp(urlScheme: String, appStoreURL: String) {
+        if let url = URL(string: urlScheme), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        } else if let appStore = URL(string: appStoreURL) {
+            UIApplication.shared.open(appStore, options: [:], completionHandler: nil)
         }
     }
 }
