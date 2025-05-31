@@ -73,13 +73,6 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
     // MARK: - 도형 표시
 
     private func drawSampleShapes() {
-//        // 샘플 도형 표시
-//        let sampleShapes = SampleShapeLoader.loadSampleShapes()
-//        for shape in sampleShapes {
-//            addOverlay(for: shape)
-//        }
-        
-        // PlaceShapeStore의 도형들도 표시
         let savedShapes = PlaceShapeStore.shared.shapes
         for shape in savedShapes {
             addOverlay(for: shape)
@@ -225,78 +218,215 @@ final class MapViewController: UIViewController, CLLocationManagerDelegate { // 
         }
     }
 
-    // MARK: - 도형 추가
     
-//    @objc func addShapeButtonTapped() {
-//        let coordinate = ... // 유저가 지도에서 지정한 위치
-//        let newShape = PlaceShape(
-//            title: "새 도형",
-//            shapeType: .circle,
-//            baseCoordinate: Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude),
-//            radius: 200, // 기본값, 사용자 입력 가능
-//            memo: "직접 추가",
-//            color: PaletteColor.blue.hex // 색상 선택 가능
-//        )
-//        // 도형 추가는 뷰모델을 통해
-//        SavedBottomSheetViewModel().addShape(newShape)
-//        // 또는 PlaceShapeStore.shared.addShape(newShape) 직접 사용
+    // MARK: - 지도 이동 관련 메서드
+//    @objc private func moveToShape(_ notification: Notification) {
+//        guard let shape = notification.object as? PlaceShape else { return }
+//        highlightedShapeID = shape.id
+//        reloadOverlays()
+//
+//        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+//        let offsetCenter = offsetLatLng(center: center, mapView: naverMapView.mapView, offsetY: 100)
+//        let radius = shape.radius ?? 500.0
+//
+//        // 위도 1도 ≈ 111,000m, 경도 1도 ≈ 111,000m * cos(위도)
+//        let latDelta = radius / 111_000.0
+//        let lngDelta = radius / (111_000.0 * cos(center.lat * .pi / 180))
+//        let southWest = NMGLatLng(lat: offsetCenter.lat - latDelta, lng: offsetCenter.lng - lngDelta)
+//        let northEast = NMGLatLng(lat: offsetCenter.lat + latDelta, lng: offsetCenter.lng + lngDelta)
+//        let bounds = NMGLatLngBounds(southWest: southWest, northEast: northEast)
+//        let cameraUpdate = NMFCameraUpdate(fit: bounds, padding: 100)
+//        cameraUpdate.animation = .easeIn
+//        cameraUpdate.animationDuration = 0.2
+//
+//        DispatchQueue.main.async { [weak self] in
+//            self?.naverMapView.mapView.moveCamera(cameraUpdate)
+//        }
 //    }
     
-    // MARK: - 리스트에서 터치하면 지도의 해당 장소로 시점을 이동
-    @objc private func moveToShape(_ notification: Notification) { // 리스트에서 도형을 선택하면 해당 위치로 이동하는 메서드입니다.
+//    @objc private func moveToShape(_ notification: Notification) {
+//        guard let shape = notification.object as? PlaceShape else { return }
+//        highlightedShapeID = shape.id
+//        reloadOverlays()
+//        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+//        let zoom = calculateZoomLevel(for: shape.radius ?? 500.0)
+//        let offsetCenter = offsetLatLng(center: center, mapView: naverMapView.mapView, offsetY: 200)
+//        let cameraPosition = NMFCameraPosition(offsetCenter, zoom: zoom)
+//        let cameraUpdate = NMFCameraUpdate(position: cameraPosition)
+//        cameraUpdate.animation = .easeIn
+//        cameraUpdate.animationDuration = 0.2
+//        DispatchQueue.main.async { [weak self] in
+//            self?.naverMapView.mapView.moveCamera(cameraUpdate)
+//        }
+//    }
+    
+//    @objc private func moveToShape(_ notification: Notification) {
+//        guard let shape = notification.object as? PlaceShape else { return }
+//        highlightedShapeID = shape.id
+//        reloadOverlays()
+//
+//        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+//        let zoom = calculateZoomLevel(for: shape.radius ?? 500.0)
+//
+//        // 1. 첫 번째 이동: 중심점+줌(오프셋 없이) 이동
+//        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+//        let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
+//        cameraUpdate1.animation = .easeIn
+//        cameraUpdate1.animationDuration = 0.01
+//
+//        self.naverMapView.mapView.moveCamera(cameraUpdate1)
+//
+//        // 2. 애니메이션 끝난 후 오프셋 적용한 위치로 재이동 (0.18초 후)
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { [weak self] in
+//            guard let self = self else { return }
+//            let offsetCenter = self.offsetLatLng(center: center, mapView: self.naverMapView.mapView, offsetY: 200)
+//            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+//            let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
+//            cameraUpdate2.animation = .easeIn
+//            cameraUpdate2.animationDuration = 0.01
+//            self.naverMapView.mapView.moveCamera(cameraUpdate2)
+//        }
+//    }
+    
+    // 아주 빠르게 두번 이동
+//    @objc private func moveToShape(_ notification: Notification) {
+//        guard let shape = notification.object as? PlaceShape else { return }
+//        highlightedShapeID = shape.id
+//        reloadOverlays()
+//
+//        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+//        let zoom = calculateZoomLevel(for: shape.radius ?? 500.0)
+//
+//        // 1. 첫 번째 이동: 즉시(center, zoom) (애니메이션 없이)
+//        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+//        let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
+//        cameraUpdate1.animation = .none
+//        self.naverMapView.mapView.moveCamera(cameraUpdate1)
+//
+//        // 2. projection이 반영된 후(0.01~0.02초 후), 오프셋 적용 위치로 이동(애니메이션 on)
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+//            guard let self = self else { return }
+//            let offsetCenter = self.offsetLatLng(center: center, mapView: self.naverMapView.mapView, offsetY: 200)
+//            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+//            let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
+//            cameraUpdate2.animation = .none
+//            self.naverMapView.mapView.moveCamera(cameraUpdate2)
+//        }
+//    }
+
+    // 아주 빠르게 두번 이동 + 같은 도형일 경우 동작 안하기
+    @objc private func moveToShape(_ notification: Notification) {
         guard let shape = notification.object as? PlaceShape else { return }
-        highlightedShapeID = shape.id // 하이라이트 ID 저장
-        let lat = shape.baseCoordinate.latitude
-        let lng = shape.baseCoordinate.longitude
-        let radius = shape.radius ?? 500.0
-        
-        let zoom = zoomLevel(for: radius)
-        
-        // 반드시 다음 RunLoop에서 오프셋 계산 및 카메라 이동
-        DispatchQueue.main.async {
-            let offsetY = self.naverMapView.mapView.bounds.height * 0.25
-            let center = NMGLatLng(lat: lat, lng: lng)
-            let offsetCenter = self.offsetLatLng(center: center, mapView: self.naverMapView.mapView, offsetY: offsetY)
-            let cameraUpdate = NMFCameraUpdate(position: NMFCameraPosition(offsetCenter, zoom: zoom))
-            cameraUpdate.animation = .easeIn
-            self.naverMapView.mapView.moveCamera(cameraUpdate)
+
+        // 1. 이미 하이라이트된 도형이면, 즉시 리턴 (이동 X, 화면 깜빡임 방지)
+        if highlightedShapeID == shape.id {
+            return
         }
-        
-        // 지도 오버레이 리로드
+        highlightedShapeID = shape.id
         reloadOverlays()
+
+        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+        let zoom = calculateZoomLevel(for: shape.radius ?? 500.0)
+
+        // 1. 첫 번째 이동: 즉시(center, zoom) (애니메이션 없이)
+        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+        let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
+        cameraUpdate1.animation = .none
+        self.naverMapView.mapView.moveCamera(cameraUpdate1)
+
+        // 2. projection이 반영된 후(0.02초 후), 오프셋 적용 위치로 이동(애니메이션 on)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+            guard let self = self else { return }
+            let offsetCenter = self.offsetLatLng(center: center, mapView: self.naverMapView.mapView, offsetY: 200)
+            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+            let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
+            cameraUpdate2.animation = .none
+            self.naverMapView.mapView.moveCamera(cameraUpdate2)
+        }
     }
     
-    // 반경 → 줌레벨 변환 공식
-    func zoomLevel(for radius: Double) -> Double { // 반경에 따라 적절한 줌레벨을 계산하는 메서드입니다.
+    
+    
+    
+//      지도뷰를 아예 껐다가 켜기
+//
+//    @objc private func moveToShape(_ notification: Notification) {
+//        guard let shape = notification.object as? PlaceShape else { return }
+//        highlightedShapeID = shape.id
+//        reloadOverlays()
+//
+//        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+//        let zoom = calculateZoomLevel(for: shape.radius ?? 500.0)
+//
+//        // 1. 지도 뷰 숨김 (유저에게 아무것도 안보이게)
+//        self.naverMapView.isHidden = true
+//
+//        // 2. 즉시 이동 (첫 이동)
+//        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+//        let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
+//        cameraUpdate1.animation = .none
+//        self.naverMapView.mapView.moveCamera(cameraUpdate1)
+//
+//        // 3. projection 반영된 뒤 오프셋 이동
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { [weak self] in
+//            guard let self = self else { return }
+//            let offsetCenter = self.offsetLatLng(center: center, mapView: self.naverMapView.mapView, offsetY: 200)
+//            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+//            let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
+//            cameraUpdate2.animation = .none
+//            self.naverMapView.mapView.moveCamera(cameraUpdate2)
+//            
+//            // 4. 지도 뷰를 다시 보여줌 (딜레이 주면 더 자연스럽게)
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) {
+//                self.naverMapView.isHidden = false
+//            }
+//        }
+//    }
+    
+
+    
+    
+    /// 도형에 대한 카메라 위치 계산
+    private func calculateCameraPosition(for shape: PlaceShape) -> NMFCameraPosition {
+        // 도형의 중심 좌표
+        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+        // 반경에 따른 줌 레벨 계산
+        let radius = shape.radius ?? 500.0
+        let zoom = calculateZoomLevel(for: radius)
+        // 오프셋 없이 중심 좌표 그대로 사용
+        return NMFCameraPosition(center, zoom: zoom)
+    }
+    
+    /// 반경에 따른 줌 레벨 계산
+    private func calculateZoomLevel(for radius: Double) -> Double {
         let minRadius: Double = 100
         let maxRadius: Double = 2000
         let minZoom: Double = 11
         let maxZoom: Double = 15
         
+        // 경계값 처리
         if radius <= minRadius { return maxZoom }
         if radius >= maxRadius { return minZoom }
-        // 선형 보간
-        return maxZoom - (radius - minRadius) * (maxZoom - minZoom) / (maxRadius - minRadius)
+        
+        // 선형 보간으로 줌 레벨 계산
+        let zoomRange = maxZoom - minZoom
+        let radiusRange = maxRadius - minRadius
+        let normalizedRadius = radius - minRadius
+        
+        return maxZoom - (normalizedRadius * zoomRange / radiusRange)
     }
     
-    // 중심 좌표를 Y축으로 오프셋
-    func offsetLatLng(center: NMGLatLng, mapView: NMFMapView, offsetY: CGFloat) -> NMGLatLng { // 중심 좌표를 Y축으로 오프셋하는 메서드입니다.
-        let projection = mapView.projection
-        let screenPoint = projection.point(from: center)
-        let offsetPoint = CGPoint(x: screenPoint.x, y: screenPoint.y + offsetY)
-        return projection.latlng(from: offsetPoint)
+    // 아래쪽으로 100 이동
+    private func offsetLatLng(center: NMGLatLng, mapView: NMFMapView, offsetY: CGFloat) -> NMGLatLng {
+        let point = mapView.projection.point(from: center)
+        let offsetPoint = CGPoint(x: point.x, y: point.y + 200) // Y는 -값: 화면 위로 올라감
+        return mapView.projection.latlng(from: offsetPoint)
     }
     
     private func reloadOverlays() {
         // 기존 오버레이 모두 제거
         overlays.forEach { $0.mapView = nil }
         overlays.removeAll()
-        
-        // 샘플 도형 다시 그리기
-//        let sampleShapes = SampleShapeLoader.loadSampleShapes()
-//        for shape in sampleShapes {
-//            addOverlay(for: shape)
-//        }
         
         // PlaceShapeStore의 도형들 다시 그리기
         let savedShapes = PlaceShapeStore.shared.shapes
@@ -345,5 +475,29 @@ extension MainTabBarController {
             NotificationCenter.default.post(name: Notification.Name("HighlightShapeInList"), object: shape)
         }
     }
+    
+    // 저장 탭의 높이 상태를 저장하는 프로퍼티
+    var savedSheetHeight: SheetHeight {
+        get {
+            if let savedVC = viewControllers?[1] as? SavedBottomSheetViewController {
+                let height = savedVC.currentSheetHeight
+                if height <= 250 {
+                    return .low
+                } else if height >= 430 {
+                    return .high
+                } else {
+                    return .medium
+                }
+            }
+            return .low
+        }
+    }
+}
+
+// 저장 탭의 높이 상태를 나타내는 열거형
+enum SheetHeight {
+    case low
+    case medium
+    case high
 }
 

@@ -76,7 +76,6 @@
 		63970D1D2DE9C93400E11238 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
 		63970D1E2DE9C93400E11238 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
 		63970D1F2DE9C93400E11238 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
-		63970D202DE9C93400E11238 /* NaverGeocodingService 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NaverGeocodingService 2.swift"; sourceTree = "<group>"; };
 		63970D212DE9C93400E11238 /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
 		63970D222DE9C93400E11238 /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
 		63970D242DE9C93400E11238 /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
@@ -154,7 +153,6 @@
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
 				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
-				63970D202DE9C93400E11238 /* NaverGeocodingService 2.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -495,7 +493,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -530,7 +528,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;

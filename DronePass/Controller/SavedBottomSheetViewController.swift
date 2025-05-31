@@ -78,10 +78,15 @@ final class SavedBottomSheetViewController: UIViewController, UIGestureRecognize
     private let viewModel: SavedBottomSheetViewModel // 바텀시트의 뷰모델입니다.
     private var cancellables = Set<AnyCancellable>() // Combine 구독 해제용
     weak var delegate: SavedBottomSheetDelegate? // 바텀시트 델리게이트
-    private var sheetHeightConstraint: NSLayoutConstraint! // 시트 높이 제약조건
+    var sheetHeightConstraint: NSLayoutConstraint! // 시트 높이 제약조건
     private var initialHeight: CGFloat = 0 // 드래그 시작 시 높이
     private var hasSetInitialPosition = false // 초기 위치 설정 여부
     private var selectedShapeID: UUID? // 선택상태
+    
+    // 현재 시트의 높이를 반환하는 프로퍼티
+    var currentSheetHeight: CGFloat {
+        return sheetHeightConstraint.constant
+    }
     
     // MARK: - Sheet Heights
     private let tabBarHeight: CGFloat // 탭바 높이
