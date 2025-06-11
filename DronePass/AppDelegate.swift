@@ -9,7 +9,7 @@ import UIKit // UIKit 프레임워크를 가져옵니다. (iOS 앱의 기본 UI 
 import CoreData // CoreData 프레임워크를 가져옵니다. (데이터 영구 저장을 위한 프레임워크)
 import Combine // Combine 프레임워크를 가져옵니다. (반응형 프로그래밍을 위한 프레임워크)
 
-@main // 이 클래스가 앱의 진입점임을 나타냅니다.
+//@main // 이 클래스가 앱의 진입점임을 나타냅니다.
 class AppDelegate: UIResponder, UIApplicationDelegate { // AppDelegate 클래스를 정의합니다. UIResponder와 UIApplicationDelegate 프로토콜을 준수합니다.
     // MARK: - Properties
     private var cancellables = Set<AnyCancellable>() // Combine 구독을 저장하고 관리하기 위한 Set입니다.

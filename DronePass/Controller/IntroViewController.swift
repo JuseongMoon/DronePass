@@ -9,13 +9,15 @@
 // 연관기능: 앱 소개, 버전 정보, 메인 화면 진입
     
 import UIKit // UIKit 프레임워크를 가져옵니다. (UI 구성 및 이벤트 처리)
+import SwiftUI
     
 class IntroViewController: UIViewController { // 앱 소개 화면을 담당하는 뷰 컨트롤러입니다.
     // MARK: - IBOutlets
     @IBOutlet private weak var descriptionLabel: UILabel! // 앱 설명을 표시하는 레이블입니다.
     @IBOutlet private weak var versionLabel: UILabel! // 앱 버전 정보를 표시하는 레이블입니다.
     
-    @IBOutlet weak var startButton: UIButton!
+    @IBOutlet weak var uikitButton: UIButton!
+    @IBOutlet weak var swiftuiButton: UIButton!
     
     // MARK: - Properties
     private let userDefaults = UserDefaults.standard // 사용자 기본 설정을 저장하는 객체입니다.
@@ -26,8 +28,10 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
         super.viewDidLoad()
         print("📱 IntroViewController - viewDidLoad")
         setupUI()
-        startButton.layer.cornerRadius = 14   // 원하면 값 조정
-        startButton.layer.masksToBounds = true
+        uikitButton.layer.cornerRadius = 14   // 원하면 값 조정
+        uikitButton.layer.masksToBounds = true
+        swiftuiButton.layer.cornerRadius = 14
+        swiftuiButton.layer.masksToBounds = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -49,10 +53,14 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
     }
     
     // MARK: - IBActions
-    @IBAction private func didTapStartButton(_ sender: UIButton) { // 시작 버튼을 눌렀을 때 호출되는 메서드입니다.
-        print("📱 IntroViewController - didTapStartButton")
-        userDefaults.set(true, forKey: hasSeenIntroKey) // 인트로를 봤음을 저장
-        moveToMain(animated: true) // 메인 화면으로 이동
+    @IBAction private func didTapUIKitButton(_ sender: UIButton) {
+        userDefaults.set(true, forKey: hasSeenIntroKey)
+        moveToMain(animated: true)
+    }
+    
+    @IBAction private func didTapSwiftUIButton(_ sender: UIButton) {
+        userDefaults.set(true, forKey: hasSeenIntroKey)
+        moveToSwiftUIMain(animated: true)
     }
     
     // MARK: - Navigation
@@ -64,5 +72,12 @@ class IntroViewController: UIViewController { // 앱 소개 화면을 담당하�
         }
         tabBarVC.modalPresentationStyle = .fullScreen // 전체 화면으로 표시
         present(tabBarVC, animated: animated) // 화면 전환
-        }
+    }
+    
+    private func moveToSwiftUIMain(animated: Bool) {
+        let mainTabView = MainTabView()
+        let hostingVC = UIHostingController(rootView: mainTabView)
+        hostingVC.modalPresentationStyle = .fullScreen
+        present(hostingVC, animated: animated)
+    }
 }

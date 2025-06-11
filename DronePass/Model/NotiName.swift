@@ -8,5 +8,7 @@
 import Foundation
 
 extension Notification.Name {
+//    static let SwiftUIShapeSelected = Notification.Name("SwiftUIShapeSelected")
+//    static let UIKitShapeSelected = Notification.Name("UIKitShapeSelected")
     static let shapesDidUpdate = Notification.Name("shapesDidUpdate")
 }

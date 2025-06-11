@@ -16,21 +16,41 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rxj-SG-Wg1">
-                                <rect key="frame" x="20" y="683.33333333333337" width="353" height="50"/>
-                                <color key="backgroundColor" systemColor="systemBlueColor"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="Q8w-LF-R1k"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
-                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                <state key="normal" title="시작하기">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                </state>
-                                <connections>
-                                    <action selector="didTapStartButton:" destination="LKY-6k-OE0" eventType="touchUpInside" id="foa-EL-aGO"/>
-                                </connections>
-                            </button>
+                            <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="cU9-Da-HAX">
+                                <rect key="frame" x="20" y="684" width="353" height="50"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Rxj-SG-Wg1">
+                                        <rect key="frame" x="0.0" y="0.0" width="166.66666666666666" height="50"/>
+                                        <color key="backgroundColor" systemColor="systemBlueColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="Q8w-LF-R1k"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="UIKit">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="didTapUIKitButton:" destination="LKY-6k-OE0" eventType="touchUpInside" id="WEw-PO-NR7"/>
+                                        </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f9s-6c-Hc1">
+                                        <rect key="frame" x="186.66666666666663" y="0.0" width="166.33333333333337" height="50"/>
+                                        <color key="backgroundColor" systemColor="systemOrangeColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="50" id="qDa-d2-sA4"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                        <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                        <state key="normal" title="SwiftUI">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="didTapSwiftUIButton:" destination="LKY-6k-OE0" eventType="touchUpInside" id="7UK-8q-o4f"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="Lfe-ZI-uuB">
                                 <rect key="frame" x="20" y="369" width="353" height="114.33333333333331"/>
                                 <subviews>
@@ -74,16 +94,17 @@
                         <color key="backgroundColor" red="0.97647058959999999" green="0.97647058959999999" blue="0.97647058959999999" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                         <constraints>
                             <constraint firstItem="Lfe-ZI-uuB" firstAttribute="leading" secondItem="UMh-xs-EJc" secondAttribute="leading" constant="20" id="2Cc-Bb-hgG"/>
-                            <constraint firstItem="Rxj-SG-Wg1" firstAttribute="leading" secondItem="UMh-xs-EJc" secondAttribute="leading" constant="20" id="VD4-xy-M43"/>
-                            <constraint firstItem="UMh-xs-EJc" firstAttribute="trailing" secondItem="Rxj-SG-Wg1" secondAttribute="trailing" constant="20" id="ePC-qM-PAI"/>
+                            <constraint firstItem="UMh-xs-EJc" firstAttribute="bottom" secondItem="cU9-Da-HAX" secondAttribute="bottom" constant="50" id="6rk-gs-d1a"/>
                             <constraint firstItem="UMh-xs-EJc" firstAttribute="trailing" secondItem="Lfe-ZI-uuB" secondAttribute="trailing" constant="20" id="jlF-ug-k3z"/>
+                            <constraint firstItem="UMh-xs-EJc" firstAttribute="trailing" secondItem="cU9-Da-HAX" secondAttribute="trailing" constant="20" id="ktI-nZ-ztG"/>
                             <constraint firstItem="Lfe-ZI-uuB" firstAttribute="centerY" secondItem="AWw-UX-f6W" secondAttribute="centerY" id="kuR-bw-cfe"/>
-                            <constraint firstItem="Rxj-SG-Wg1" firstAttribute="top" secondItem="Lfe-ZI-uuB" secondAttribute="bottom" constant="200" id="ndg-RS-jdG"/>
+                            <constraint firstItem="cU9-Da-HAX" firstAttribute="leading" secondItem="UMh-xs-EJc" secondAttribute="leading" constant="20" id="szV-LQ-ZHD"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="descriptionLabel" destination="BXE-9T-EtE" id="zcv-5u-eAc"/>
-                        <outlet property="startButton" destination="Rxj-SG-Wg1" id="JFz-WT-XHM"/>
+                        <outlet property="swiftuiButton" destination="f9s-6c-Hc1" id="U2O-qE-3P1"/>
+                        <outlet property="uikitButton" destination="Rxj-SG-Wg1" id="RdN-gV-U7z"/>
                         <outlet property="versionLabel" destination="d4B-36-9RZ" id="F85-gk-q2I"/>
                     </connections>
                 </viewController>
@@ -210,6 +231,9 @@
         </systemColor>
         <systemColor name="systemGreenColor">
             <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemOrangeColor">
+            <color red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

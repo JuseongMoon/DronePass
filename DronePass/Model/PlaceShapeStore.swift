@@ -9,13 +9,17 @@
 // 연관기능: 도형 추가, 삭제, 저장, 불러오기
 
 import Foundation
+import Combine
+import SwiftUI
 
 // PlaceShape 모델 직접 import
 //import DronePass
 
-public final class PlaceShapeStore {
-    public static let shared = PlaceShapeStore()
-    @Published public private(set) var shapes: [PlaceShape] = []
+final class PlaceShapeStore: ObservableObject {
+    static let shared = PlaceShapeStore()
+    @Published var shapes: [PlaceShape] = []
+    @Published var selectedShapeID: UUID? = nil
+
     
     private let fileManager = FileManager.default
     private let documentsDirectory: URL
@@ -30,6 +34,12 @@ public final class PlaceShapeStore {
         
         // 초기 데이터 로드
         loadShapes()
+    }
+    
+    func deleteShape(_ shape: PlaceShape) {
+        if let index = shapes.firstIndex(where: { $0.id == shape.id }) {
+            shapes.remove(at: index)
+        }
     }
     
     private func loadShapes() {

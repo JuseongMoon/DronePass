@@ -8,8 +8,8 @@
 /* Class = "UITabBarItem"; title = "설정"; ObjectID = "GuA-oP-8zl"; */
 "GuA-oP-8zl.title" = "설정";
 
-/* Class = "UIButton"; normalTitle = "시작하기"; ObjectID = "Rxj-SG-Wg1"; */
-"Rxj-SG-Wg1.normalTitle" = "시작하기";
+/* Class = "UIButton"; normalTitle = "UIKit"; ObjectID = "Rxj-SG-Wg1"; */
+"Rxj-SG-Wg1.normalTitle" = "UIKit";
 
 /* Class = "UITabBarItem"; title = "저장"; ObjectID = "ZnJ-BR-fdn"; */
 "ZnJ-BR-fdn.title" = "저장";

@@ -4,6 +4,7 @@
 //
 //  Created by 문주성 on 5/25/25.
 //
+// 이사검증완료
 
 import Foundation
 import UserNotifications   // iOS의 푸시 알림(로컬 알림 포함) 기능을 사용하기 위한 프레임워크

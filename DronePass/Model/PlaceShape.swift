@@ -42,7 +42,7 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
     public var polylineCoordinates: [Coordinate]? // 선형 도형의 좌표 배열입니다. (선택적)
 
     public var memo: String? // 도형에 대한 메모입니다. (선택적)
-    public var expireDate: Date? // 도형의 만료 날짜입니다. (선택적)
+    public var expireDate: Date? // 도형의 만료 날짜입니다.
     public let startedAt: Date // 도형이 생성된 날짜입니다.
 
     /// **팔레트 컬러 (색상 팔레트에서 고름)**
@@ -59,7 +59,7 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
         polylineCoordinates: [Coordinate]? = nil, // 선형 도형의 좌표 배열을 설정합니다. (선택적)
         memo: String? = nil, // 도형에 대한 메모를 설정합니다. (선택적)
         address: String? = nil, // 도형의 주소를 설정합니다. (선택적)
-        expireDate: Date? = nil, // 도형의 만료 날짜를 설정합니다. (선택적)
+        expireDate: Date?, // 도형의 만료 날짜를 설정합니다. (선택적)
         startedAt: Date = Date(), // 도형의 생성 날짜를 설정합니다. 기본값은 현재 시간입니다.
         color: String = "#007AFF" // 도형의 색상을 설정합니다. 기본값은 파란색입니다.
     ) {

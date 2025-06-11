@@ -6,17 +6,26 @@
 //
 
 import UIKit // UIKit 프레임워크를 가져옵니다. (iOS 앱의 기본 UI 컴포넌트들을 사용하기 위함)
+import SwiftUI
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate { // SceneDelegate 클래스를 정의합니다. UIResponder와 UIWindowSceneDelegate 프로토콜을 준수합니다.
 
     var window: UIWindow? // 앱의 메인 윈도우를 저장하는 프로퍼티입니다.
 
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) { // Scene이 생성될 때 호출되는 메서드입니다.
-        // 이 메서드는 UIWindow를 Scene에 연결하고 설정하는 데 사용됩니다.
-        // Storyboard를 사용하는 경우, window 프로퍼티는 자동으로 초기화되고 Scene에 연결됩니다.
-        // 이 델리게이트는 연결되는 Scene이나 Session이 새로운 것임을 의미하지 않습니다.
-        guard let _ = (scene as? UIWindowScene) else { return } // Scene이 UIWindowScene 타입인지 확인합니다.
+//    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) { // Scene이 생성될 때 호출되는 메서드입니다.
+//        // 이 메서드는 UIWindow를 Scene에 연결하고 설정하는 데 사용됩니다.
+//        // Storyboard를 사용하는 경우, window 프로퍼티는 자동으로 초기화되고 Scene에 연결됩니다.
+//        // 이 델리게이트는 연결되는 Scene이나 Session이 새로운 것임을 의미하지 않습니다.
+//        guard let _ = (scene as? UIWindowScene) else { return } // Scene이 UIWindowScene 타입인지 확인합니다.
+//    }
+    
+    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = UIHostingController(rootView: MainTabView()) // MainTabView로 변경!
+        self.window = window
+        window.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) { // Scene이 시스템에 의해 해제될 때 호출되는 메서드입니다.
