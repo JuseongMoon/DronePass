@@ -165,3 +165,7 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
         return "\(latString) \(lonString)"
     }
 }
+
+extension Coordinate: Identifiable {
+    public var id: String { "\(latitude),\(longitude)" }
+}

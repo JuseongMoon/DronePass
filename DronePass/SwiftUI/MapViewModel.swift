@@ -8,21 +8,21 @@ class MapViewModel: NSObject, ObservableObject {
     @Published var highlightedShapeID: UUID?
     @Published var overlays: [NMFOverlay] = []
     @Published var currentMapView: NMFMapView?
-    
+
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
-    
+
     override init() {
         super.init()
         setupLocationManager()
         setupShapeStoreObserver()
     }
-    
+
     private func setupLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = 10
-        
+
         let status = locationManager.authorizationStatus
         switch status {
         case .notDetermined:
@@ -33,16 +33,17 @@ class MapViewModel: NSObject, ObservableObject {
             break
         }
     }
-    
+
     private func setupShapeStoreObserver() {
         PlaceShapeStore.shared.$shapes
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
+                // ⭐️ 상태변이 defer 필요 없음 (이미 MainQueue) – but 코어 함수만 사용
                 self?.reloadOverlays()
             }
             .store(in: &cancellables)
     }
-    
+
     func addOverlay(for shape: PlaceShape, mapView: NMFMapView) {
         switch shape.shapeType {
         case .circle:
@@ -51,16 +52,16 @@ class MapViewModel: NSObject, ObservableObject {
             let circleOverlay = NMFCircleOverlay()
             circleOverlay.center = center
             circleOverlay.radius = radius
-            
+
             let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
             let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
-            
+
             circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
             circleOverlay.outlineWidth = 2
             circleOverlay.outlineColor = mainColor
             circleOverlay.mapView = mapView
             overlays.append(circleOverlay)
-            
+
             if shape.id == highlightedShapeID {
                 let highlightOverlay = NMFCircleOverlay()
                 highlightOverlay.center = center
@@ -71,7 +72,7 @@ class MapViewModel: NSObject, ObservableObject {
                 highlightOverlay.mapView = mapView
                 overlays.append(highlightOverlay)
             }
-            
+
             circleOverlay.touchHandler = { [weak self] _ in
                 NotificationCenter.default.post(name: Notification.Name("ShapeOverlayTapped"), object: shape)
                 return true
@@ -80,13 +81,20 @@ class MapViewModel: NSObject, ObservableObject {
             break
         }
     }
-    
+
     func reloadOverlays() {
-        guard let mapView = currentMapView else { return }
-        
-        overlays.forEach { $0.mapView = nil }
+        // ⭐️ mapView 유효성 체크
+        guard let mapView = currentMapView else {
+            overlays.removeAll()
+            return
+        }
+        // ⭐️ overlays 해제 시 nil-check
+        overlays.forEach { overlay in
+            if overlay.mapView != nil {
+                overlay.mapView = nil
+            }
+        }
         overlays.removeAll()
-        
         let savedShapes = PlaceShapeStore.shared.shapes
         for shape in savedShapes {
             addOverlay(for: shape, mapView: mapView)
