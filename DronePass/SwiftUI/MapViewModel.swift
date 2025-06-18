@@ -11,11 +11,17 @@ class MapViewModel: NSObject, ObservableObject {
 
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
+    
+    // NotificationCenter 상수 정의
+    private static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
+    private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
+    private static let openSavedTabNotification = Notification.Name("OpenSavedTabNotification")
 
     override init() {
         super.init()
         setupLocationManager()
         setupShapeStoreObserver()
+        setupNotifications()
     }
 
     private func setupLocationManager() {
@@ -42,6 +48,67 @@ class MapViewModel: NSObject, ObservableObject {
                 self?.reloadOverlays()
             }
             .store(in: &cancellables)
+    }
+
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleMoveToShape(_:)),
+            name: Self.moveToShapeNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleShapeOverlayTapped(_:)),
+            name: Self.shapeOverlayTappedNotification,
+            object: nil
+        )
+    }
+
+    @objc private func handleShapeOverlayTapped(_ notification: Notification) {
+        guard let shape = notification.object as? PlaceShape else { return }
+        highlightedShapeID = shape.id
+        reloadOverlays()
+        
+        // 저장 탭 열기 알림 전송
+        NotificationCenter.default.post(
+            name: Self.openSavedTabNotification,
+            object: shape.id
+        )
+    }
+
+    @objc private func handleMoveToShape(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let coordinate = userInfo["coordinate"] as? Coordinate,
+              let radius = userInfo["radius"] as? Double,
+              let mapView = currentMapView else { return }
+        
+        // 이미 하이라이트된 도형이면 리턴
+        if let shapeID = highlightedShapeID,
+           let currentShape = PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeID }),
+           currentShape.baseCoordinate == coordinate {
+            return
+        }
+        
+        let center = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
+        let zoom = calculateZoomLevel(for: radius)
+        
+        // 1. 첫 번째 이동: 즉시(center, zoom) (애니메이션 없이)
+        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+        let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
+        cameraUpdate1.animation = .none
+        mapView.moveCamera(cameraUpdate1)
+        
+        // 2. projection이 반영된 후(0.02초 후), 오프셋 적용 위치로 이동(애니메이션 on)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+            guard let self = self else { return }
+            let offsetCenter = self.offsetLatLng(center: center, mapView: mapView, offsetY: 200)
+            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+            let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
+            cameraUpdate2.animation = .none
+            mapView.moveCamera(cameraUpdate2)
+        }
     }
 
     func addOverlay(for shape: PlaceShape, mapView: NMFMapView) {
@@ -148,3 +215,4 @@ extension MapViewModel: CLLocationManagerDelegate {
         print("Location manager failed with error: \(error.localizedDescription)")
     }
 } 
+

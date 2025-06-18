@@ -9,11 +9,92 @@ import SwiftUI
 import CoreLocation
 import Combine
 
+
+// 동적으로 높이가 변하는 TextEditor
+struct GrowingTextEditor: View {
+    @Binding var text: String
+    @FocusState.Binding var isFocused: Bool
+    var minHeight: CGFloat = 40
+    var maxHeight: CGFloat = 300
+
+    @State private var dynamicHeight: CGFloat = 40
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            TextEditor(text: $text)
+                .focused($isFocused)
+//                .frame(height: dynamicHeight)
+//                .background(Color(UIColor.secondarySystemBackground))
+//                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color(UIColor.systemGray3))
+                )
+                .onChange(of: text) { _ in
+                    recalculateHeight()
+                }
+                .onAppear {
+                    recalculateHeight()
+                }
+
+            if text.isEmpty {
+                Text("메모를 입력하세요")
+                    .foregroundColor(.gray)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
+            }
+        }
+    }
+
+    private func recalculateHeight() {
+        let size = CGSize(width: UIScreen.main.bounds.width - 140, height: .infinity) // 타이틀 뷰 폭 고려
+        let attributes = [NSAttributedString.Key.font: UIFont.preferredFont(forTextStyle: .body)]
+        let estimatedHeight = NSString(string: text.isEmpty ? " " : text)
+            .boundingRect(with: size, options: .usesLineFragmentOrigin, attributes: attributes, context: nil).height
+        dynamicHeight = min(max(estimatedHeight + 28, minHeight), maxHeight)
+    }
+}
+
+// 동적으로 높이가 변하는 AddressField
+struct AddressField: View {
+    let text: String
+    let placeholder: String
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading) {
+                if text.isEmpty {
+                    Text(placeholder)
+                        .foregroundColor(.gray)
+                        .padding(.vertical, 8)
+                } else {
+                    Text(text)
+                        .foregroundColor(.primary)
+                        .padding(.vertical, 8)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 8)
+            .background(Color(UIColor.systemBackground))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(UIColor.systemGray3))
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 struct ShapeEditView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = PlaceShapeStore.shared
+    @FocusState private var isFocused: Bool
+    @State private var showingAddressSearch = false
+    @State private var showingCoordinateInput = false
     
-    let coordinate: Coordinate
+    @State var coordinate: Coordinate
     var onAdd: ((PlaceShape) -> Void)?
     var originalShape: PlaceShape?
     
@@ -26,8 +107,10 @@ struct ShapeEditView: View {
     @State private var isDateOnly = false
     @State private var showingCancelAlert = false
     @State private var coordinateText: String = ""
-    @State private var coordinateValidation: String = ""
-    @State private var isCoordinateValid = true
+    @State private var selectedLatitude: Double?
+    @State private var selectedLongitude: Double?
+    @State private var showingAlert = false
+    @State private var alertMessage = ""
     
     private let dateOnlyKey = "isDateOnlyMode"
     private let lastStartDateKey = "lastStartDate"
@@ -41,33 +124,29 @@ struct ShapeEditView: View {
                     makeRow(title: "제목") {
                         TextField("제목을 입력하세요", text: $title)
                             .textFieldStyle(.roundedBorder)
+                            .focused($isFocused)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color(UIColor.systemGray3))
+                            )
                     }
                     
                     // 좌표
                     makeRow(title: "좌표") {
-                        VStack(alignment: .leading, spacing: 4) {
-                            TextField("예시: 37° 38′ 55″ N 126° 41′ 12″ E", text: $coordinateText)
-                                .textFieldStyle(.roundedBorder)
-                                .onChange(of: coordinateText) { newValue in
-                                    validateCoordinate(newValue)
-                                }
-                            
-                            Text("※드론원스탑에서 승인받은 좌표를 그대로 복사붙여넣기 하세요")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            if !coordinateValidation.isEmpty {
-                                Text(coordinateValidation)
-                                    .font(.caption)
-                                    .foregroundColor(isCoordinateValid ? .green : .red)
-                            }
-                        }
+                        AddressField(
+                            text: coordinateText,
+                            placeholder: "좌표를 입력하세요",
+                            action: { showingCoordinateInput = true }
+                        )
                     }
                     
                     // 주소
                     makeRow(title: "주소") {
-                        TextField("해당 장소의 주소를 입력하세요", text: $address)
-                            .textFieldStyle(.roundedBorder)
+                        AddressField(
+                            text: address,
+                            placeholder: "주소 검색을 위해 터치하세요",
+                            action: { showingAddressSearch = true }
+                        )
                     }
                     
                     // 반경
@@ -75,12 +154,18 @@ struct ShapeEditView: View {
                         TextField("미터 단위로 입력해주세요", text: $radius)
                             .textFieldStyle(.roundedBorder)
                             .keyboardType(.decimalPad)
+                            .focused($isFocused)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6)
+                                    .stroke(Color(UIColor.systemGray3))
+                            )
                     }
                     
                     
                     // 시작일
                     makeRow(title: "시작일") {
                         DatePicker("", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                            .frame(height: 45)
                             .onChange(of: startDate) { _ in
                                 if endDate < startDate {
                                     endDate = startDate
@@ -91,6 +176,7 @@ struct ShapeEditView: View {
                     // 종료일
                     makeRow(title: "종료일") {
                         DatePicker("", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                            .frame(height: 30)
                     }
                     
                     // 날짜 설정
@@ -104,13 +190,7 @@ struct ShapeEditView: View {
                     
                     // 메모
                     makeRow(title: "메모") {
-                        TextEditor(text: $memo)
-                            .frame(height: 300)
-                            .padding(8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color(.systemGray5))
-                            )
+                        GrowingTextEditor(text: $memo, isFocused: $isFocused, minHeight: 40, maxHeight: 300)
                     }
                 }
                 .padding()
@@ -131,6 +211,11 @@ struct ShapeEditView: View {
                         saveShape()
                     }
                 }
+                ToolbarItem(placement: .keyboard) {
+                    Button("완료") {
+                        isFocused = false
+                    }
+                }
             }
             .alert("수정 중인 정보가 있습니다", isPresented: $showingCancelAlert) {
                 Button("취소", role: .cancel) { }
@@ -140,9 +225,40 @@ struct ShapeEditView: View {
             } message: {
                 Text("수정 중인 내용이 모두 사라집니다. 닫으시겠습니까?")
             }
+            .alert("입력 오류", isPresented: $showingAlert) {
+                Button("확인", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
+            }
+            .onTapGesture {
+                isFocused = false
+            }
             .onAppear {
                 setupInitialValues()
-                fetchAddressIfNeeded()
+            }
+            .sheet(isPresented: $showingAddressSearch) {
+                SearchingAddressView(
+                    onSelectAddress: { address in
+                        self.address = address.roadAddress
+                        if let coordinate = address.coordinate {
+                            selectedLatitude = coordinate.latitude
+                            selectedLongitude = coordinate.longitude
+                            
+                            // 선택된 좌표로 coordinate 업데이트
+                            self.coordinate = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                            coordinateText = self.coordinate.formattedCoordinate
+                        }
+                    }
+                )
+            }
+            .sheet(isPresented: $showingCoordinateInput) {
+                CoordinateView(
+                    onSelectCoordinate: { newCoordinate, newAddress in
+                        self.coordinate = newCoordinate
+                        self.coordinateText = newCoordinate.formattedCoordinate
+                        self.address = newAddress
+                    }
+                )
             }
         }
     }
@@ -168,7 +284,6 @@ struct ShapeEditView: View {
             endDate = shape.expireDate ?? Date()
             coordinateText = shape.baseCoordinate.formattedCoordinate
         } else {
-            coordinateText = coordinate.formattedCoordinate
             // 이전 설정값 불러오기
             isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
             if let lastStart = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
@@ -177,18 +292,6 @@ struct ShapeEditView: View {
             if let lastEnd = UserDefaults.standard.object(forKey: lastEndDateKey) as? Date {
                 endDate = lastEnd
             }
-        }
-        validateCoordinate(coordinateText)
-    }
-    
-    private func validateCoordinate(_ input: String) {
-        if let newCoordinate = Coordinate.parse(input) {
-            coordinateValidation = "유효한 좌표 형식입니다"
-            isCoordinateValid = true
-            coordinateText = newCoordinate.formattedCoordinate
-        } else {
-            coordinateValidation = "잘못된 좌표 형식입니다"
-            isCoordinateValid = false
         }
     }
     
@@ -211,24 +314,6 @@ struct ShapeEditView: View {
         }
     }
     
-    private func fetchAddressIfNeeded() {
-        if address.isEmpty {
-            NaverGeocodingService.shared.fetchAddress(
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            ) { result in
-                DispatchQueue.main.async {
-                    switch result {
-                    case .success(let fetchedAddress):
-                        address = fetchedAddress
-                    case .failure:
-                        address = "주소를 찾을 수 없음"
-                    }
-                }
-            }
-        }
-    }
-    
     private func hasChanges() -> Bool {
         guard let original = originalShape else { return false }
         
@@ -241,6 +326,13 @@ struct ShapeEditView: View {
     }
     
     private func saveShape() {
+        // 좌표와 주소가 모두 비어있는지 확인
+        if coordinateText.isEmpty && address.isEmpty {
+            alertMessage = "좌표나 주소를 반드시 입력해주세요!"
+            showingAlert = true
+            return
+        }
+        
         let newShape = PlaceShape(
             id: originalShape?.id ?? UUID(),
             title: title.isEmpty ? "새 도형" : title,
@@ -270,12 +362,16 @@ struct ShapeEditView: View {
         
         // UI 갱신을 위한 Notification 발송
         NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        
+        // 수정 완료 후 화면 닫기
+        dismiss()
     }
 }
 
 #Preview {
     ShapeEditView(
-        coordinate: Coordinate(latitude: 37.5331, longitude: 126.6342),
+        coordinate: Coordinate(latitude: 0, longitude: 0),
         onAdd: { _ in }
     )
 }
+

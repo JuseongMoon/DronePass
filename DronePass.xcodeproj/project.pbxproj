@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384C82E02B391007684D1 /* NaverGeocodingModels.swift */; };
+		630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384CA2E02C716007684D1 /* CoordinateView.swift */; };
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CA2DF9885B00089659 /* SavedTableListView.swift */; };
 		6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */; };
@@ -18,6 +20,7 @@
 		633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CC2DF888C700BBDD38 /* DronePassApp.swift */; };
 		633F13CF2DF8941600BBDD38 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CE2DF8941600BBDD38 /* SettingView.swift */; };
 		633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */; };
+		6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchingAddressView.swift */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
 		63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D332DE9C93400E11238 /* LaunchScreen.storyboard */; };
 		63970D432DE9C93400E11238 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D352DE9C93400E11238 /* Main.storyboard */; };
@@ -69,6 +72,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		630384C82E02B391007684D1 /* NaverGeocodingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingModels.swift; sourceTree = "<group>"; };
+		630384CA2E02C716007684D1 /* CoordinateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateView.swift; sourceTree = "<group>"; };
 		6337C4CA2DF9885B00089659 /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
 		6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailView.swift; sourceTree = "<group>"; };
 		6337C4D02DF98F4E00089659 /* ShapeEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeEditView.swift; sourceTree = "<group>"; };
@@ -81,6 +86,7 @@
 		633F13CC2DF888C700BBDD38 /* DronePassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassApp.swift; sourceTree = "<group>"; };
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
+		6383D99C2E0298C60033550D /* SearchingAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingAddressView.swift; sourceTree = "<group>"; };
 		63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShapePopupViewController.swift; sourceTree = "<group>"; };
 		63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
 		63970D052DE9C93400E11238 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
@@ -164,6 +170,8 @@
 				6337C4CA2DF9885B00089659 /* SavedTableListView.swift */,
 				6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */,
 				6337C4D02DF98F4E00089659 /* ShapeEditView.swift */,
+				6383D99C2E0298C60033550D /* SearchingAddressView.swift */,
+				630384CA2E02C716007684D1 /* CoordinateView.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -192,6 +200,7 @@
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
 				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
+				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -448,6 +457,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */,
+				630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */,
 				633F13C82DF842F300BBDD38 /* MapViewModel.swift in Sources */,
 				633F13C92DF842F300BBDD38 /* NaverMapView.swift in Sources */,
 				63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */,
@@ -461,6 +471,7 @@
 				63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */,
 				63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */,
 				63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */,
+				6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */,
 				63970D572DE9C93400E11238 /* SavedBottomSheetViewModel.swift in Sources */,
 				63970D582DE9C93400E11238 /* AppInfo.swift in Sources */,
 				6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */,
@@ -482,6 +493,7 @@
 				633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */,
 				633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */,
 				63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */,
+				630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */,
 				633F13CB2DF885DB00BBDD38 /* MainTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

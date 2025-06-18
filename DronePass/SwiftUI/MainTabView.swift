@@ -15,6 +15,10 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .map
     @State private var isSavedSheetPresented = false
     @State private var isSettingsSheetPresented = false
+    @State private var selectedShapeID: UUID? = nil
+    
+    // NotificationCenter 상수 정의
+    private static let openSavedTabNotification = Notification.Name("OpenSavedTabNotification")
 
     var body: some View {
         GeometryReader { geometry in
@@ -28,16 +32,19 @@ struct MainTabView: View {
 
                 // 저장 sheet 오버레이
                 if isSavedSheetPresented {
-                    SavedOverlayView(isPresented: $isSavedSheetPresented)
-                        .frame(width: min(geometry.size.width, 500),
-                               height: geometry.size.height * 0.6)
-                        .background(.ultraThinMaterial)
-                        .cornerRadius(24)
-                        .shadow(radius: 20)
-                        .transition(.move(edge: .bottom))
-                        .zIndex(1)
-                        .position(x: geometry.size.width / 2,
-                                  y: geometry.size.height - (geometry.size.height * 0.25) - 40) // 탭바 높이만큼 올림
+                    SavedOverlayView(
+                        isPresented: $isSavedSheetPresented,
+                        selectedShapeID: $selectedShapeID
+                    )
+                    .frame(width: min(geometry.size.width, 500),
+                           height: geometry.size.height * 0.6 - 40)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(24)
+                    .shadow(radius: 20)
+                    .transition(.move(edge: .bottom))
+                    .zIndex(1)
+                    .position(x: geometry.size.width / 2,
+                              y: geometry.size.height - (geometry.size.height * 0.25) - 40)
                 }
 
                 // 설정 sheet 오버레이 (탭바 위에 항상 보이게)
@@ -111,6 +118,29 @@ struct MainTabView: View {
             }
         }
         .ignoresSafeArea(.keyboard)
+        .onAppear {
+            setupNotifications()
+        }
+        .onDisappear {
+            removeNotifications()
+        }
+    }
+    
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: Self.openSavedTabNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            if let shapeID = notification.object as? UUID {
+                selectedShapeID = shapeID
+                isSavedSheetPresented = true
+            }
+        }
+    }
+    
+    private func removeNotifications() {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -147,6 +177,8 @@ struct MapMainView: View {
 // 저장 오버레이 뷰 (기존 SavedBottomSheetViewController 참고)
 struct SavedOverlayView: View {
     @Binding var isPresented: Bool
+    @Binding var selectedShapeID: UUID?
+
     var body: some View {
         VStack {
             HStack {
@@ -159,9 +191,7 @@ struct SavedOverlayView: View {
             .padding(.bottom, 5)
 //            Divider()
             // 저장 목록 내용
-            SavedTableListView()
-            Spacer()
-            Text("지도를 길게 눌러 새로운 도형을 만들어보세요")
+            SavedTableListView(selectedShapeID: $selectedShapeID)
             Spacer()
         }
     }

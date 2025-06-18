@@ -12,12 +12,24 @@ import UIKit
 #endif
 import SafariServices
 
+// 환경값 정의
+private struct MemoBoxMaxHeightKey: EnvironmentKey {
+    static let defaultValue: CGFloat = 400
+}
+extension EnvironmentValues {
+    var memoBoxMaxHeight: CGFloat {
+        get { self[MemoBoxMaxHeightKey.self] }
+        set { self[MemoBoxMaxHeightKey.self] = newValue }
+    }
+}
+
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @StateObject private var store = PlaceShapeStore.shared
     
-    let shape: PlaceShape
+    @State private var shape: PlaceShape
+    private let originalShape: PlaceShape
     
     // onClose: Called when the close button is tapped
     var onClose: (() -> Void)? = nil
@@ -34,6 +46,16 @@ struct ShapeDetailView: View {
     @State private var showSafari = false
     @State private var safariURL: URL? = nil
     @State private var showEditSheet = false
+    
+    @Environment(\.memoBoxMaxHeight) private var memoBoxMaxHeight
+    
+    init(shape: PlaceShape, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
+        _shape = State(initialValue: shape)
+        self.originalShape = shape
+        self.onClose = onClose
+        self.onEdit = onEdit
+        self.onDelete = onDelete
+    }
     
     private var addressURL: URL? {
         guard let address = shape.address else { return nil }
@@ -79,103 +101,111 @@ struct ShapeDetailView: View {
         }
     }
     
+    // MARK: - Body
+
+    
     var body: some View {
-        NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    // 제목
-                    dataRow(title: "제목", value: shape.title)
-                    // 좌표
-                    dataRow(title: "좌표", value: shape.baseCoordinate.formattedCoordinate)
-                    // 주소 (텍스트만 링크)
-                    dataRow(title: "주소", value: shape.address ?? "-", isLink: true, linkURL: addressURL)
-                    // 반경
-                    if let radius = shape.radius {
-                        dataRow(title: "반경", value: "\(Int(radius)) m")
+        GeometryReader { geometry in
+            NavigationView {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // 제목
+                        dataRow(title: "제목", value: shape.title)
+                        // 좌표
+                        dataRow(title: "좌표", value: shape.baseCoordinate.formattedCoordinate)
+                        // 주소 (텍스트만 링크)
+                        dataRow(title: "주소", value: shape.address ?? "-", isLink: true, linkURL: addressURL)
+                        // 반경
+                        if let radius = shape.radius {
+                            dataRow(title: "반경", value: "\(Int(radius)) m")
+                        }
+                        // 시작일
+                        dataRow(title: "시작일", value: DateFormatter.koreanDateTime.string(from: shape.startedAt))
+                        // 종료일
+                        if let expire = shape.expireDate {
+                            dataRow(title: "종료일", value: DateFormatter.koreanDateTime.string(from: expire))
+                        }
+                        // 메모
+                        dataRow(title: "메모", value: shape.memo ?? "-")
                     }
-                    // 시작일
-                    dataRow(title: "시작일", value: DateFormatter.koreanDateTime.string(from: shape.startedAt))
-                    // 종료일
-                    if let expire = shape.expireDate {
-                        dataRow(title: "종료일", value: DateFormatter.koreanDateTime.string(from: expire))
-                    }
-                    // 메모
-                    dataRow(title: "메모", value: shape.memo ?? "-")
+                    .padding()
+                    .padding(.trailing, -10)
+                    .padding(.leading, 5)
                 }
-                .padding()
-                .padding(.trailing, -10)
-                .padding(.leading, 5)
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .navigationTitle("")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("닫기") {
+                .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle("")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("닫기") {
+                            dismiss()
+                            onClose?()
+                        }
+                    }
+                }
+                .safeAreaInset(edge: .bottom) {
+                    HStack(spacing: 16) {
+                        Button(action: { showEditSheet = true }) {
+                            Text("수정하기")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                        Button(action: { showDeleteAlert = true }) {
+                            Text("삭제하기")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                    }
+                    .frame(height: 56)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+                .alert("도형 삭제", isPresented: $showDeleteAlert) {
+                    Button("취소", role: .cancel) {}
+                    Button("삭제하기", role: .destructive) {
+                        store.removeShape(id: shape.id)
+                        onDelete?()
                         dismiss()
-                        onClose?()
+                        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                    }
+                } message: {
+                    Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
+                    if let updatedShape = store.getShape(id: shape.id) {
+                        shape = updatedShape
                     }
                 }
-            }
-            .safeAreaInset(edge: .bottom) {
-                HStack(spacing: 16) {
-                    Button(action: { showEditSheet = true }) {
-                        Text("수정하기")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
+                    ForEach(mapButtons, id: \.title) { button in
+                        Button(button.title) { button.action() }
                     }
-                    Button(action: { showDeleteAlert = true }) {
-                        Text("삭제하기")
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
+                    Button("취소", role: .cancel) {}
+                } message: {
+                    Text("아래 앱으로 길찾기를 시작합니다.")
+                }
+                .sheet(isPresented: $showSafari) {
+                    if let url = safariURL {
+                        SafariView(url: url)
                     }
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-            }
-            .alert("도형 삭제", isPresented: $showDeleteAlert) {
-                Button("취소", role: .cancel) {}
-                Button("삭제하기", role: .destructive) {
-                    // 실제 데이터 삭제
-                    store.removeShape(id: shape.id)
-                    // 콜백 실행
-                    onDelete?()
-                    // 화면 닫기
-                    dismiss()
-                    // UI 갱신을 위한 Notification 발송
-                    NotificationCenter.default.post(name: .shapesDidChange, object: nil)
-                }
-            } message: {
-                Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
-            }
-            .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
-                ForEach(mapButtons, id: \.title) { button in
-                    Button(button.title) { button.action() }
-                }
-                Button("취소", role: .cancel) {}
-            } message: {
-                Text("아래 앱으로 길찾기를 시작합니다.")
-            }
-            .sheet(isPresented: $showSafari) {
-                if let url = safariURL {
-                    SafariView(url: url)
+                .sheet(isPresented: $showEditSheet) {
+                    ShapeEditView(
+                        coordinate: shape.baseCoordinate,
+                        onAdd: { updatedShape in
+                            shape = updatedShape
+                            showEditSheet = false
+                        },
+                        originalShape: shape
+                    )
                 }
             }
-        }
-        .sheet(isPresented: $showEditSheet) {
-            ShapeEditView(
-                coordinate: shape.baseCoordinate,
-                onAdd: { newShape in
-                    // 닫기만 처리하여 편집 시트만 닫히도록 변경
-                    showEditSheet = false
-                },
-                originalShape: shape
-            )
+            .environment(\.memoBoxMaxHeight, geometry.size.height - 56 - 8 - 10)
         }
     }
     
@@ -189,8 +219,10 @@ struct ShapeDetailView: View {
                 .foregroundColor(.primary)
                 .padding(.top, 8)
             if title == "메모" {
-                HyperlinkTextView(text: value, font: .systemFont(ofSize: 17), textColor: UIColor.label, showSafari: $showSafari, safariURL: $safariURL)
-                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                TextEditor(text: .constant(value))
+                    .font(.system(size: 17))
+                    .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 300)
+                    .disabled(true)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .stroke(Color(.systemGray4), lineWidth: 1)
@@ -292,7 +324,17 @@ struct SafariView: UIViewControllerRepresentable {
         title: "드론 비행연습 및 테스트촬영",
         baseCoordinate: Coordinate(latitude: 37.5331, longitude: 126.6342),
         radius: 999,
-        memo: "군 담당자 [☎️ 032-510-9226]",
+        memo: """
+군 담당자  [ ☎ 031-290-9221 ]
+
+ · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+ · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+ · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+ · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+ · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+ · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+
+""",
         address: "인천광역시 서구 청라동 1-791",
         expireDate: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
         startedAt: Date(),
@@ -306,4 +348,3 @@ struct SafariView: UIViewControllerRepresentable {
         }
     )
 }
-

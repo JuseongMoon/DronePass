@@ -8,7 +8,105 @@
 
 import Foundation // 네트워크 통신 등 기본 기능을 위해 Foundation 프레임워크를 가져옵니다.
 
-// 네이버 지오코딩(좌표→주소 변환) API를 호출하는 서비스 클래스입니다.
+
+// MARK: - Models
+struct NaverGeocodingResponse: Codable {
+    let status: String
+    let addresses: [NaverAddress]?
+    let error: NaverErrorResponse?
+    
+    struct NaverErrorResponse: Codable {
+        let errorCode: String
+        let message: String
+        let details: String
+    }
+}
+
+struct NaverAddress: Codable {
+    let roadAddress: String
+    let jibunAddress: String
+    let englishAddress: String?
+    let x: String
+    let y: String
+    
+    // NaverDetailAddress로 변환하는 메서드
+    func toDetailAddress() -> NaverDetailAddress {
+        return NaverDetailAddress(
+            roadAddress: roadAddress,
+            jibunAddress: jibunAddress,
+            englishAddress: englishAddress,
+            addressElements: [], // 기본값으로 빈 배열 사용
+            x: x,
+            y: y,
+            distance: 0.0 // 기본값으로 0.0 사용
+        )
+    }
+}
+
+struct NaverReverseGeocodingResponse: Codable {
+    let status: Status
+    let results: [NaverResult]?
+    
+    struct Status: Codable {
+        let code: Int
+        let name: String
+        let message: String
+    }
+    
+    struct NaverResult: Codable {
+        let name: String
+        let code: Code?
+        let region: Region
+        let land: Land
+        
+        struct Code: Codable {
+            let id: String
+            let type: String
+            let mappingId: String
+        }
+        
+        struct Region: Codable {
+            let area0: Area
+            let area1: Area
+            let area2: Area
+            let area3: Area
+            let area4: Area
+            
+            struct Area: Codable {
+                let name: String
+                let coords: Coords?
+                let alias: String?
+                
+                struct Coords: Codable {
+                    let center: Center
+                    
+                    struct Center: Codable {
+                        let crs: String
+                        let x: Double
+                        let y: Double
+                    }
+                }
+            }
+        }
+        
+        struct Land: Codable {
+            let type: String
+            let number1: String
+            let number2: String
+            let addition0: Addition
+            let addition1: Addition
+            let addition2: Addition
+            let name: String?
+            
+            struct Addition: Codable {
+                let type: String
+                let value: String
+            }
+        }
+    }
+}
+
+// MARK: - Service
 final class NaverGeocodingService {
     // 싱글톤 패턴: 앱 전체에서 이 서비스 인스턴스를 하나만 공유합니다.
     static let shared = NaverGeocodingService()
@@ -20,74 +118,119 @@ final class NaverGeocodingService {
     private let clientID = "47b5di8weq"
     private let clientSecret = "Z4MZw0saRvBpzgZAPUBQ0tDxV7azzVzFZuWClEFz"
     
-    // 위도(latitude)와 경도(longitude)를 받아 주소를 조회하는 함수입니다.
-    // completion 파라미터는 네트워크 요청이 끝난 후 주소(String) 또는 에러(Error)를 반환합니다.
-    func fetchAddress(latitude: Double, longitude: Double, completion: @escaping (Result<String, Error>) -> Void) {
-        // 네이버 리버스 지오코딩 API를 호출할 URL 문자열을 만듭니다.
-        // (경도, 위도 순서에 주의!)
-        let urlString = "https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=\(longitude),\(latitude)&orders=roadaddr,addr&output=json"
+    // MARK: - Geocoding (주소 → 좌표)
+    func geocode(address: String) async throws -> [NaverDetailAddress] {
+        let urlString = "https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=\(address.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
         
-        // 문자열을 URL 타입으로 변환합니다. 잘못된 경우(주소 생성 실패) 에러를 반환하고 함수 종료.
         guard let url = URL(string: urlString) else {
-            completion(.failure(NSError(domain: "URL", code: 0)))
-            return
+            throw NSError(domain: "URL", code: 0)
         }
         
-        // URLRequest 객체를 만듭니다. (이걸로 서버에 요청을 보냅니다.)
         var request = URLRequest(url: url)
-        // 네이버 API에서 요구하는 인증 헤더를 추가합니다.
-        // ⚠️ 여기서 키는 "X-NCP-APIGW-API-KEY-ID", "X-NCP-APIGW-API-KEY"이어야 정상작동!
         request.addValue(clientID, forHTTPHeaderField: "X-NCP-APIGW-API-KEY-ID")
         request.addValue(clientSecret, forHTTPHeaderField: "X-NCP-APIGW-API-KEY")
         
-        // 네트워크 요청을 비동기로 보냅니다. (결과는 클로저에서 받아 처리)
-        session.dataTask(with: request) { data, response, error in
-            // 에러가 있으면 콘솔에 출력하고, completion에 에러를 넘깁니다.
-            if let error = error {
-                print("네트워크 에러:", error)
-                completion(.failure(error))
-                return
+        print("[Geocoding] Request URL: \(urlString)")
+        print("[Geocoding] Headers: \(request.allHTTPHeaderFields ?? [:])")
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "Response", code: 0)
+        }
+        
+        // 응답 데이터 로깅
+        if let responseString = String(data: data, encoding: .utf8) {
+            print("[Geocoding] Response: \(responseString)")
+        }
+        
+        if httpResponse.statusCode != 200 {
+            if let errorResponse = try? JSONDecoder().decode(NaverGeocodingResponse.self, from: data),
+               let error = errorResponse.error {
+                throw NSError(domain: "API", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: error.message])
             }
-            // 데이터가 없으면 에러 처리
-            guard let data = data else {
-                print("데이터 없음")
-                completion(.failure(NSError(domain: "NoData", code: 0)))
-                return
-            }
-            do {
-                // 응답 데이터를 JSON 객체로 변환
-                let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-                print("네이버 응답:", json ?? "nil")
-                
-                // "results"라는 배열에서 주소 정보 추출 시도
-                if let results = (json?["results"] as? [[String: Any]]) {
-                    // (1) 도로명 주소(roadaddr)가 있으면 먼저 반환
-                    if let road = results.first(where: { $0["name"] as? String == "roadaddr" }),
-                       let land = road["land"] as? [String: Any],
-                       let roadName = land["name"] as? String {
-                        completion(.success(roadName))
-                        return
-                    }
-                    // (2) 지번 주소(addr)가 있으면 지역명(시, 구, 동, 리 등)을 조합해 반환
-                    if let addr = results.first(where: { $0["name"] as? String == "addr" }),
-                       let region = addr["region"] as? [String: Any],
-                       let area1 = region["area1"] as? [String: Any], let name1 = area1["name"] as? String,
-                       let area2 = region["area2"] as? [String: Any], let name2 = area2["name"] as? String,
-                       let area3 = region["area3"] as? [String: Any], let name3 = area3["name"] as? String,
-                       let area4 = region["area4"] as? [String: Any], let name4 = area4["name"] as? String {
-                        let address = "\(name1) \(name2) \(name3) \(name4)"
-                        completion(.success(address))
-                        return
-                    }
-                    // (3) 그 외 legalcode, admcode 등도 추가 파싱 가능 (추후 확장 가능)
+            throw NSError(domain: "API", code: httpResponse.statusCode)
+        }
+        
+        let geocodingResponse = try JSONDecoder().decode(NaverGeocodingResponse.self, from: data)
+        guard let addresses = geocodingResponse.addresses else {
+            throw NSError(domain: "Data", code: 0)
+        }
+        
+        // NaverAddress를 NaverDetailAddress로 변환
+        return addresses.map { $0.toDetailAddress() }
+    }
+    
+    // MARK: - Reverse Geocoding (좌표 → 주소)
+    func reverseGeocode(latitude: Double, longitude: Double) async throws -> String {
+        let urlString = "https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc?coords=\(longitude),\(latitude)&orders=roadaddr,addr&output=json"
+        
+        guard let url = URL(string: urlString) else {
+            throw NSError(domain: "URL", code: 0)
+        }
+        
+        var request = URLRequest(url: url)
+        request.addValue(clientID, forHTTPHeaderField: "X-NCP-APIGW-API-KEY-ID")
+        request.addValue(clientSecret, forHTTPHeaderField: "X-NCP-APIGW-API-KEY")
+        
+        let (data, response) = try await session.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "Response", code: 0)
+        }
+        
+        if httpResponse.statusCode != 200 {
+            throw NSError(domain: "API", code: httpResponse.statusCode)
+        }
+        
+        let reverseGeocodingResponse = try JSONDecoder().decode(NaverReverseGeocodingResponse.self, from: data)
+        
+        guard reverseGeocodingResponse.status.code == 0,
+              let results = reverseGeocodingResponse.results else {
+            throw NSError(domain: "Data", code: 0)
+        }
+        
+        // 도로명 주소 우선
+        if let roadAddr = results.first(where: { $0.name == "roadaddr" }) {
+            var address = ""
+            
+            // 지역 정보
+            let region = roadAddr.region
+            address += "\(region.area1.name) \(region.area2.name) \(region.area3.name)"
+            
+            // 도로명 + 건물번호
+            if let roadName = roadAddr.land.name {
+                address += " \(roadName)"
+                address += " \(roadAddr.land.number1)"
+                if !roadAddr.land.number2.isEmpty {
+                    address += "-\(roadAddr.land.number2)"
                 }
-                // 원하는 주소를 찾지 못한 경우(파싱 실패)
-                completion(.failure(NSError(domain: "Parse", code: 0)))
-            } catch {
-                // JSON 파싱 중 에러 발생 시
-                print("파싱 에러:", error)
-                completion(.failure(error))
             }
-        }.resume() // 네트워크 요청 시작
+            
+            // 건물명
+            if roadAddr.land.addition0.type == "building" && !roadAddr.land.addition0.value.isEmpty {
+                address += " (\(roadAddr.land.addition0.value))"
+            }
+            
+            return address
+        }
+        
+        // 지번 주소
+        if let addr = results.first(where: { $0.name == "addr" }) {
+            var address = ""
+            let region = addr.region
+            address += "\(region.area1.name) \(region.area2.name) \(region.area3.name)"
+            
+            if !addr.land.number1.isEmpty {
+                address += " \(addr.land.number1)"
+                if !addr.land.number2.isEmpty {
+                    address += "-\(addr.land.number2)"
+                }
+            }
+            
+            return address
+        }
+        
+        throw NSError(domain: "Data", code: 0)
     }
 }

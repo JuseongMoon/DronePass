@@ -7,8 +7,14 @@
 
 import SwiftUI
 import NMapsMap
+import MapKit
 
-class MainViewCoordinator: NSObject {
+class MainViewCoordinator: NSObject, ObservableObject {
+    @Published var currentAddress: String = ""
+    @Published var isSearchingAddress: Bool = false
+    @Published var selectedAddress: String = ""
+    @Published var selectedCoordinate: Coordinate?
+    
     var onLongPress: ((Coordinate) -> Void)?
     
     init(onLongPress: ((Coordinate) -> Void)? = nil) {
@@ -26,14 +32,45 @@ class MainViewCoordinator: NSObject {
         let coordinate = Coordinate(latitude: latlng.lat, longitude: latlng.lng)
         
         // 주소 조회
-        NaverGeocodingService.shared.fetchAddress(
-            latitude: coordinate.latitude,
-            longitude: coordinate.longitude
-        ) { [weak self] result in
-            DispatchQueue.main.async {
-                self?.onLongPress?(coordinate)
+        Task {
+            do {
+                let address = try await NaverGeocodingService.shared.reverseGeocode(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+                await MainActor.run {
+                    self.currentAddress = address
+                    self.onLongPress?(coordinate)
+                }
+            } catch {
+                print("주소 변환 실패:", error)
             }
         }
+    }
+    
+    func mapView(_ mapView: MKMapView, didLongPressAt coordinate: CLLocationCoordinate2D) {
+        // 주소 조회
+        Task {
+            do {
+                let address = try await NaverGeocodingService.shared.reverseGeocode(
+                    latitude: coordinate.latitude,
+                    longitude: coordinate.longitude
+                )
+                await MainActor.run {
+                    self.currentAddress = address
+                    let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                    self.onLongPress?(coord)
+                }
+            } catch {
+                print("주소 변환 실패:", error)
+            }
+        }
+    }
+    
+    func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
+        let coordinate = annotation.coordinate
+        let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        self.selectedCoordinate = coord
     }
 }
 
@@ -105,17 +142,17 @@ struct MainView: View {
         .sheet(item: $selectedCoordinate, onDismiss: {
             selectedCoordinate = nil
         }) { coordinate in
-            ShapeEditView(
-                coordinate: coordinate,
+                ShapeEditView(
+                    coordinate: coordinate,
                 onAdd: { _ in
-                    viewModel.reloadOverlays()
-                    DispatchQueue.main.async {
+                        viewModel.reloadOverlays()
+                        DispatchQueue.main.async {
                         selectedCoordinate = nil
+                        }
                     }
-                }
-            )
-            .presentationDetents([.large])
-            .presentationDragIndicator(.visible)
+                )
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
 
