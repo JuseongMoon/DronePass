@@ -11,12 +11,16 @@ import Solar
 
 struct SettingView: View {
     @StateObject private var viewModel = SettingViewModel()
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.dismiss) private var dismiss
+    
+    // MainTabView와 연동을 위한 상태
+    @State private var shouldOpenSavedTab = false
     
     init() {
+        // iOS 기본 설정 스타일 적용
         let appearance = UINavigationBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.shadowColor = .clear
+        appearance.configureWithDefaultBackground()
         
         UINavigationBar.appearance().standardAppearance = appearance
         UINavigationBar.appearance().compactAppearance = appearance
@@ -24,108 +28,134 @@ struct SettingView: View {
     }
 
     var body: some View {
-        ZStack {
-            Color.clear.background(.ultraThinMaterial).ignoresSafeArea()
-            NavigationView {
-                List {
-                    // 현 위치 기반 정보 Section
-                    Section(header: Text("현 위치 기반 정보")) {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("일출: \(viewModel.sunriseTime)")
-                                Spacer()
-                                Text(viewModel.sunriseSuffix)
-                                    .foregroundColor(viewModel.sunriseSuffixColor)
-                                    .font(.caption)
-                            }
-                            HStack {
-                                Text("일몰: \(viewModel.sunsetTime)")
-                                Spacer()
-                                Text(viewModel.sunsetSuffix)
-                                    .foregroundColor(viewModel.sunsetSuffixColor)
-                                    .font(.caption)
-                            }
+        NavigationView {
+            List {
+                // 현 위치 기반 정보 Section
+                Section {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Text("일출: \(viewModel.sunriseTime)")
+                            Spacer()
+                            Text(viewModel.sunriseSuffix)
+                                .foregroundColor(viewModel.sunriseSuffixColor)
+                                .font(.caption)
                         }
+                        HStack {
+                            Text("일몰: \(viewModel.sunsetTime)")
+                            Spacer()
+                            Text(viewModel.sunsetSuffix)
+                                .foregroundColor(viewModel.sunsetSuffixColor)
+                                .font(.caption)
+                        }
+                    }
+                } header: {
+                    Text("현 위치 기반 정보")
+                }
+                
+                // 빠른 액세스 Section
+                Section {
+                    Button(action: {
+                        // 설정창을 닫고 저장 탭 열기
+                        shouldOpenSavedTab = true
+                    }) {
+                        HStack {
+                            Image(systemName: "tray.full")
+                                .foregroundColor(.blue)
+                            Text("저장 목록 보기")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                                .font(.caption)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                } header: {
+                    Text("빠른 액세스")
+                }
+                
+                // 알림 설정 Section
+                Section {
+                    Toggle("도형 만료일 알림", isOn: $viewModel.isEndDateAlarmEnabled)
+                        .onChange(of: viewModel.isEndDateAlarmEnabled) { newValue in
+                            SettingManager.shared.isEndDateAlarmEnabled = newValue
+                        }
+                    
+                    Toggle("일출/일몰 알림", isOn: $viewModel.isSunriseSunsetAlarmEnabled)
+                        .onChange(of: viewModel.isSunriseSunsetAlarmEnabled) { newValue in
+                            SettingManager.shared.isSunriseSunsetAlarmEnabled = newValue
+                        }
+                } header: {
+                    Text("알림 설정")
+                }
+
+                // 일반 설정 Section
+                Section {
+                    NavigationLink {
+                        ColorPickerView(
+                            selected: ColorManager.shared.defaultColor,
+                            onColorSelected: { color in
+                                // 선택된 색상 처리
+                            }
+                        )
+                    } label: {
+                        Text("도형 색 바꾸기")
                     }
                     
-                    // 알림 설정 Section
-                    Section(header: Text("알림 설정")) {
-                        Toggle(isOn: $viewModel.isEndDateAlarmEnabled) {
-                            VStack(alignment: .leading) {
-                                Text("종료일 알림")
-                                Text("도형 종료일 7일전 알림을 받습니다.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .onChange(of: viewModel.isEndDateAlarmEnabled) { value in
-                            viewModel.setEndDateAlarmEnabled(value)
-                        }
-
-                        Toggle(isOn: $viewModel.isSunriseSunsetAlarmEnabled) {
-                            VStack(alignment: .leading) {
-                                Text("일출/일몰 알림")
-                                Text("일출/일몰 30분전, 10분전 알림을 받습니다.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .onChange(of: viewModel.isSunriseSunsetAlarmEnabled) { value in
-                            viewModel.setSunriseSunsetAlarmEnabled(value)
-                        }
+                    Button(role: .destructive) {
+                        viewModel.showDeleteExpiredShapesAlert = true
+                    } label: {
+                        Text("만료된 도형 전부 삭제")
                     }
-
-                    // 일반 설정 Section
-                    Section(header: Text("일반 설정")) {
-                        NavigationLink {
-                            ColorPickerView(
-                                selected: ColorManager.shared.defaultColor,
-                                onColorSelected: { color in
-                                    // 선택된 색상 처리
-                                }
-                            )
-                        } label: {
-                            Text("도형 색 바꾸기")
-                        }
-                        
-                        Button(role: .destructive) {
-                            viewModel.showDeleteExpiredShapesAlert = true
-                        } label: {
-                            Text("만료된 도형 전부 삭제")
-                        }
-                    }
-
-                    // 기타 설정 Section
-                    Section(header: Text("기타 설정")) {
-                        Button {
-                            viewModel.showAppInfoAlert = true
-                        } label: {
-                            Text("앱 정보")
-                        }
-                    }
+                } header: {
+                    Text("일반 설정")
                 }
-                .listStyle(InsetGroupedListStyle())
-                .navigationBarTitleDisplayMode(.inline)
-                .padding(.top, 20)
-                .alert("만료된 도형을 모두 삭제할까요?", isPresented: $viewModel.showDeleteExpiredShapesAlert) {
-                    Button("삭제", role: .destructive) {
-                        viewModel.deleteExpiredShapes()
+
+                // 기타 설정 Section
+                Section {
+                    Button {
+                        viewModel.showAppInfoAlert = true
+                    } label: {
+                        Text("앱 정보")
                     }
-                    Button("취소", role: .cancel) {}
-                } message: {
-                    Text("종료일이 지난 도형을 모두 삭제합니다. 이 작업은 되돌릴 수 없습니다.")
-                }
-                .alert("앱 정보", isPresented: $viewModel.showAppInfoAlert) {
-                    Button("확인", role: .cancel) {}
-                } message: {
-                    Text(viewModel.appInfoText)
-                }
-                .onAppear {
-                    viewModel.requestLocation()
+                } header: {
+                    Text("기타 설정")
                 }
             }
-            .navigationViewStyle(StackNavigationViewStyle())
+            .navigationTitle("설정")
+            .navigationBarTitleDisplayMode(.large)
+            .alert("만료된 도형을 모두 삭제할까요?", isPresented: $viewModel.showDeleteExpiredShapesAlert) {
+                Button("삭제", role: .destructive) {
+                    viewModel.deleteExpiredShapes()
+                }
+                Button("취소", role: .cancel) {}
+            } message: {
+                Text("종료일이 지난 도형을 모두 삭제합니다. 이 작업은 되돌릴 수 없습니다.")
+            }
+            .alert("앱 정보", isPresented: $viewModel.showAppInfoAlert) {
+                Button("확인", role: .cancel) {}
+            } message: {
+                Text(viewModel.appInfoText)
+            }
+            .onAppear {
+                viewModel.requestLocation()
+            }
+            .onChange(of: shouldOpenSavedTab) { shouldOpen in
+                if shouldOpen {
+                    // MainTabView에 저장 탭 열기 알림 전송
+                    NotificationCenter.default.post(
+                        name: Notification.Name("OpenSavedTabFromSettings"),
+                        object: nil
+                    )
+                    shouldOpenSavedTab = false
+                }
+            }
+            
+            if horizontalSizeClass == .regular {
+                Text("설정 항목을 선택해주세요")
+                    .foregroundColor(.secondary)
+            }
         }
+        .applyNavigationViewStyle(horizontalSizeClass)
     }
 }
 
@@ -302,6 +332,17 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
 
     func deleteExpiredShapes() {
         SettingManager.shared.deleteExpiredShapes()
+    }
+}
+
+extension View {
+    @ViewBuilder
+    func applyNavigationViewStyle(_ horizontalSizeClass: UserInterfaceSizeClass?) -> some View {
+        if horizontalSizeClass == .regular {
+            self.navigationViewStyle(DoubleColumnNavigationViewStyle())
+        } else {
+            self.navigationViewStyle(StackNavigationViewStyle())
+        }
     }
 }
 

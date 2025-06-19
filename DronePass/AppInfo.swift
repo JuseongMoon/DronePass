@@ -35,7 +35,7 @@ struct AppInfo { // AppInfo 구조체를 정의합니다. 앱 전체에서 사�
         
         static let contact: String = """
         Science Fiction Inc.
-        hisnote@me.com
+        support@sciencefiction.co.kr
         """
     }
     

@@ -135,7 +135,7 @@ struct ShapeEditView: View {
                     makeRow(title: "좌표") {
                         AddressField(
                             text: coordinateText,
-                            placeholder: "좌표를 입력하세요",
+                            placeholder: "터치해서 좌표를 입력하세요",
                             action: { showingCoordinateInput = true }
                         )
                     }
@@ -144,7 +144,7 @@ struct ShapeEditView: View {
                     makeRow(title: "주소") {
                         AddressField(
                             text: address,
-                            placeholder: "주소 검색을 위해 터치하세요",
+                            placeholder: "터치해서 주소를 검색하세요",
                             action: { showingAddressSearch = true }
                         )
                     }
@@ -165,7 +165,7 @@ struct ShapeEditView: View {
                     // 시작일
                     makeRow(title: "시작일") {
                         DatePicker("", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                            .frame(height: 45)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .onChange(of: startDate) { _ in
                                 if endDate < startDate {
                                     endDate = startDate
@@ -176,7 +176,7 @@ struct ShapeEditView: View {
                     // 종료일
                     makeRow(title: "종료일") {
                         DatePicker("", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                            .frame(height: 30)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     
                     // 날짜 설정
@@ -209,11 +209,6 @@ struct ShapeEditView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("저장") {
                         saveShape()
-                    }
-                }
-                ToolbarItem(placement: .keyboard) {
-                    Button("완료") {
-                        isFocused = false
                     }
                 }
             }

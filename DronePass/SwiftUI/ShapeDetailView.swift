@@ -12,94 +12,6 @@ import UIKit
 #endif
 import SafariServices
 
-// MARK: - Constants
-private enum Constants {
-    static let buttonHeight: CGFloat = 56
-    static let memoHeightRatio: CGFloat = 0.4
-    static let cornerRadius: CGFloat = 10
-    static let titleWidth: CGFloat = 60
-    static let spacing: CGFloat = 16
-    static let bottomPadding: CGFloat = 20
-}
-
-// MARK: - Subviews
-private struct DetailRow: View {
-    let title: String
-    let value: String
-    var isLink: Bool = false
-    var onTap: (() -> Void)? = nil
-    
-    var body: some View {
-        HStack(alignment: .top) {
-            Text(title)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.gray)
-                .frame(width: Constants.titleWidth, alignment: .leading)
-            
-            if isLink {
-                Button(action: { onTap?() }) {
-                    Text(value)
-                        .font(.system(size: 16))
-                        .foregroundColor(.blue)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-            } else {
-                Text(value)
-                    .font(.system(size: 16))
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-        }
-    }
-}
-
-private struct MemoView: View {
-    let memo: String
-    let height: CGFloat
-    
-    var body: some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text("메모")
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(.gray)
-                .frame(width: Constants.titleWidth, alignment: .leading)
-            
-            HyperlinkTextView(
-                text: memo,
-                font: .systemFont(ofSize: 16),
-                textColor: .label,
-                showSafari: .constant(false),
-                safariURL: .constant(nil)
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: height)
-            .background(
-                RoundedRectangle(cornerRadius: Constants.cornerRadius)
-                    .stroke(Color(.systemGray4), lineWidth: 1)
-            )
-        }
-    }
-}
-
-private struct ActionButton: View {
-    let title: String
-    let color: Color
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(color)
-                .foregroundColor(.white)
-                .cornerRadius(Constants.cornerRadius)
-        }
-    }
-}
-
-// MARK: - Main View
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -172,98 +84,143 @@ struct ShapeDetailView: View {
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            NavigationView {
-                VStack(spacing: Constants.spacing) {
-                    ScrollView {
-                        VStack(spacing: Constants.spacing + 8) {
-                            DetailRow(title: "제목", value: shape.title)
-                            DetailRow(title: "좌표", value: shape.baseCoordinate.formattedCoordinate)
-                            DetailRow(title: "주소", value: shape.address ?? "-", isLink: true) {
-                                showActionSheet = true
-                            }
-                            if let radius = shape.radius {
-                                DetailRow(title: "반경", value: "\(Int(radius)) m")
-                            }
-                            DetailRow(title: "시작일", value: DateFormatter.koreanDateTime.string(from: shape.startedAt))
-                            if let expire = shape.expireDate {
-                                DetailRow(title: "종료일", value: DateFormatter.koreanDateTime.string(from: expire))
-                            }
-                            MemoView(
-                                memo: shape.memo ?? "-",
-                                height: geometry.size.height * Constants.memoHeightRatio
-                            )
-                        }
-                        .padding(.horizontal)
+        NavigationView {
+            List {
+                Section {
+                    HStack {
+                        Text("제목")
+                        Spacer()
+                        Text(shape.title)
+                            .foregroundColor(.secondary)
                     }
                     
-                    Spacer()
+                    HStack {
+                        Text("좌표")
+                        Spacer()
+                        Text(shape.baseCoordinate.formattedCoordinate)
+                            .foregroundColor(.secondary)
+                    }
                     
-                    HStack(spacing: Constants.spacing) {
-                        ActionButton(title: "수정하기", color: .blue) {
+                    HStack {
+                        Text("주소")
+                        Spacer()
+                        Button(shape.address ?? "-") {
+                            showActionSheet = true
+                        }
+                        .foregroundColor(.blue)
+                    }
+                    
+                    if let radius = shape.radius {
+                        HStack {
+                            Text("반경")
+                            Spacer()
+                            Text("\(Int(radius)) m")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    HStack {
+                        Text("시작일")
+                        Spacer()
+                        Text(DateFormatter.koreanDateTime.string(from: shape.startedAt))
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    if let expire = shape.expireDate {
+                        HStack {
+                            Text("종료일")
+                            Spacer()
+                            Text(DateFormatter.koreanDateTime.string(from: expire))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Section("메모") {
+                    VStack {
+                        HyperlinkTextView(
+                            text: shape.memo ?? "-",
+                            font: .systemFont(ofSize: 16),
+                            textColor: UIColor.secondaryLabel,
+                            showSafari: $showSafari,
+                            safariURL: $safariURL
+                        )
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 180, maxHeight: 180)
+                }
+            }
+            .listStyle(.insetGrouped)
+            .environment(\.defaultMinListRowHeight, 44)
+            .environment(\.defaultMinListHeaderHeight, 8)
+            .padding(.top, -20)
+            .navigationTitle("상세 정보")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button("수정하기") {
                             showEditSheet = true
                         }
-                        ActionButton(title: "삭제하기", color: .red) {
+                        Button("삭제하기", role: .destructive) {
                             showDeleteAlert = true
                         }
-                    }
-                    .frame(height: Constants.buttonHeight)
-                    .padding(.horizontal)
-                    .padding(.bottom, Constants.bottomPadding)
-                }
-                .navigationBarTitleDisplayMode(.inline)
-                .navigationTitle("")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button("닫기") {
-                            dismiss()
-                            onClose?()
-                        }
-                    }
-                }
-                .alert("도형 삭제", isPresented: $showDeleteAlert) {
-                    Button("취소", role: .cancel) {}
-                    Button("삭제하기", role: .destructive) {
-                        store.removeShape(id: shape.id)
-                        onDelete?()
-                        dismiss()
-                        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
-                    }
-                } message: {
-                    Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
-                }
-                .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
-                    ForEach(mapButtons, id: \.title) { button in
-                        Button(button.title) { button.action() }
-                    }
-                    Button("취소", role: .cancel) {}
-                } message: {
-                    Text("아래 앱으로 길찾기를 시작합니다.")
-                }
-                .sheet(isPresented: $showSafari) {
-                    if let url = safariURL {
-                        SafariView(url: url)
-                    }
-                }
-                .sheet(isPresented: $showEditSheet) {
-                    ShapeEditView(
-                        coordinate: shape.baseCoordinate,
-                        onAdd: { updatedShape in
-                            shape = updatedShape
-                            showEditSheet = false
-                        },
-                        originalShape: shape
-                    )
-                    .presentationDetents([.height(geometry.size.height + 50)])
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
-                    if let updatedShape = store.getShape(id: shape.id) {
-                        shape = updatedShape
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
+            .alert("도형 삭제", isPresented: $showDeleteAlert) {
+                Button("취소", role: .cancel) {}
+                Button("삭제하기", role: .destructive) {
+                    store.removeShape(id: shape.id)
+                    onDelete?()
+                    dismiss()
+                    NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                }
+            } message: {
+                Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
+            }
+            .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
+                ForEach(mapButtons, id: \.title) { button in
+                    Button(button.title) { button.action() }
+                }
+                Button("취소", role: .cancel) {}
+            } message: {
+                Text("아래 앱으로 길찾기를 시작합니다.")
+            }
+            .sheet(isPresented: $showSafari) {
+                if let url = safariURL {
+                    SafariView(url: url)
+                }
+            }
+            .sheet(isPresented: $showEditSheet) {
+                ShapeEditView(
+                    coordinate: shape.baseCoordinate,
+                    onAdd: { updatedShape in
+                        shape = updatedShape
+                        showEditSheet = false
+                    },
+                    originalShape: shape
+                )
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
+                if let updatedShape = store.getShape(id: shape.id) {
+                    shape = updatedShape
+                }
+            }
         }
+        .presentationDetents([.fraction(0.8)])
+        .presentationDragIndicator(.visible)
+        .presentationCompactAdaptation(.popover)
     }
+}
+
+struct SafariView: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> SFSafariViewController {
+        SFSafariViewController(url: url)
+    }
+    func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
 }
 
 struct HyperlinkTextView: UIViewRepresentable {
@@ -280,12 +237,13 @@ struct HyperlinkTextView: UIViewRepresentable {
         textView.isScrollEnabled = true
         textView.backgroundColor = .clear
         textView.dataDetectorTypes = [.link, .phoneNumber]
-        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        textView.textContainer.lineFragmentPadding = 0
         textView.delegate = context.coordinator
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         textView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        textView.isUserInteractionEnabled = true
         textView.showsVerticalScrollIndicator = true
-        textView.alwaysBounceVertical = true
         return textView
     }
 
@@ -317,14 +275,6 @@ struct HyperlinkTextView: UIViewRepresentable {
     }
 }
 
-struct SafariView: UIViewControllerRepresentable {
-    let url: URL
-    func makeUIViewController(context: Context) -> SFSafariViewController {
-        SFSafariViewController(url: url)
-    }
-    func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
-}
-
 // MARK: - Preview
 #Preview {
     let dummy = PlaceShape(
@@ -337,13 +287,16 @@ struct SafariView: UIViewControllerRepresentable {
 
 · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
 · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+hisnote@me.com
+https://www.naver.com
 · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
 · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+hisnote@me.com
+https://www.naver.com
 · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
 · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
-· 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
-· 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
-
+hisnote@me.com
+https://www.naver.com
 """,
         address: "인천광역시 서구 청라동 1-791",
         expireDate: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
@@ -358,3 +311,4 @@ struct SafariView: UIViewControllerRepresentable {
         }
     )
 }
+

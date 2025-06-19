@@ -121,7 +121,3 @@ final class ShapeManager {
         }
     }
 }
-
-extension Notification.Name {
-    static let shapesDidChange = Notification.Name("shapesDidChange")
-} 

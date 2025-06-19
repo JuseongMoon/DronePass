@@ -6,121 +6,325 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct SavedTableListView: View {
-    @ObservedObject var placeShapeStore = PlaceShapeStore.shared
-    @State private var selectedShape: PlaceShape? = nil
+    @StateObject private var placeShapeStore = PlaceShapeStore.shared
     @Binding var selectedShapeID: UUID?
     
-    // NotificationCenter 상수 정의
-    private static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
-    private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
-
+    // MARK: - Notification Names
+    static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
+    static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
+    
+    // MARK: - Constants
+    enum Constants {
+        static let dateFormatter: DateFormatter = {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            return df
+        }()
+    }
+    
     var body: some View {
-        ScrollViewReader { proxy in
-            List(selection: $selectedShapeID) {
+        List {
             if placeShapeStore.shapes.isEmpty {
-                Text("저장된 항목이 없습니다.")
-                    .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .center)
+                EmptyStateView()
             } else {
-                ForEach(placeShapeStore.shapes) { shape in
-                    ZStack {
-                        HStack(alignment: .top, spacing: 12) {
-                            // 왼쪽 컬러 원
-                            Circle()
-                                .fill(Color(UIColor(hex: shape.color) ?? .systemBlue))
-                                .frame(width: 18, height: 18)
-                                .padding(.top, 2)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(shape.title)
-                                    .font(.headline)
-                                if let address = shape.address {
-                                    Text(address)
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                Text("\(Self.dateFormatter.string(from: shape.startedAt)) ~ \(Self.dateFormatter.string(from: shape.expireDate ?? Date()))")
-                                    .font(.caption2)
-                                    .foregroundColor(.secondary)
-                            }
-                            Spacer()
-                            VStack(alignment: .trailing, spacing: 0) {
-                                // info 버튼
-                                Button(action: {
-                                    selectedShape = shape
-                                }) {
-                                    Image(systemName: "info.circle")
-                                        .font(.title2)
-                                        .foregroundColor(.blue)
-                                            .frame(width: 54, height: 54)
-                                            .contentShape(Rectangle())
-                                }
-                                    .buttonStyle(PlainButtonStyle())
-                                Spacer()
-                                // 반경
-                                if let radius = shape.radius {
-                                    Text("반경: \(Int(radius)) m")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
-                                }
-                            }
-                            .frame(height: 48)
-                        }
-                        .padding(.vertical, 6)
-                    }
-                        .contentShape(Rectangle())
-                        .id(shape.id)
-                        .onTapGesture {
-                            selectedShapeID = shape.id
-                            NotificationCenter.default.post(
-                                name: Self.moveToShapeNotification,
-                                object: nil,
-                                userInfo: [
-                                    "coordinate": shape.baseCoordinate,
-                                    "radius": shape.radius ?? 100.0
-                                ]
-                            )
-                            NotificationCenter.default.post(
-                                name: Self.shapeOverlayTappedNotification,
-                                object: shape
-                            )
-                        }
-                }
-                .onDelete(perform: deleteShape)
+                ShapeListContent(
+                    shapes: placeShapeStore.shapes,
+                    selectedShapeID: $selectedShapeID,
+                    onDelete: deleteShape
+                )
             }
         }
-        .listStyle(.plain)
-        .sheet(item: $selectedShape) { shape in
-            ShapeDetailView(shape: shape) {
-                selectedShape = nil
-                }
-            }
-            .onChange(of: selectedShapeID) { newID in
-                if let id = newID {
-                    withAnimation {
-                        proxy.scrollTo(id, anchor: .center)
-                    }
-                }
-            }
+        .listStyle(.insetGrouped)
+        .environment(\.defaultMinListRowHeight, 10)
+        .environment(\.defaultMinListHeaderHeight, 1)
+        .padding(.top, -25)
+        .onAppear(perform: onAppear)
+        .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
+            handleShapesDidChange()
         }
     }
     
-    private func deleteShape(at offsets: IndexSet) {
-        for index in offsets {
-            let shape = placeShapeStore.shapes[index]
-            placeShapeStore.deleteShape(shape)
+    // MARK: - Private Methods
+    private func onAppear() {
+        print("📱 SavedTableListView appeared, shapes count: \(placeShapeStore.shapes.count)")
+        placeShapeStore.loadShapes()
+    }
+    
+    private func handleShapesDidChange() {
+        print("🔄 Received shapesDidChange notification")
+        DispatchQueue.main.async {
+            placeShapeStore.loadShapes()
         }
     }
-
-    private static let dateFormatter: DateFormatter = {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
-        return df
-    }()
+    
+    private func deleteShape(at indexSet: IndexSet) {
+        let sortedShapes = placeShapeStore.shapes.sorted(by: { $0.title < $1.title })
+        for index in indexSet {
+            let shape = sortedShapes[index]
+            placeShapeStore.removeShape(id: shape.id)
+        }
+    }
 }
 
+// MARK: - EmptyStateView
+private struct EmptyStateView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "tray")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text("저장된 항목이 없습니다.")
+                .font(.headline)
+                .foregroundColor(.secondary)
+            Text("지도에서 + 버튼을 눌러 새로운 도형을 추가해보세요.")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
+    }
+}
+
+// MARK: - ShapeListContent
+private struct ShapeListContent: View {
+    let shapes: [PlaceShape]
+    @Binding var selectedShapeID: UUID?
+    let onDelete: (IndexSet) -> Void
+    
+    var body: some View {
+        ForEach(shapes.sorted(by: { $0.title < $1.title })) { shape in
+            ShapeListRow(shape: shape, selectedShapeID: $selectedShapeID)
+        }
+        .onDelete(perform: onDelete)
+    }
+}
+
+// MARK: - ShapeListRow
+private struct ShapeListRow: View {
+    let shape: PlaceShape
+    @Binding var selectedShapeID: UUID?
+    
+    private var isSelected: Bool {
+        selectedShapeID == shape.id
+    }
+    
+    var body: some View {
+        ZStack(alignment: .leading) {
+            if isSelected {
+                Color.accentColor.opacity(0.1)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(.horizontal, -60)
+                    .padding(.vertical, -40)
+                    .clipShape(RoundedRectangle(cornerRadius: 17))
+            }
+            
+            HStack(spacing: 8) {
+                // 왼쪽: 색상 인디케이터
+                ShapeColorIndicator(color: shape.color)
+                    .padding(.leading, 4)
+                
+                // 중앙: 도형 정보
+                ShapeInfoContent(shape: shape)
+                    .padding(.leading, 4)
+                
+                Spacer()
+                
+                // 오른쪽: 상세 정보 및 액션
+                ShapeDetailContent(shape: shape)
+                    .padding(.trailing, 4)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { handleShapeTap() }
+            .frame(minHeight: 65)
+        }
+    }
+    
+    private func handleShapeTap() {
+        selectedShapeID = shape.id
+        NotificationCenter.default.post(
+            name: SavedTableListView.moveToShapeNotification,
+            object: nil,
+            userInfo: [
+                "coordinate": shape.baseCoordinate,
+                "radius": shape.radius ?? 100.0
+            ]
+        )
+        NotificationCenter.default.post(
+            name: SavedTableListView.shapeOverlayTappedNotification,
+            object: shape
+        )
+    }
+}
+
+// MARK: - Row Components
+private struct ShapeColorIndicator: View {
+    let color: String
+    
+    var body: some View {
+        VStack(alignment: .trailing) {
+            Rectangle()
+                .fill(Color(UIColor(hex: color) ?? .systemBlue))
+                .frame(width: 4, height: 35)
+                .cornerRadius(15)
+                .shadow(radius: 1)
+        }
+//        .padding(.bottom)
+    }
+}
+
+private struct ShapeInfoContent: View {
+    let shape: PlaceShape
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(shape.title)
+                .font(.headline)
+                .lineLimit(1)
+            if let address = shape.address {
+                Text(address)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            Text(dateRangeText)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
+    private var dateRangeText: String {
+        "\(formattedDate(shape.startedAt)) ~ \(formattedDate(shape.expireDate ?? Date()))"
+    }
+    
+    private func formattedDate(_ date: Date) -> String {
+        SavedTableListView.Constants.dateFormatter.string(from: date)
+    }
+}
+
+private struct ShapeDetailContent: View {
+    let shape: PlaceShape
+    @State private var showingDetailView = false
+    
+    var body: some View {
+        Button(action: {
+            showingDetailView = true
+        }) {
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
+                .font(.caption)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .frame(width: 30, alignment: .trailing)
+        .sheet(isPresented: $showingDetailView) {
+            ShapeDetailView(shape: shape)
+        }
+    }
+}
+
+// MARK: - Supporting Views
+private struct ColorRectangle: View {
+    let color: String
+    
+    var body: some View {
+        Rectangle()
+            .fill(Color(UIColor(hex: color) ?? .systemBlue))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .cornerRadius(15)
+    }
+}
+
+private struct ShapeInfo: View {
+    let shape: PlaceShape
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(shape.title)
+                .font(.headline)
+                .lineLimit(1)
+            if let address = shape.address {
+                Text(address)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            Text("\(formattedDate(shape.startedAt)) ~ \(formattedDate(shape.expireDate ?? Date()))")
+                .font(.caption2)
+                .foregroundColor(.secondary)
+        }
+    }
+    
+    private func formattedDate(_ date: Date) -> String {
+        SavedTableListView.Constants.dateFormatter.string(from: date)
+    }
+}
+
+// MARK: - Preview
 #Preview {
     SavedTableListView(selectedShapeID: .constant(nil))
+        .onAppear {
+            // Canvas에서 더미 데이터 추가
+            let dummyShapes = [
+                PlaceShape(
+                    title: "드론 비행 구역 A",
+                    shapeType: .circle,
+                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    radius: 500.0,
+                    address: "서울특별시 중구 세종대로 110",
+                    expireDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                    color: "#FF6B6B"
+                ),
+                PlaceShape(
+                    title: "헬기 착륙장",
+                    shapeType: .circle,
+                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    radius: 300.0,
+                    address: "서울특별시 강남구 테헤란로 152",
+                    expireDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
+                    color: "#4ECDC4"
+                ),
+                PlaceShape(
+                    title: "공사 현장",
+                    shapeType: .circle,
+                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    radius: 800.0,
+                    address: "서울특별시 마포구 와우산로 94",
+                    expireDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
+                    color: "#45B7D1"
+                ),
+                PlaceShape(
+                    title: "이벤트 공간",
+                    shapeType: .circle,
+                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    radius: 200.0,
+                    address: "서울특별시 종로구 종로 1---------------------",
+                    expireDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
+                    color: "#96CEB4"
+                ),
+                PlaceShape(
+                    title: "보안 구역",
+                    shapeType: .circle,
+                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    radius: 100000.0,
+                    address: "서울특별시 용산구 이태원로 27",
+                    expireDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
+                    color: "#FFEAA7"
+                )
+            ]
+            
+            PlaceShapeStore.shared.shapes = dummyShapes
+        }
 }
+
+#Preview("Empty State") {
+    SavedTableListView(selectedShapeID: .constant(nil))
+        .onAppear {
+            PlaceShapeStore.shared.shapes = []
+        }
+}
+

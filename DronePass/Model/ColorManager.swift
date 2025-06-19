@@ -44,9 +44,7 @@ final class ColorManager {
     private let defaultColorKey = "defaultShapeColor"
     
     // 항상 첫 번째 도형의 색상을 변수로 보유
-
     private(set) var firstShapeColor: PaletteColor = .blue
-
     
     private init() {
         if UserDefaults.standard.string(forKey: defaultColorKey) == nil {
@@ -55,8 +53,7 @@ final class ColorManager {
         // 앱 시작 시 도형이 있으면 첫 번째 색상을 동기화
         syncFirstShapeColor()
         // 도형이 바뀔 때마다 색상을 갱신하도록 옵저버 등록
-        NotificationCenter.default.addObserver(self, selector: #selector(syncFirstShapeColor), name: .shapesDidUpdate, object: nil)
-
+        NotificationCenter.default.addObserver(self, selector: #selector(syncFirstShapeColor), name: .shapesDidChange, object: nil)
     }
     
     var defaultColor: PaletteColor {

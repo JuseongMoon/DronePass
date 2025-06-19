@@ -15,6 +15,7 @@ class CoordinateViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var address: String?
     @Published var parsedCoordinate: Coordinate?
+    @Published var showAddressNotFoundAlert = false
     
     func validateAndSearch() async {
         if let coordinate = Coordinate.parse(coordinateText) {
@@ -46,7 +47,8 @@ class CoordinateViewModel: ObservableObject {
             )
             self.address = address
         } catch {
-            self.errorMessage = "주소 검색 중 오류가 발생했습니다: \(error.localizedDescription)"
+            // 주소 검색 실패 시 알림창 표시
+            self.showAddressNotFoundAlert = true
             print("[좌표검색] 에러 발생: \(error)")
         }
         
@@ -92,14 +94,20 @@ struct CoordinateView: View {
                         .padding(.top, 4)
                 }
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("※드론원스탑에서 승인받은 좌표를 그대로 복사붙여넣기 하세요")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
+                VStack(spacing: 16) {
+                    Image(systemName: "location.circle")
+                        .font(.largeTitle)
+                        .foregroundColor(.gray)
                     
-                    VStack(alignment: .leading, spacing: 2) {
+                    Text("좌표를 입력해주세요")
+                        .font(.headline)
+                        .foregroundColor(.gray)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("※드론원스탑에서 승인받은 좌표를 그대로 복사붙여넣기 하세요")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
                         Text("지원하는 좌표 형식:")
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -113,9 +121,12 @@ struct CoordinateView: View {
                         .font(.caption2)
                         .foregroundColor(.secondary)
                     }
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
                     .padding(.horizontal)
-                    .padding(.top, 4)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 if viewModel.isSearching {
                     ProgressView()
@@ -154,6 +165,19 @@ struct CoordinateView: View {
                     }
                     .disabled(!viewModel.isCoordinateValid)
                 }
+            }
+            .alert("주소 검색 실패", isPresented: $viewModel.showAddressNotFoundAlert) {
+                Button("예") {
+                    if let coordinate = viewModel.parsedCoordinate {
+                        onSelectCoordinate?(coordinate, "주소를 찾을 수 없습니다")
+                        dismiss()
+                    }
+                }
+                Button("아니요", role: .cancel) {
+                    // 검색창으로 돌아가기 (좌표는 그대로 유지)
+                }
+            } message: {
+                Text("주소가 검색되지 않습니다. 이대로 좌표를 입력할까요? \n (길찾기는 좌표를 기반으로 진행됩니다)")
             }
         }
         .presentationDetents([.medium])

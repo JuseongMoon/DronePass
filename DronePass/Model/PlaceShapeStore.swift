@@ -36,56 +36,49 @@ final class PlaceShapeStore: ObservableObject {
         loadShapes()
     }
     
-    func deleteShape(_ shape: PlaceShape) {
-        if let index = shapes.firstIndex(where: { $0.id == shape.id }) {
-            shapes.remove(at: index)
-        }
-    }
-    
-    private func loadShapes() {
+    public func loadShapes() {
         do {
             if fileManager.fileExists(atPath: shapesFileURL.path) {
                 let data = try Data(contentsOf: shapesFileURL)
                 shapes = try decoder.decode([PlaceShape].self, from: data)
+                print("✅ 도형 데이터 로드 성공: \(shapes.count)개")
             } else {
                 // 파일이 없으면 빈 배열로 시작
                 shapes = []
+                print("📁 도형 데이터 파일이 없어 빈 배열로 시작")
                 // 빈 배열을 파일로 저장
-                try saveShapes()
+                saveShapes()
             }
         } catch {
-            print("도형 데이터 로드 실패: \(error)")
+            print("❌ 도형 데이터 로드 실패: \(error)")
             shapes = []
         }
     }
     
-    private func saveShapes() throws {
-        let data = try encoder.encode(shapes)
-        try data.write(to: shapesFileURL)
+    public func saveShapes() {
+        do {
+            let data = try encoder.encode(shapes)
+            try data.write(to: shapesFileURL)
+            print("💾 도형 데이터 저장 성공: \(shapes.count)개")
+        } catch {
+            print("❌ 도형 데이터 저장 실패: \(error)")
+        }
     }
     
     public func addShape(_ shape: PlaceShape) {
         shapes.append(shape)
-        do {
-            try saveShapes()
-        } catch {
-            print("도형 추가 실패: \(error)")
-        }
+        saveShapes()
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
     }
     
     public func removeShape(id: UUID) {
         shapes.removeAll { $0.id == id }
-        do {
-            try saveShapes()
-        } catch {
-            print("도형 삭제 실패: \(error)")
-        }
+        saveShapes()
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
     }
 
     
     public func updateAllShapesColor(to newColor: String) {
-
-        
         do {
             // 1. 파일에서 도형 전체 불러오기
             let data = try Data(contentsOf: shapesFileURL)
@@ -109,11 +102,8 @@ final class PlaceShapeStore: ObservableObject {
             var newShapes = shapes
             newShapes[idx] = shape
             shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
-            do {
-                try saveShapes()
-            } catch {
-                print("도형 수정 실패: \(error)")
-            }
+            saveShapes()
+            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
         }
     }
     
@@ -126,13 +116,61 @@ final class PlaceShapeStore: ObservableObject {
             return true
         }
         self.shapes = filtered
-        do {
-            try saveShapes()
-        } catch {
-            print("만료 도형 삭제 실패: \(error)")
-        }
+        saveShapes()
         // UI 갱신을 위해 Notification 전송
         NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+    }
+    
+    // MARK: - 샘플 데이터 추가 (테스트용)
+    public func addSampleData() {
+        let sampleShapes = [
+            PlaceShape(
+                title: "서울시청",
+                shapeType: .circle,
+                baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                radius: 500,
+                memo: "서울시청 주변 비행 금지 구역입니다. 드론 비행 시 주의하세요.",
+                address: "서울특별시 중구 태평로1가 31",
+                expireDate: Date().addingTimeInterval(86400 * 7),
+                startedAt: Date(),
+                color: "#FF0000"
+            ),
+            PlaceShape(
+                title: "경복궁",
+                shapeType: .circle,
+                baseCoordinate: Coordinate(latitude: 37.5796, longitude: 126.9770),
+                radius: 300,
+                memo: "경복궁 보존 구역입니다. 문화재 보호를 위해 드론 비행이 제한됩니다.",
+                address: "서울특별시 종로구 사직로 161",
+                expireDate: Date().addingTimeInterval(86400 * 30),
+                startedAt: Date(),
+                color: "#00FF00"
+            ),
+            PlaceShape(
+                title: "한강공원",
+                shapeType: .circle,
+                baseCoordinate: Coordinate(latitude: 37.5219, longitude: 126.9369),
+                radius: 800,
+                memo: "한강공원 드론 비행 허용 구역입니다. 안전한 비행을 위해 규정을 준수하세요.",
+                address: "서울특별시 영등포구 여의도동",
+                expireDate: Date().addingTimeInterval(86400 * 90),
+                startedAt: Date(),
+                color: "#007AFF"
+            )
+        ]
+        
+        for shape in sampleShapes {
+            addShape(shape)
+        }
+        
+        print("🎯 샘플 데이터 추가 완료: \(sampleShapes.count)개")
+    }
+    
+    public func clearAllData() {
+        shapes.removeAll()
+        saveShapes()
+        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        print("🗑️ 모든 데이터 삭제 완료")
     }
 }
 
@@ -144,3 +182,4 @@ extension PlaceShapeStore {
         return shapes.first(where: { $0.id == id })
     }
 }
+
