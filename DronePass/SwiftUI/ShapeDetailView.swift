@@ -12,17 +12,94 @@ import UIKit
 #endif
 import SafariServices
 
-// 환경값 정의
-private struct MemoBoxMaxHeightKey: EnvironmentKey {
-    static let defaultValue: CGFloat = 400
+// MARK: - Constants
+private enum Constants {
+    static let buttonHeight: CGFloat = 56
+    static let memoHeightRatio: CGFloat = 0.4
+    static let cornerRadius: CGFloat = 10
+    static let titleWidth: CGFloat = 60
+    static let spacing: CGFloat = 16
+    static let bottomPadding: CGFloat = 20
 }
-extension EnvironmentValues {
-    var memoBoxMaxHeight: CGFloat {
-        get { self[MemoBoxMaxHeightKey.self] }
-        set { self[MemoBoxMaxHeightKey.self] = newValue }
+
+// MARK: - Subviews
+private struct DetailRow: View {
+    let title: String
+    let value: String
+    var isLink: Bool = false
+    var onTap: (() -> Void)? = nil
+    
+    var body: some View {
+        HStack(alignment: .top) {
+            Text(title)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.gray)
+                .frame(width: Constants.titleWidth, alignment: .leading)
+            
+            if isLink {
+                Button(action: { onTap?() }) {
+                    Text(value)
+                        .font(.system(size: 16))
+                        .foregroundColor(.blue)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                Text(value)
+                    .font(.system(size: 16))
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
     }
 }
 
+private struct MemoView: View {
+    let memo: String
+    let height: CGFloat
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text("메모")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.gray)
+                .frame(width: Constants.titleWidth, alignment: .leading)
+            
+            HyperlinkTextView(
+                text: memo,
+                font: .systemFont(ofSize: 16),
+                textColor: .label,
+                showSafari: .constant(false),
+                safariURL: .constant(nil)
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(height: height)
+            .background(
+                RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                    .stroke(Color(.systemGray4), lineWidth: 1)
+            )
+        }
+    }
+}
+
+private struct ActionButton: View {
+    let title: String
+    let color: Color
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(color)
+                .foregroundColor(.white)
+                .cornerRadius(Constants.cornerRadius)
+        }
+    }
+}
+
+// MARK: - Main View
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
@@ -31,13 +108,8 @@ struct ShapeDetailView: View {
     @State private var shape: PlaceShape
     private let originalShape: PlaceShape
     
-    // onClose: Called when the close button is tapped
-    var onClose: (() -> Void)? = nil
-    
-    // onEdit: Called when the edit button is tapped
-    var onEdit: (() -> Void)? = nil
-    
-    // onDelete: Called when the delete button is confirmed
+    var onClose: (() -> Void)?
+    var onEdit: (() -> Void)?
     var onDelete: (() -> Void)?
     
     @State private var showMapSheet = false
@@ -46,8 +118,6 @@ struct ShapeDetailView: View {
     @State private var showSafari = false
     @State private var safariURL: URL? = nil
     @State private var showEditSheet = false
-    
-    @Environment(\.memoBoxMaxHeight) private var memoBoxMaxHeight
     
     init(shape: PlaceShape, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
         _shape = State(initialValue: shape)
@@ -101,36 +171,45 @@ struct ShapeDetailView: View {
         }
     }
     
-    // MARK: - Body
-
-    
     var body: some View {
         GeometryReader { geometry in
             NavigationView {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        // 제목
-                        dataRow(title: "제목", value: shape.title)
-                        // 좌표
-                        dataRow(title: "좌표", value: shape.baseCoordinate.formattedCoordinate)
-                        // 주소 (텍스트만 링크)
-                        dataRow(title: "주소", value: shape.address ?? "-", isLink: true, linkURL: addressURL)
-                        // 반경
-                        if let radius = shape.radius {
-                            dataRow(title: "반경", value: "\(Int(radius)) m")
+                VStack(spacing: Constants.spacing) {
+                    ScrollView {
+                        VStack(spacing: Constants.spacing + 8) {
+                            DetailRow(title: "제목", value: shape.title)
+                            DetailRow(title: "좌표", value: shape.baseCoordinate.formattedCoordinate)
+                            DetailRow(title: "주소", value: shape.address ?? "-", isLink: true) {
+                                showActionSheet = true
+                            }
+                            if let radius = shape.radius {
+                                DetailRow(title: "반경", value: "\(Int(radius)) m")
+                            }
+                            DetailRow(title: "시작일", value: DateFormatter.koreanDateTime.string(from: shape.startedAt))
+                            if let expire = shape.expireDate {
+                                DetailRow(title: "종료일", value: DateFormatter.koreanDateTime.string(from: expire))
+                            }
+                            MemoView(
+                                memo: shape.memo ?? "-",
+                                height: geometry.size.height * Constants.memoHeightRatio
+                            )
                         }
-                        // 시작일
-                        dataRow(title: "시작일", value: DateFormatter.koreanDateTime.string(from: shape.startedAt))
-                        // 종료일
-                        if let expire = shape.expireDate {
-                            dataRow(title: "종료일", value: DateFormatter.koreanDateTime.string(from: expire))
-                        }
-                        // 메모
-                        dataRow(title: "메모", value: shape.memo ?? "-")
+                        .padding(.horizontal)
                     }
-                    .padding()
-                    .padding(.trailing, -10)
-                    .padding(.leading, 5)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: Constants.spacing) {
+                        ActionButton(title: "수정하기", color: .blue) {
+                            showEditSheet = true
+                        }
+                        ActionButton(title: "삭제하기", color: .red) {
+                            showDeleteAlert = true
+                        }
+                    }
+                    .frame(height: Constants.buttonHeight)
+                    .padding(.horizontal)
+                    .padding(.bottom, Constants.bottomPadding)
                 }
                 .navigationBarTitleDisplayMode(.inline)
                 .navigationTitle("")
@@ -142,29 +221,6 @@ struct ShapeDetailView: View {
                         }
                     }
                 }
-                .safeAreaInset(edge: .bottom) {
-                    HStack(spacing: 16) {
-                        Button(action: { showEditSheet = true }) {
-                            Text("수정하기")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.blue)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                        }
-                        Button(action: { showDeleteAlert = true }) {
-                            Text("삭제하기")
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.red)
-                                .foregroundColor(.white)
-                                .cornerRadius(12)
-                        }
-                    }
-                    .frame(height: 56)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
                 .alert("도형 삭제", isPresented: $showDeleteAlert) {
                     Button("취소", role: .cancel) {}
                     Button("삭제하기", role: .destructive) {
@@ -175,11 +231,6 @@ struct ShapeDetailView: View {
                     }
                 } message: {
                     Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
-                    if let updatedShape = store.getShape(id: shape.id) {
-                        shape = updatedShape
-                    }
                 }
                 .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
                     ForEach(mapButtons, id: \.title) { button in
@@ -203,60 +254,14 @@ struct ShapeDetailView: View {
                         },
                         originalShape: shape
                     )
+                    .presentationDetents([.height(geometry.size.height + 50)])
+                }
+                .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
+                    if let updatedShape = store.getShape(id: shape.id) {
+                        shape = updatedShape
+                    }
                 }
             }
-            .environment(\.memoBoxMaxHeight, geometry.size.height - 56 - 8 - 10)
-        }
-    }
-    
-    // MARK: - 데이터 행 뷰
-    @ViewBuilder
-    private func dataRow(title: String, value: String, isLink: Bool = false, linkURL: URL? = nil) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            Text(title)
-                .font(.headline)
-                .frame(width: 60, alignment: .leading)
-                .foregroundColor(.primary)
-                .padding(.top, 8)
-            if title == "메모" {
-                TextEditor(text: .constant(value))
-                    .font(.system(size: 17))
-                    .frame(maxWidth: .infinity, minHeight: 200, maxHeight: 300)
-                    .disabled(true)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color(.systemGray4), lineWidth: 1)
-                    )
-            } else if title == "주소" {
-                Button(action: { showActionSheet = true }) {
-                    Text(value)
-                        .font(.body)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.blue)
-                        .lineLimit(.max)
-                        .truncationMode(.tail)
-                }
-                .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color(.systemGray4), lineWidth: 1)
-                )
-                .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                Text(value)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .foregroundColor(.primary)
-                    .lineLimit(.max)
-                    .truncationMode(.tail)
-                    .padding(12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color(.systemGray4), lineWidth: 1)
-                    )
-            }
-            Spacer()
         }
     }
 }
@@ -272,12 +277,15 @@ struct HyperlinkTextView: UIViewRepresentable {
         let textView = UITextView()
         textView.isEditable = false
         textView.isSelectable = true
-        textView.isScrollEnabled = false
+        textView.isScrollEnabled = true
         textView.backgroundColor = .clear
         textView.dataDetectorTypes = [.link, .phoneNumber]
-        textView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        textView.textContainerInset = UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
         textView.delegate = context.coordinator
         textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        textView.showsVerticalScrollIndicator = true
+        textView.alwaysBounceVertical = true
         return textView
     }
 
@@ -317,7 +325,7 @@ struct SafariView: UIViewControllerRepresentable {
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
 }
 
-// MARK: - 프리뷰
+// MARK: - Preview
 #Preview {
     let dummy = PlaceShape(
         id: UUID(),
@@ -327,12 +335,14 @@ struct SafariView: UIViewControllerRepresentable {
         memo: """
 군 담당자  [ ☎ 031-290-9221 ]
 
- · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
- · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
- · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
- · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
- · 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
- · 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+· 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+· 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+· 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+· 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+· 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+· 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
+· 인근 촬영금지시설이 촬영될 가능성이 명백한 경우 (업무일 기준)촬영 2일 전까지 연락 후 안내받으시기 바랍니다.
+· 현장통제 보안담당자 : 031-290-9041(연락 가능시간 : 평일 09:00 ~ 17:00 / 그 외 연락불가)
 
 """,
         address: "인천광역시 서구 청라동 1-791",

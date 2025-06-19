@@ -11,7 +11,7 @@ class MapViewModel: NSObject, ObservableObject {
 
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
-    
+
     // NotificationCenter 상수 정의
     private static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
     private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")

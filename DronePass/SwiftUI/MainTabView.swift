@@ -36,14 +36,14 @@ struct MainTabView: View {
                         isPresented: $isSavedSheetPresented,
                         selectedShapeID: $selectedShapeID
                     )
-                    .frame(width: min(geometry.size.width, 500),
+                        .frame(width: min(geometry.size.width, 500),
                            height: geometry.size.height * 0.6 - 40)
-                    .background(.ultraThinMaterial)
-                    .cornerRadius(24)
-                    .shadow(radius: 20)
-                    .transition(.move(edge: .bottom))
-                    .zIndex(1)
-                    .position(x: geometry.size.width / 2,
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(24)
+                        .shadow(radius: 20)
+                        .transition(.move(edge: .bottom))
+                        .zIndex(1)
+                        .position(x: geometry.size.width / 2,
                               y: geometry.size.height - (geometry.size.height * 0.25) - 40)
                 }
 

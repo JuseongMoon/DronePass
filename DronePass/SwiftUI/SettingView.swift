@@ -11,10 +11,21 @@ import Solar
 
 struct SettingView: View {
     @StateObject private var viewModel = SettingViewModel()
+    
+    init() {
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithTransparentBackground()
+        appearance.backgroundColor = .clear
+        appearance.shadowColor = .clear
+        
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+    }
 
     var body: some View {
         ZStack {
-            Color.clear.background(.ultraThinMaterial)
+            Color.clear.background(.ultraThinMaterial).ignoresSafeArea()
             NavigationView {
                 List {
                     // 현 위치 기반 정보 Section
@@ -36,7 +47,7 @@ struct SettingView: View {
                             }
                         }
                     }
-
+                    
                     // 알림 설정 Section
                     Section(header: Text("알림 설정")) {
                         Toggle(isOn: $viewModel.isEndDateAlarmEnabled) {
@@ -66,16 +77,17 @@ struct SettingView: View {
 
                     // 일반 설정 Section
                     Section(header: Text("일반 설정")) {
-                        NavigationLink(
-                            destination: ColorPickerView(
+                        NavigationLink {
+                            ColorPickerView(
                                 selected: ColorManager.shared.defaultColor,
                                 onColorSelected: { color in
-                                    // 선택된 색상 처리 (필요시 ViewModel에 반영)
+                                    // 선택된 색상 처리
                                 }
                             )
-                        ) {
+                        } label: {
                             Text("도형 색 바꾸기")
                         }
+                        
                         Button(role: .destructive) {
                             viewModel.showDeleteExpiredShapesAlert = true
                         } label: {
@@ -92,6 +104,9 @@ struct SettingView: View {
                         }
                     }
                 }
+                .listStyle(InsetGroupedListStyle())
+                .navigationBarTitleDisplayMode(.inline)
+                .padding(.top, 20)
                 .alert("만료된 도형을 모두 삭제할까요?", isPresented: $viewModel.showDeleteExpiredShapesAlert) {
                     Button("삭제", role: .destructive) {
                         viewModel.deleteExpiredShapes()
@@ -109,6 +124,7 @@ struct SettingView: View {
                     viewModel.requestLocation()
                 }
             }
+            .navigationViewStyle(StackNavigationViewStyle())
         }
     }
 }

@@ -15,61 +15,61 @@ struct SavedTableListView: View {
     // NotificationCenter 상수 정의
     private static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
     private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
-    
+
     var body: some View {
         ScrollViewReader { proxy in
             List(selection: $selectedShapeID) {
-                if placeShapeStore.shapes.isEmpty {
-                    Text("저장된 항목이 없습니다.")
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                } else {
-                    ForEach(placeShapeStore.shapes) { shape in
-                        ZStack {
-                            HStack(alignment: .top, spacing: 12) {
-                                // 왼쪽 컬러 원
-                                Circle()
-                                    .fill(Color(UIColor(hex: shape.color) ?? .systemBlue))
-                                    .frame(width: 18, height: 18)
-                                    .padding(.top, 2)
+            if placeShapeStore.shapes.isEmpty {
+                Text("저장된 항목이 없습니다.")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+            } else {
+                ForEach(placeShapeStore.shapes) { shape in
+                    ZStack {
+                        HStack(alignment: .top, spacing: 12) {
+                            // 왼쪽 컬러 원
+                            Circle()
+                                .fill(Color(UIColor(hex: shape.color) ?? .systemBlue))
+                                .frame(width: 18, height: 18)
+                                .padding(.top, 2)
 
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(shape.title)
-                                        .font(.headline)
-                                    if let address = shape.address {
-                                        Text(address)
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    Text("\(Self.dateFormatter.string(from: shape.startedAt)) ~ \(Self.dateFormatter.string(from: shape.expireDate ?? Date()))")
-                                        .font(.caption2)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(shape.title)
+                                    .font(.headline)
+                                if let address = shape.address {
+                                    Text(address)
+                                        .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
-                                Spacer()
-                                VStack(alignment: .trailing, spacing: 0) {
-                                    // info 버튼
-                                    Button(action: {
-                                        selectedShape = shape
-                                    }) {
-                                        Image(systemName: "info.circle")
-                                            .font(.title2)
-                                            .foregroundColor(.blue)
+                                Text("\(Self.dateFormatter.string(from: shape.startedAt)) ~ \(Self.dateFormatter.string(from: shape.expireDate ?? Date()))")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 0) {
+                                // info 버튼
+                                Button(action: {
+                                    selectedShape = shape
+                                }) {
+                                    Image(systemName: "info.circle")
+                                        .font(.title2)
+                                        .foregroundColor(.blue)
                                             .frame(width: 54, height: 54)
                                             .contentShape(Rectangle())
-                                    }
-                                    .buttonStyle(PlainButtonStyle())
-                                    Spacer()
-                                    // 반경
-                                    if let radius = shape.radius {
-                                        Text("반경: \(Int(radius)) m")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
                                 }
-                                .frame(height: 48)
+                                    .buttonStyle(PlainButtonStyle())
+                                Spacer()
+                                // 반경
+                                if let radius = shape.radius {
+                                    Text("반경: \(Int(radius)) m")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
                             }
-                            .padding(.vertical, 6)
+                            .frame(height: 48)
                         }
+                        .padding(.vertical, 6)
+                    }
                         .contentShape(Rectangle())
                         .id(shape.id)
                         .onTapGesture {
@@ -87,14 +87,14 @@ struct SavedTableListView: View {
                                 object: shape
                             )
                         }
-                    }
-                    .onDelete(perform: deleteShape)
                 }
+                .onDelete(perform: deleteShape)
             }
-            .listStyle(.plain)
-            .sheet(item: $selectedShape) { shape in
-                ShapeDetailView(shape: shape) {
-                    selectedShape = nil
+        }
+        .listStyle(.plain)
+        .sheet(item: $selectedShape) { shape in
+            ShapeDetailView(shape: shape) {
+                selectedShape = nil
                 }
             }
             .onChange(of: selectedShapeID) { newID in

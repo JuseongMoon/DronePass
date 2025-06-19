@@ -138,7 +138,7 @@ final class PlaceShapeStore: ObservableObject {
 
 extension PlaceShapeStore {
     /// 저장된 모든 도형의 색상을 새로운 색상(hex)으로 변경하고 저장/갱신
-    
+
     /// 특정 id의 도형을 반환
     func getShape(id: UUID) -> PlaceShape? {
         return shapes.first(where: { $0.id == id })

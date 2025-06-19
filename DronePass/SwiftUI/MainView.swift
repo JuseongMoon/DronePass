@@ -35,8 +35,8 @@ class MainViewCoordinator: NSObject, ObservableObject {
         Task {
             do {
                 let address = try await NaverGeocodingService.shared.reverseGeocode(
-                    latitude: coordinate.latitude,
-                    longitude: coordinate.longitude
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude
                 )
                 await MainActor.run {
                     self.currentAddress = address
