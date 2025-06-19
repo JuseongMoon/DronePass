@@ -68,7 +68,7 @@ struct SearchingAddressView: View {
                 // 검색 바
                 SearchBar(
                     text: $searchText,
-                    placeholder: "",
+                    placeholder: "도로명 주소로 검색해주세요",
                     onSubmit: {
                         Task {
                             await viewModel.searchAddress(query: searchText)
@@ -90,16 +90,9 @@ struct SearchingAddressView: View {
                 } else if viewModel.addresses.isEmpty {
                     // 검색 결과가 없을 때 안내 메시지 표시
                     VStack(spacing: 16) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.largeTitle)
-                            .foregroundColor(.gray)
-                        
-                        Text("도로명 주소로 검색해주세요")
-                            .font(.headline)
-                            .foregroundColor(.gray)
-                        
+       
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("지번 주소나 건물명으로는 검색이 어려울 수 있습니다")
+                            Text("지번 주소나 건물명으로는 검색이 어렵습니다")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             
@@ -118,7 +111,7 @@ struct SearchingAddressView: View {
                         }
                         .padding()
                         .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                        .cornerRadius(20)
                         .padding(.horizontal)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

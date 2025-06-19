@@ -16,6 +16,7 @@ struct GrowingTextEditor: View {
     @FocusState.Binding var isFocused: Bool
     var minHeight: CGFloat = 40
     var maxHeight: CGFloat = 300
+    
 
     @State private var dynamicHeight: CGFloat = 40
 
@@ -93,6 +94,7 @@ struct ShapeEditView: View {
     @FocusState private var isFocused: Bool
     @State private var showingAddressSearch = false
     @State private var showingCoordinateInput = false
+    @State private var selectedDetent: PresentationDetent = .large
     
     @State var coordinate: Coordinate
     var onAdd: ((PlaceShape) -> Void)?
@@ -118,82 +120,102 @@ struct ShapeEditView: View {
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 20) {
+            Form {
+                Section {
                     // 제목
-                    makeRow(title: "제목") {
+                    HStack {
+                        Text("제목")
                         TextField("제목을 입력하세요", text: $title)
-                            .textFieldStyle(.roundedBorder)
-                            .focused($isFocused)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(UIColor.systemGray3))
-                            )
+                            .multilineTextAlignment(.trailing)
                     }
+                    .frame(height: 30)
                     
                     // 좌표
-                    makeRow(title: "좌표") {
-                        AddressField(
-                            text: coordinateText,
-                            placeholder: "터치해서 좌표를 입력하세요",
-                            action: { showingCoordinateInput = true }
-                        )
+                    Button(action: { showingCoordinateInput = true }) {
+                        HStack {
+                            Text("좌표")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text(coordinateText.isEmpty ? "터치해서 좌표를 입력하세요" : coordinateText)
+                                .foregroundColor(coordinateText.isEmpty ? .gray : .primary)
+                                .multilineTextAlignment(.trailing)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .font(.footnote)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .frame(height: 30)
                     
                     // 주소
-                    makeRow(title: "주소") {
-                        AddressField(
-                            text: address,
-                            placeholder: "터치해서 주소를 검색하세요",
-                            action: { showingAddressSearch = true }
-                        )
+                    Button(action: { showingAddressSearch = true }) {
+                        HStack {
+                            Text("주소")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text(address.isEmpty ? "터치해서 주소를 검색하세요" : address)
+                                .foregroundColor(address.isEmpty ? .gray : .primary)
+                                .multilineTextAlignment(.trailing)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .font(.footnote)
+                        }
                     }
+                    .buttonStyle(.plain)
+                    .frame(height: 30)
                     
                     // 반경
-                    makeRow(title: "반경(m)") {
+                    HStack {
+                        Text("반경(m)")
                         TextField("미터 단위로 입력해주세요", text: $radius)
-                            .textFieldStyle(.roundedBorder)
                             .keyboardType(.decimalPad)
-                            .focused($isFocused)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(Color(UIColor.systemGray3))
-                            )
+                            .multilineTextAlignment(.trailing)
                     }
-                    
-                    
+                    .frame(height: 30)
+                }
+                
+                Section {
                     // 시작일
-                    makeRow(title: "시작일") {
-                        DatePicker("", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .onChange(of: startDate) { _ in
-                                if endDate < startDate {
-                                    endDate = startDate
-                                }
+                    DatePicker("시작일", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                        .onChange(of: startDate) { _ in
+                            if endDate < startDate {
+                                endDate = startDate
                             }
-                    }
+                        }
+                        .frame(height: 30)
                     
                     // 종료일
-                    makeRow(title: "종료일") {
-                        DatePicker("", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    DatePicker("종료일", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                        .frame(height: 30)
                     
                     // 날짜 설정
-                    makeRow(title: "일단위 입력") {
-                        Toggle("", isOn: $isDateOnly)
-                            .onChange(of: isDateOnly) { newValue in
-                                UserDefaults.standard.set(newValue, forKey: dateOnlyKey)
-                                updateDates()
-                            }
-                    }
-                    
+                    Toggle("일단위 입력", isOn: $isDateOnly)
+                        .onChange(of: isDateOnly) { newValue in
+                            UserDefaults.standard.set(newValue, forKey: dateOnlyKey)
+                            updateDates()
+                        }
+                        .frame(height: 30)
+                }
+                
+                Section {
                     // 메모
-                    makeRow(title: "메모") {
-                        GrowingTextEditor(text: $memo, isFocused: $isFocused, minHeight: 40, maxHeight: 300)
+                    VStack(alignment: .leading) {
+                        Text("메모")
+                        TextEditor(text: $memo)
+                            .frame(minHeight: 100)
+                            .overlay(
+                                Group {
+                                    if memo.isEmpty {
+                                        Text("메모를 입력하세요")
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 4)
+                                            .padding(.vertical, 8)
+                                    }
+                                },
+                                alignment: .topLeading
+                            )
                     }
                 }
-                .padding()
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -225,12 +247,6 @@ struct ShapeEditView: View {
             } message: {
                 Text(alertMessage)
             }
-            .onTapGesture {
-                isFocused = false
-            }
-            .onAppear {
-                setupInitialValues()
-            }
             .sheet(isPresented: $showingAddressSearch) {
                 SearchingAddressView(
                     onSelectAddress: { address in
@@ -238,13 +254,15 @@ struct ShapeEditView: View {
                         if let coordinate = address.coordinate {
                             selectedLatitude = coordinate.latitude
                             selectedLongitude = coordinate.longitude
-                            
-                            // 선택된 좌표로 coordinate 업데이트
                             self.coordinate = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
                             coordinateText = self.coordinate.formattedCoordinate
                         }
                     }
                 )
+                .interactiveDismissDisabled()
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.fraction(0.85)])
+                .presentationContentInteraction(.scrolls)
             }
             .sheet(isPresented: $showingCoordinateInput) {
                 CoordinateView(
@@ -254,18 +272,11 @@ struct ShapeEditView: View {
                         self.address = newAddress
                     }
                 )
+                .interactiveDismissDisabled()
+                .presentationDragIndicator(.visible)
+                .presentationDetents([.fraction(0.85)])
+                .presentationContentInteraction(.scrolls)
             }
-        }
-    }
-    
-    private func makeRow<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
-        HStack(alignment: title == "메모" ? .top : .center, spacing: 12) {
-            Text(title)
-                .font(.body)
-                .frame(width: 80, alignment: .leading)
-                .padding(.top, title == "메모" ? 8 : 0)
-            
-            content()
         }
     }
     

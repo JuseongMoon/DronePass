@@ -69,7 +69,7 @@ struct CoordinateView: View {
                 // 검색 바
                 SearchBar(
                     text: $viewModel.coordinateText,
-                    placeholder: "예시: 37° 34′ 40″ N 126° 58′ 30″ E",
+                    placeholder: "좌표를 입력해주세요",
                     onSubmit: {
                         Task {
                             await viewModel.validateAndSearch()
@@ -95,16 +95,9 @@ struct CoordinateView: View {
                 }
                 
                 VStack(spacing: 16) {
-                    Image(systemName: "location.circle")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray)
-                    
-                    Text("좌표를 입력해주세요")
-                        .font(.headline)
-                        .foregroundColor(.gray)
                     
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("※드론원스탑에서 승인받은 좌표를 그대로 복사붙여넣기 하세요")
+                        Text("드론원스탑에서 승인받은 좌표를 그대로 복사&붙여넣기 하세요")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                         
@@ -123,7 +116,7 @@ struct CoordinateView: View {
                     }
                     .padding()
                     .background(Color(.systemGray6))
-                    .cornerRadius(8)
+                    .cornerRadius(20)
                     .padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
