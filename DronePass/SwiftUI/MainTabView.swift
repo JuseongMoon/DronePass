@@ -13,6 +13,7 @@ struct MainTabView: View {
     @State private var selectedShapeID: UUID? = nil
     @State private var isSavedSheetPresented = false
     @State private var isSettingsSheetPresented = false
+    @State private var shapeIDToScrollTo: UUID? = nil
     
     private static let openSavedTabNotification = Notification.Name("OpenSavedTabNotification")
     private static let openSavedTabFromSettingsNotification = Notification.Name("OpenSavedTabFromSettings")
@@ -85,7 +86,8 @@ struct MainTabView: View {
                 if isSavedSheetPresented {
                     SavedListOverlayView(
                         selectedShapeID: $selectedShapeID,
-                        isPresented: $isSavedSheetPresented
+                        isPresented: $isSavedSheetPresented,
+                        shapeIDToScrollTo: $shapeIDToScrollTo
                     )
                     .transition(.move(edge: getOverlayEdge()).combined(with: .opacity))
                 }
@@ -162,8 +164,20 @@ struct MainTabView: View {
             queue: .main
         ) { notification in
             if let shapeID = notification.object as? UUID {
-                selectedShapeID = shapeID
-                isSavedSheetPresented = true
+                // 1. 하이라이트를 위해 selectedShapeID는 즉시 업데이트합니다.
+                self.selectedShapeID = shapeID
+
+                // 2. 시트가 닫혀있었다면, 애니메이션 시간을 고려하여 스크롤을 지연 실행합니다.
+                if !self.isSavedSheetPresented {
+                    self.isSavedSheetPresented = true
+                    // 애니메이션 시간(response: 0.5)보다 약간 긴 딜레이를 줍니다.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        self.shapeIDToScrollTo = shapeID
+                    }
+                } else {
+                    // 시트가 이미 열려있었다면, 바로 스크롤을 실행합니다.
+                    self.shapeIDToScrollTo = shapeID
+                }
             }
         }
         
@@ -289,6 +303,7 @@ struct SettingsTabPlaceholderView: View {
 struct SavedListOverlayView: View {
     @Binding var selectedShapeID: UUID?
     @Binding var isPresented: Bool
+    @Binding var shapeIDToScrollTo: UUID?
     @StateObject private var placeShapeStore = PlaceShapeStore.shared
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging = false
@@ -331,7 +346,10 @@ struct SavedListOverlayView: View {
                         .zIndex(1)
                         
                         // 저장된 항목 목록
-                        SavedTableListView(selectedShapeID: $selectedShapeID)
+                        SavedTableListView(
+                            selectedShapeID: $selectedShapeID,
+                            shapeIDToScrollTo: $shapeIDToScrollTo
+                        )
                             .padding(.top, 8)
                             .zIndex(0)
                     }
@@ -404,7 +422,10 @@ struct SavedListOverlayView: View {
                         .zIndex(1)
                         
                         // 저장된 항목 목록
-                        SavedTableListView(selectedShapeID: $selectedShapeID)
+                        SavedTableListView(
+                            selectedShapeID: $selectedShapeID,
+                            shapeIDToScrollTo: $shapeIDToScrollTo
+                        )
                             .padding(.top, 8)
                             .zIndex(0)
                     }

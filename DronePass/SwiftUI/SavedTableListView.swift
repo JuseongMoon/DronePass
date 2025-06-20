@@ -11,10 +11,24 @@ import CoreLocation
 struct SavedTableListView: View {
     @StateObject private var placeShapeStore = PlaceShapeStore.shared
     @Binding var selectedShapeID: UUID?
+    @Binding var shapeIDToScrollTo: UUID?
     
     // MARK: - Notification Names
     static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
     static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
+    
+    // MARK: - Notification Data Structure
+    struct MoveToShapeData {
+        let coordinate: Coordinate
+        let radius: Double
+        let shapeID: UUID
+        
+        init(coordinate: Coordinate, radius: Double, shapeID: UUID) {
+            self.coordinate = coordinate
+            self.radius = radius
+            self.shapeID = shapeID
+        }
+    }
     
     // MARK: - Constants
     enum Constants {
@@ -26,24 +40,39 @@ struct SavedTableListView: View {
     }
     
     var body: some View {
-        List {
-            if placeShapeStore.shapes.isEmpty {
-                EmptyStateView()
-            } else {
-                ShapeListContent(
-                    shapes: placeShapeStore.shapes,
-                    selectedShapeID: $selectedShapeID,
-                    onDelete: deleteShape
-                )
+        ScrollViewReader { proxy in
+            List {
+                if placeShapeStore.shapes.isEmpty {
+                    EmptyStateView()
+                } else {
+                    ShapeListContent(
+                        shapes: placeShapeStore.shapes,
+                        selectedShapeID: $selectedShapeID,
+                        onDelete: deleteShape
+                    )
+                }
             }
-        }
-        .listStyle(.insetGrouped)
-        .environment(\.defaultMinListRowHeight, 10)
-        .environment(\.defaultMinListHeaderHeight, 1)
-        .padding(.top, -25)
-        .onAppear(perform: onAppear)
-        .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
-            handleShapesDidChange()
+            .listStyle(.insetGrouped)
+            .environment(\.defaultMinListRowHeight, 10)
+            .environment(\.defaultMinListHeaderHeight, 1)
+            .padding(.top, -25)
+            .onAppear(perform: onAppear)
+            .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
+                handleShapesDidChange()
+            }
+            .onChange(of: shapeIDToScrollTo) { newID in
+                guard let id = newID else { return }
+
+                // 뷰가 준비된 후 스크롤을 실행합니다.
+                withAnimation {
+                    proxy.scrollTo(id, anchor: .center)
+                }
+
+                // 트리거를 리셋하여 다음 스크롤을 준비합니다.
+                DispatchQueue.main.async {
+                    shapeIDToScrollTo = nil
+                }
+            }
         }
     }
     
@@ -99,6 +128,7 @@ private struct ShapeListContent: View {
     var body: some View {
         ForEach(shapes.sorted(by: { $0.title < $1.title })) { shape in
             ShapeListRow(shape: shape, selectedShapeID: $selectedShapeID)
+                .id(shape.id)
         }
         .onDelete(perform: onDelete)
     }
@@ -108,6 +138,7 @@ private struct ShapeListContent: View {
 private struct ShapeListRow: View {
     let shape: PlaceShape
     @Binding var selectedShapeID: UUID?
+    @State private var showingDetailView = false
     
     private var isSelected: Bool {
         selectedShapeID == shape.id
@@ -135,28 +166,31 @@ private struct ShapeListRow: View {
                 Spacer()
                 
                 // 오른쪽: 상세 정보 및 액션
-                ShapeDetailContent(shape: shape)
+                ShapeDetailContent(showingDetailView: $showingDetailView)
                     .padding(.trailing, 4)
             }
             .contentShape(Rectangle())
             .onTapGesture { handleShapeTap() }
             .frame(minHeight: 65)
         }
+        .sheet(isPresented: $showingDetailView) {
+            ShapeDetailView(shape: shape)
+        }
     }
     
     private func handleShapeTap() {
+        // 지도 이동 및 하이라이트를 위한 알림만 보냅니다.
         selectedShapeID = shape.id
+        
+        let moveData = SavedTableListView.MoveToShapeData(
+            coordinate: shape.baseCoordinate,
+            radius: shape.radius ?? 100.0,
+            shapeID: shape.id
+        )
+        
         NotificationCenter.default.post(
             name: SavedTableListView.moveToShapeNotification,
-            object: nil,
-            userInfo: [
-                "coordinate": shape.baseCoordinate,
-                "radius": shape.radius ?? 100.0
-            ]
-        )
-        NotificationCenter.default.post(
-            name: SavedTableListView.shapeOverlayTappedNotification,
-            object: shape
+            object: moveData
         )
     }
 }
@@ -199,17 +233,16 @@ private struct ShapeInfoContent: View {
     }
     
     private var dateRangeText: String {
-        "\(formattedDate(shape.startedAt)) ~ \(formattedDate(shape.expireDate ?? Date()))"
-    }
-    
-    private func formattedDate(_ date: Date) -> String {
-        SavedTableListView.Constants.dateFormatter.string(from: date)
+        let start = SavedTableListView.Constants.dateFormatter.string(from: shape.startedAt)
+        if let end = shape.expireDate {
+            return "\(start) ~ \(SavedTableListView.Constants.dateFormatter.string(from: end))"
+        }
+        return start
     }
 }
 
 private struct ShapeDetailContent: View {
-    let shape: PlaceShape
-    @State private var showingDetailView = false
+    @Binding var showingDetailView: Bool
     
     var body: some View {
         Button(action: {
@@ -221,9 +254,6 @@ private struct ShapeDetailContent: View {
         }
         .buttonStyle(PlainButtonStyle())
         .frame(width: 30, alignment: .trailing)
-        .sheet(isPresented: $showingDetailView) {
-            ShapeDetailView(shape: shape)
-        }
     }
 }
 
@@ -266,7 +296,10 @@ private struct ShapeInfo: View {
 
 // MARK: - Preview
 #Preview {
-    SavedTableListView(selectedShapeID: .constant(nil))
+    SavedTableListView(
+        selectedShapeID: .constant(nil),
+        shapeIDToScrollTo: .constant(nil)
+    )
         .onAppear {
             // Canvas에서 더미 데이터 추가
             let dummyShapes = [
@@ -322,7 +355,10 @@ private struct ShapeInfo: View {
 }
 
 #Preview("Empty State") {
-    SavedTableListView(selectedShapeID: .constant(nil))
+    SavedTableListView(
+        selectedShapeID: .constant(nil),
+        shapeIDToScrollTo: .constant(nil)
+    )
         .onAppear {
             PlaceShapeStore.shared.shapes = []
         }

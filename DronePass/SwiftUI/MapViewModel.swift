@@ -12,8 +12,20 @@ class MapViewModel: NSObject, ObservableObject {
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
 
+    // MARK: - Constants
+    private enum CameraConstants {
+        static let defaultRadius: Double = 100.0
+    }
+    
+    private enum AnimationType {
+        case none
+        case smooth
+        case immediate
+    }
+
     // NotificationCenter 상수 정의
     private static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
+    private static let moveWithoutZoomNotification = Notification.Name("MoveWithoutZoomNotification")
     private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
     private static let openSavedTabNotification = Notification.Name("OpenSavedTabNotification")
 
@@ -60,6 +72,13 @@ class MapViewModel: NSObject, ObservableObject {
         
         NotificationCenter.default.addObserver(
             self,
+            selector: #selector(handleMoveWithoutZoom(_:)),
+            name: Self.moveWithoutZoomNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
             selector: #selector(handleShapeOverlayTapped(_:)),
             name: Self.shapeOverlayTappedNotification,
             object: nil
@@ -68,6 +87,8 @@ class MapViewModel: NSObject, ObservableObject {
 
     @objc private func handleShapeOverlayTapped(_ notification: Notification) {
         guard let shape = notification.object as? PlaceShape else { return }
+        
+        // 하이라이트 상태 업데이트
         highlightedShapeID = shape.id
         reloadOverlays()
         
@@ -78,94 +99,189 @@ class MapViewModel: NSObject, ObservableObject {
         )
     }
 
+    // MARK: - 카메라 이동 처리
+    @objc private func handleMoveWithoutZoom(_ notification: Notification) {
+        guard let moveData = notification.object as? SavedTableListView.MoveToShapeData,
+              let mapView = currentMapView else { return }
+        
+        if shouldSkipMove(for: moveData) { return }
+        
+        // 하이라이트 업데이트 및 오버레이 리로드
+        highlightedShapeID = moveData.shapeID
+        reloadOverlays()
+
+        // 저장 탭 열기 알림 전송
+        NotificationCenter.default.post(
+            name: Self.openSavedTabNotification,
+            object: moveData.shapeID
+        )
+        
+        // 줌 변경 없이 좌표만 이동
+        let center = NMGLatLng(lat: moveData.coordinate.latitude, lng: moveData.coordinate.longitude)
+        let (offsetX, offsetY) = calculateDynamicOffsets()
+        let offsetCenter = offsetLatLng(center: center, mapView: mapView, offsetX: offsetX, offsetY: offsetY)
+        let cameraPosition = NMFCameraPosition(offsetCenter, zoom: mapView.cameraPosition.zoom)
+        let cameraUpdate = NMFCameraUpdate(position: cameraPosition)
+        cameraUpdate.animation = .easeIn
+        mapView.moveCamera(cameraUpdate)
+    }
+        
     @objc private func handleMoveToShape(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let coordinate = userInfo["coordinate"] as? Coordinate,
-              let radius = userInfo["radius"] as? Double,
+        guard let moveData = notification.object as? SavedTableListView.MoveToShapeData,
               let mapView = currentMapView else { return }
         
         // 이미 하이라이트된 도형이면 리턴
-        if let shapeID = highlightedShapeID,
-           let currentShape = PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeID }),
-           currentShape.baseCoordinate == coordinate {
-            return
+        if shouldSkipMove(for: moveData) { return }
+        
+        moveCameraToShape(
+            shapeID: moveData.shapeID,
+            coordinate: moveData.coordinate,
+            radius: moveData.radius,
+            mapView: mapView
+        )
+    }
+    
+    private func shouldSkipMove(for moveData: SavedTableListView.MoveToShapeData) -> Bool {
+        guard let shapeID = highlightedShapeID,
+              let currentShape = PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeID }) else {
+            return false
         }
-        
+        return currentShape.baseCoordinate == moveData.coordinate
+    }
+    
+    private func moveCameraToShape(shapeID: UUID, coordinate: Coordinate, radius: Double, mapView: NMFMapView) {
         let center = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
-        let zoom = calculateZoomLevel(for: radius)
+        let targetZoom = calculateZoomLevel(for: radius)
         
-        // 1. 첫 번째 이동: 즉시(center, zoom) (애니메이션 없이)
-        let cameraPosition1 = NMFCameraPosition(center, zoom: zoom)
+        // 1단계: 먼저 현재 위치에서 목표 줌 레벨로 조정
+        let currentCameraPosition = mapView.cameraPosition
+        let cameraPosition1 = NMFCameraPosition(currentCameraPosition.target, zoom: targetZoom)
         let cameraUpdate1 = NMFCameraUpdate(position: cameraPosition1)
-        cameraUpdate1.animation = .none
+        cameraUpdate1.animation = .easeIn
         mapView.moveCamera(cameraUpdate1)
         
-        // 2. projection이 반영된 후(0.02초 후), 오프셋 적용 위치로 이동(애니메이션 on)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+        // 2단계: 목표 좌표로 이동하면서 하이라이트 적용
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self = self else { return }
-            let offsetCenter = self.offsetLatLng(center: center, mapView: mapView, offsetY: 200)
-            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: zoom)
+
+            // 하이라이트 상태 업데이트 및 오버레이 리로드
+            self.highlightedShapeID = shapeID
+            self.reloadOverlays()
+
+            // 줌 레벨이 변경된 후, 올바른 projection으로 오프셋을 계산합니다.
+            let (offsetX, offsetY) = self.calculateDynamicOffsets()
+            let offsetCenter = self.offsetLatLng(center: center, mapView: mapView, offsetX: offsetX, offsetY: offsetY)
+
+            let cameraPosition2 = NMFCameraPosition(offsetCenter, zoom: targetZoom)
             let cameraUpdate2 = NMFCameraUpdate(position: cameraPosition2)
-            cameraUpdate2.animation = .none
+            cameraUpdate2.animation = .easeIn
             mapView.moveCamera(cameraUpdate2)
+        }
+    }
+    
+    private func calculateDynamicOffsets() -> (x: CGFloat, y: CGFloat) {
+        let screenSize = UIScreen.main.bounds.size
+        let isPad = UIDevice.current.userInterfaceIdiom == .pad
+        let isLandscape = screenSize.width > screenSize.height
+
+        if isPad && isLandscape {
+            // iPad 가로 모드
+            // Y축: 중앙 정렬 (오프셋 0)
+            // X축: 화면 너비의 15%만큼 왼쪽으로 이동 (오른쪽으로 보이게)
+            let offsetX = -screenSize.width * 0.15
+            return (x: offsetX, y: 0)
+        } else {
+            // iPhone 세로 & iPad 세로 모드
+            // Y축: 화면 높이의 23%만큼 위로 이동 (위에 27% 여백)
+            // X축: 중앙 정렬 (오프셋 0)
+            let offsetY = screenSize.height * 0.23
+            return (x: 0, y: offsetY)
         }
     }
 
     func addOverlay(for shape: PlaceShape, mapView: NMFMapView) {
         switch shape.shapeType {
         case .circle:
-            guard let radius = shape.radius else { return }
-            let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
-            let circleOverlay = NMFCircleOverlay()
-            circleOverlay.center = center
-            circleOverlay.radius = radius
-
-            let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
-            let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
-
-            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
-            circleOverlay.outlineWidth = 2
-            circleOverlay.outlineColor = mainColor
-            circleOverlay.mapView = mapView
-            overlays.append(circleOverlay)
-
-            if shape.id == highlightedShapeID {
-                let highlightOverlay = NMFCircleOverlay()
-                highlightOverlay.center = center
-                highlightOverlay.radius = radius + 2
-                highlightOverlay.fillColor = UIColor.clear
-                highlightOverlay.outlineWidth = 5
-                highlightOverlay.outlineColor = .systemRed
-                highlightOverlay.mapView = mapView
-                overlays.append(highlightOverlay)
-            }
-
-            circleOverlay.touchHandler = { [weak self] _ in
-                NotificationCenter.default.post(name: Notification.Name("ShapeOverlayTapped"), object: shape)
-                return true
-            }
+            addCircleOverlay(for: shape, mapView: mapView)
         default:
             break
         }
     }
+    
+    private func addCircleOverlay(for shape: PlaceShape, mapView: NMFMapView) {
+        guard let radius = shape.radius else { return }
+        
+        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+        let circleOverlay = createCircleOverlay(center: center, radius: radius, shape: shape)
+        circleOverlay.mapView = mapView
+        overlays.append(circleOverlay)
+        
+        // 하이라이트 오버레이 추가
+        if shape.id == highlightedShapeID {
+            let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
+            highlightOverlay.mapView = mapView
+            overlays.append(highlightOverlay)
+        }
+        
+        // 터치 핸들러 설정
+        circleOverlay.touchHandler = { _ in
+            let moveData = SavedTableListView.MoveToShapeData(
+                coordinate: shape.baseCoordinate,
+                radius: shape.radius ?? CameraConstants.defaultRadius,
+                shapeID: shape.id
+            )
+            NotificationCenter.default.post(
+                name: Self.moveWithoutZoomNotification,
+                object: moveData
+            )
+            return true
+        }
+    }
+    
+    private func createCircleOverlay(center: NMGLatLng, radius: Double, shape: PlaceShape) -> NMFCircleOverlay {
+        let circleOverlay = NMFCircleOverlay()
+        circleOverlay.center = center
+        circleOverlay.radius = radius
+        
+        let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
+        let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
+        
+        circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
+        circleOverlay.outlineWidth = 2
+        circleOverlay.outlineColor = mainColor
+        
+        return circleOverlay
+    }
+    
+    private func createHighlightOverlay(center: NMGLatLng, radius: Double) -> NMFCircleOverlay {
+        let highlightOverlay = NMFCircleOverlay()
+        highlightOverlay.center = center
+        highlightOverlay.radius = radius + 2
+        highlightOverlay.fillColor = UIColor.clear
+        highlightOverlay.outlineWidth = 5
+        highlightOverlay.outlineColor = .systemRed
+        
+        return highlightOverlay
+    }
 
     func reloadOverlays() {
-        // ⭐️ mapView 유효성 체크
-        guard let mapView = currentMapView else {
-            overlays.removeAll()
-            return
-        }
-        // ⭐️ overlays 해제 시 nil-check
-        overlays.forEach { overlay in
-            if overlay.mapView != nil {
-                overlay.mapView = nil
-            }
-        }
-        overlays.removeAll()
+        // 기존 오버레이 정리
+        clearOverlays()
+        
+        // 새로운 오버레이 추가
+        guard let mapView = currentMapView else { return }
+        
         let savedShapes = PlaceShapeStore.shared.shapes
         for shape in savedShapes {
             addOverlay(for: shape, mapView: mapView)
         }
+    }
+    
+    private func clearOverlays() {
+        overlays.forEach { overlay in
+            overlay.mapView = nil
+        }
+        overlays.removeAll()
     }
     
     func calculateZoomLevel(for radius: Double) -> Double {
@@ -184,9 +300,9 @@ class MapViewModel: NSObject, ObservableObject {
         return maxZoom - (normalizedRadius * zoomRange / radiusRange)
     }
     
-    func offsetLatLng(center: NMGLatLng, mapView: NMFMapView, offsetY: CGFloat) -> NMGLatLng {
+    func offsetLatLng(center: NMGLatLng, mapView: NMFMapView, offsetX: CGFloat, offsetY: CGFloat) -> NMGLatLng {
         let point = mapView.projection.point(from: center)
-        let offsetPoint = CGPoint(x: point.x, y: point.y + offsetY)
+        let offsetPoint = CGPoint(x: point.x + offsetX, y: point.y + offsetY)
         return mapView.projection.latlng(from: offsetPoint)
     }
 }
@@ -215,4 +331,3 @@ extension MapViewModel: CLLocationManagerDelegate {
         print("Location manager failed with error: \(error.localizedDescription)")
     }
 } 
-

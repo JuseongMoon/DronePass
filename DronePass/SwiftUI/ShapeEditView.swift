@@ -118,6 +118,23 @@ struct ShapeEditView: View {
     private let lastStartDateKey = "lastStartDate"
     private let lastEndDateKey = "lastEndDate"
     
+    init(coordinate: Coordinate, onAdd: ((PlaceShape) -> Void)? = nil, originalShape: PlaceShape? = nil) {
+        self._coordinate = State(initialValue: coordinate)
+        self.onAdd = onAdd
+        self.originalShape = originalShape
+        
+        // 초기값 설정
+        if let shape = originalShape {
+            self._title = State(initialValue: shape.title)
+            self._address = State(initialValue: shape.address ?? "")
+            self._radius = State(initialValue: String(format: "%.0f", shape.radius ?? 200))
+            self._memo = State(initialValue: shape.memo ?? "")
+            self._startDate = State(initialValue: shape.startedAt)
+            self._endDate = State(initialValue: shape.expireDate ?? Date())
+            self._coordinateText = State(initialValue: shape.baseCoordinate.formattedCoordinate)
+        }
+    }
+    
     var body: some View {
         NavigationView {
             Form {
@@ -277,20 +294,19 @@ struct ShapeEditView: View {
                 .presentationDetents([.fraction(0.85)])
                 .presentationContentInteraction(.scrolls)
             }
+            .onAppear {
+                setupInitialValues()
+            }
         }
     }
     
     private func setupInitialValues() {
         if let shape = originalShape {
-            title = shape.title
-            address = shape.address ?? ""
-            radius = String(format: "%.0f", shape.radius ?? 200)
-            memo = shape.memo ?? ""
-            startDate = shape.startedAt
-            endDate = shape.expireDate ?? Date()
-            coordinateText = shape.baseCoordinate.formattedCoordinate
+            // 기존 도형 수정 시에는 이미 init에서 설정된 값들을 유지
+            // 추가 설정이 필요한 경우에만 여기서 처리
+            isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
         } else {
-            // 이전 설정값 불러오기
+            // 새로운 도형 생성 시에만 기본값 설정
             isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
             if let lastStart = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
                 startDate = lastStart
