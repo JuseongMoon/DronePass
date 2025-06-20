@@ -105,10 +105,10 @@ private struct EmptyStateView: View {
             Image(systemName: "tray")
                 .font(.system(size: 48))
                 .foregroundColor(.secondary)
-            Text("저장된 항목이 없습니다.")
+            Text("저장된 도형이 없습니다.")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text("지도에서 + 버튼을 눌러 새로운 도형을 추가해보세요.")
+            Text("지도에서 + 버튼을 누르거나 지도를 길게 눌러서 새로운 도형을 추가해보세요.")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -171,7 +171,7 @@ private struct ShapeListRow: View {
             }
             .contentShape(Rectangle())
             .onTapGesture { handleShapeTap() }
-            .frame(minHeight: 65)
+            .frame(minHeight: 55)
         }
         .sheet(isPresented: $showingDetailView) {
             ShapeDetailView(shape: shape)

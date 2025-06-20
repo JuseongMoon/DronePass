@@ -112,6 +112,17 @@ struct MainTabView: View {
         .onDisappear {
             removeNotifications()
         }
+        .onChange(of: isSavedSheetPresented) { isPresented in
+            if !isPresented {
+                // 하이라이트 해제 알림
+                NotificationCenter.default.post(
+                    name: Notification.Name("ClearMapHighlightNotification"),
+                    object: nil
+                )
+                // 목록 선택 상태도 해제
+                selectedShapeID = nil
+            }
+        }
     }
     
     // 탭 선택 상태 계산 함수
@@ -163,6 +174,11 @@ struct MainTabView: View {
             object: nil,
             queue: .main
         ) { notification in
+            // 설정창이 열려있으면 닫아줍니다.
+            if self.isSettingsSheetPresented {
+                self.isSettingsSheetPresented = false
+            }
+            
             if let shapeID = notification.object as? UUID {
                 // 1. 하이라이트를 위해 selectedShapeID는 즉시 업데이트합니다.
                 self.selectedShapeID = shapeID
@@ -493,24 +509,23 @@ struct SettingsOverlayView: View {
                             // 헤더
                             HStack {
                                 Text("설정")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
+                                    .font(.title)
+                                    .fontWeight(.bold)
                                 
                                 Spacer()
                             }
                             .padding(.horizontal)
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 4)
                         }
                         .background(Color(UIColor.systemBackground))
                         .zIndex(1)
                         
                         // 설정 내용
-                        SettingsContentView(
+                        SettingView(
                             viewModel: viewModel,
                             showColorPicker: $showColorPicker
                         )
-                            .padding(.top, 8)
-                            .zIndex(0)
+                        .zIndex(0)
                     }
                     .frame(width: min(geometry.size.width * 0.4, 400))
                     .frame(maxHeight: geometry.size.height * 0.75)
@@ -563,24 +578,23 @@ struct SettingsOverlayView: View {
                             // 헤더
                             HStack {
                                 Text("설정")
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
+                                    .font(.title)
+                                    .fontWeight(.bold)
                                 
                                 Spacer()
                             }
                             .padding(.horizontal)
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 4)
                         }
                         .background(Color(UIColor.systemBackground))
                         .zIndex(1)
                         
                         // 설정 내용
-                        SettingsContentView(
+                        SettingView(
                             viewModel: viewModel,
                             showColorPicker: $showColorPicker
                         )
-                            .padding(.top, 8)
-                            .zIndex(0)
+                        .zIndex(0)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: min(geometry.size.height * 0.5, 500))
@@ -631,146 +645,11 @@ struct SettingsOverlayView: View {
             )
             .presentationDragIndicator(.visible)
         }
-    }
-}
-
-// MARK: - Settings Content View
-struct SettingsContentView: View {
-    @ObservedObject var viewModel: SettingViewModel
-    @Binding var showColorPicker: Bool
-    
-    var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
-                // 현 위치 기반 정보 Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("현 위치 기반 정보")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("일출: \(viewModel.sunriseTime)")
-                            Spacer()
-                            Text(viewModel.sunriseSuffix)
-                                .foregroundColor(viewModel.sunriseSuffixColor)
-                                .font(.caption)
-                        }
-                        HStack {
-                            Text("일몰: \(viewModel.sunsetTime)")
-                            Spacer()
-                            Text(viewModel.sunsetSuffix)
-                                .foregroundColor(viewModel.sunsetSuffixColor)
-                                .font(.caption)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                
-                // 알림 설정 Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("알림 설정")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    
-                    VStack(spacing: 12) {
-                        Toggle(isOn: $viewModel.isEndDateAlarmEnabled) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("종료일 알림")
-                                Text("도형 종료일 7일전 알림을 받습니다.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .onChange(of: viewModel.isEndDateAlarmEnabled) { value in
-                            viewModel.setEndDateAlarmEnabled(value)
-                        }
-
-                        Toggle(isOn: $viewModel.isSunriseSunsetAlarmEnabled) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("일출/일몰 알림")
-                                Text("일출/일몰 30분전, 10분전 알림을 받습니다.")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                        .onChange(of: viewModel.isSunriseSunsetAlarmEnabled) { value in
-                            viewModel.setSunriseSunsetAlarmEnabled(value)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                
-                // 일반 설정 Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("일반 설정")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    
-                    VStack(spacing: 12) {
-                        Button(action: {
-                            showColorPicker = true
-                        }) {
-                            HStack {
-                                Text("도형 색 바꾸기")
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
-                                    .font(.caption)
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                        
-                        Button(role: .destructive) {
-                            viewModel.showDeleteExpiredShapesAlert = true
-                        } label: {
-                            HStack {
-                                Text("만료된 도형 전부 삭제")
-                                Spacer()
-                            }
-                            .padding()
-                            .background(Color(.systemGray6))
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
-                
-                // 기타 설정 Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("기타 설정")
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.secondary)
-                    
-                    Button {
-                        viewModel.showAppInfoAlert = true
-                    } label: {
-                        HStack {
-                            Text("앱 정보")
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-            .padding()
+        .sheet(isPresented: $viewModel.showPatchNotesSheet) {
+            PatchNotesView(
+                patchNotes: viewModel.patchNotes,
+                isLoading: viewModel.isLoadingPatchNotes
+            )
         }
         .alert("만료된 도형을 모두 삭제할까요?", isPresented: $viewModel.showDeleteExpiredShapesAlert) {
             Button("삭제", role: .destructive) {
@@ -780,10 +659,8 @@ struct SettingsContentView: View {
         } message: {
             Text("종료일이 지난 도형을 모두 삭제합니다. 이 작업은 되돌릴 수 없습니다.")
         }
-        .alert("앱 정보", isPresented: $viewModel.showAppInfoAlert) {
-            Button("확인", role: .cancel) {}
-        } message: {
-            Text(viewModel.appInfoText)
+        .sheet(isPresented: $viewModel.showAppInfoSheet) {
+            AppInfoView()
         }
         .onAppear {
             viewModel.requestLocation()

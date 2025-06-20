@@ -96,7 +96,7 @@ struct ShapeEditView: View {
     @State private var showingCoordinateInput = false
     @State private var selectedDetent: PresentationDetent = .large
     
-    @State var coordinate: Coordinate
+    @State var coordinate: Coordinate?
     var onAdd: ((PlaceShape) -> Void)?
     var originalShape: PlaceShape?
     
@@ -118,7 +118,7 @@ struct ShapeEditView: View {
     private let lastStartDateKey = "lastStartDate"
     private let lastEndDateKey = "lastEndDate"
     
-    init(coordinate: Coordinate, onAdd: ((PlaceShape) -> Void)? = nil, originalShape: PlaceShape? = nil) {
+    init(coordinate: Coordinate?, onAdd: ((PlaceShape) -> Void)? = nil, originalShape: PlaceShape? = nil) {
         self._coordinate = State(initialValue: coordinate)
         self.onAdd = onAdd
         self.originalShape = originalShape
@@ -131,7 +131,25 @@ struct ShapeEditView: View {
             self._memo = State(initialValue: shape.memo ?? "")
             self._startDate = State(initialValue: shape.startedAt)
             self._endDate = State(initialValue: shape.expireDate ?? Date())
-            self._coordinateText = State(initialValue: shape.baseCoordinate.formattedCoordinate)
+            
+            // coordinate가 nil이면 빈 문자열로 설정, 아니면 shape의 좌표 사용
+            if let coord = coordinate {
+                self._coordinateText = State(initialValue: coord.formattedCoordinate)
+            } else {
+                self._coordinateText = State(initialValue: "")
+            }
+        } else {
+            // originalShape이 nil인 경우 (새로운 생성)
+            if let coord = coordinate {
+                self._coordinateText = State(initialValue: coord.formattedCoordinate)
+            } else {
+                self._coordinateText = State(initialValue: "")
+            }
+        }
+        
+        // long press로 진입 시 주소만 업데이트
+        if originalShape?.title.isEmpty ?? false { // nil coalescing
+            self._address = State(initialValue: originalShape?.address ?? "")
         }
     }
     
@@ -142,6 +160,7 @@ struct ShapeEditView: View {
                     // 제목
                     HStack {
                         Text("제목")
+                            .bold()
                         TextField("제목을 입력하세요", text: $title)
                             .multilineTextAlignment(.trailing)
                     }
@@ -151,6 +170,7 @@ struct ShapeEditView: View {
                     Button(action: { showingCoordinateInput = true }) {
                         HStack {
                             Text("좌표")
+                                .bold()
                                 .foregroundColor(.primary)
                             Spacer()
                             Text(coordinateText.isEmpty ? "터치해서 좌표를 입력하세요" : coordinateText)
@@ -168,11 +188,14 @@ struct ShapeEditView: View {
                     Button(action: { showingAddressSearch = true }) {
                         HStack {
                             Text("주소")
+                                .bold()
                                 .foregroundColor(.primary)
                             Spacer()
                             Text(address.isEmpty ? "터치해서 주소를 검색하세요" : address)
                                 .foregroundColor(address.isEmpty ? .gray : .primary)
                                 .multilineTextAlignment(.trailing)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.gray)
                                 .font(.footnote)
@@ -184,6 +207,7 @@ struct ShapeEditView: View {
                     // 반경
                     HStack {
                         Text("반경(m)")
+                            .bold()
                         TextField("미터 단위로 입력해주세요", text: $radius)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
@@ -200,10 +224,14 @@ struct ShapeEditView: View {
                             }
                         }
                         .frame(height: 30)
+                        .bold()
+
                     
                     // 종료일
                     DatePicker("종료일", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
                         .frame(height: 30)
+                        .bold()
+
                     
                     // 날짜 설정
                     Toggle("일단위 입력", isOn: $isDateOnly)
@@ -212,14 +240,17 @@ struct ShapeEditView: View {
                             updateDates()
                         }
                         .frame(height: 30)
+                        .bold()
+
                 }
                 
                 Section {
                     // 메모
                     VStack(alignment: .leading) {
                         Text("메모")
+                            .bold()
                         TextEditor(text: $memo)
-                            .frame(minHeight: 100)
+                            .frame(minHeight: 170)
                             .overlay(
                                 Group {
                                     if memo.isEmpty {
@@ -251,6 +282,9 @@ struct ShapeEditView: View {
                     }
                 }
             }
+            .onTapGesture {
+                hideKeyboard()
+            }
             .alert("수정 중인 정보가 있습니다", isPresented: $showingCancelAlert) {
                 Button("취소", role: .cancel) { }
                 Button("닫기", role: .destructive) {
@@ -272,7 +306,7 @@ struct ShapeEditView: View {
                             selectedLatitude = coordinate.latitude
                             selectedLongitude = coordinate.longitude
                             self.coordinate = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
-                            coordinateText = self.coordinate.formattedCoordinate
+                            coordinateText = self.coordinate?.formattedCoordinate ?? ""
                         }
                     }
                 )
@@ -300,13 +334,16 @@ struct ShapeEditView: View {
         }
     }
     
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+    
     private func setupInitialValues() {
-        if let shape = originalShape {
-            // 기존 도형 수정 시에는 이미 init에서 설정된 값들을 유지
-            // 추가 설정이 필요한 경우에만 여기서 처리
+        if let shape = originalShape, !shape.title.isEmpty {
+            // 기존 도형 '수정' 시에만 날짜 등을 설정
             isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
         } else {
-            // 새로운 도형 생성 시에만 기본값 설정
+            // '새로운' 도형 생성 시 (long press 포함)
             isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
             if let lastStart = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
                 startDate = lastStart
@@ -315,6 +352,12 @@ struct ShapeEditView: View {
                 endDate = lastEnd
             }
         }
+        
+        // 공통 좌표 설정 - coordinate가 nil이면 빈 문자열 유지
+        if let coord = coordinate {
+            self.coordinateText = coord.formattedCoordinate
+        }
+        // coordinate가 nil이면 coordinateText는 빈 문자열로 유지 (이미 초기화에서 설정됨)
     }
     
     private func updateDates() {
@@ -349,8 +392,18 @@ struct ShapeEditView: View {
     
     private func saveShape() {
         // 좌표와 주소가 모두 비어있는지 확인
-        if coordinateText.isEmpty && address.isEmpty {
+        if coordinate == nil && address.isEmpty {
             alertMessage = "좌표나 주소를 반드시 입력해주세요!"
+            showingAlert = true
+            return
+        }
+        
+        // 주소가 비어있으면 nil로 처리, 아니면 그대로 저장 (실패 메시지도 포함)
+        let addressToSave = address.isEmpty ? "해당 위치의 주소가 존재하지 않습니다" : address
+        
+        // 좌표가 nil이면 저장하지 않음 (이론상 위에서 걸러짐)
+        guard let finalCoordinate = coordinate else {
+            alertMessage = "좌표가 설정되지 않았습니다."
             showingAlert = true
             return
         }
@@ -359,10 +412,10 @@ struct ShapeEditView: View {
             id: originalShape?.id ?? UUID(),
             title: title.isEmpty ? "새 도형" : title,
             shapeType: .circle,
-            baseCoordinate: coordinate,
+            baseCoordinate: finalCoordinate,
             radius: Double(radius) ?? 200,
             memo: memo.isEmpty ? nil : memo,
-            address: address.isEmpty ? nil : address,
+            address: addressToSave,
             expireDate: endDate,
             startedAt: startDate,
             color: ColorManager.shared.defaultColor.rawValue
@@ -372,12 +425,11 @@ struct ShapeEditView: View {
         UserDefaults.standard.set(startDate, forKey: lastStartDateKey)
         UserDefaults.standard.set(endDate, forKey: lastEndDateKey)
         
-        if originalShape != nil {
-            // 기존 도형 수정
-            store.updateShape(newShape)
-        } else {
-            // 새로운 도형 추가
+        // originalShape의 title이 비어있으면 '새 도형 추가', 아니면 '기존 도형 수정'
+        if originalShape?.title.isEmpty ?? true {
             store.addShape(newShape)
+        } else {
+            store.updateShape(newShape)
         }
         
         onAdd?(newShape)

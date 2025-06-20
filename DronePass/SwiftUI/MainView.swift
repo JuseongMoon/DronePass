@@ -83,14 +83,27 @@ extension MainViewCoordinator: UIGestureRecognizerDelegate {
 struct MainView: View {
     @StateObject var viewModel = MapViewModel()
     @State var mapView: NMFMapView?
-    @State var selectedCoordinate: Coordinate?
-    @State private var coordinator: MainViewCoordinator?
+    
+    // 새 도형 만들기 관련 상태
+    @State private var newShapeCoordinate: Coordinate?
+    @State private var newShapeAddress: String?
+    @State private var showShapeEditView = false
+    
+    // 알림 관련 상태
+    @State private var showNewShapeConfirmAlert = false
+    @State private var showGeocodingFailedAlert = false
 
     var body: some View {
         ZStack {
-            NaverMapView(mapView: $mapView, onMapViewCreated: { mapView in
-                setupMapView(mapView)
-            })
+            NaverMapView(
+                mapView: $mapView,
+                onMapViewCreated: { mapView in
+                    setupMapView(mapView)
+                },
+                onLongPress: { coordinate in
+                    handleLongPress(at: coordinate)
+                }
+            )
             .edgesIgnoringSafeArea(.all)
 
             // 오른쪽 하단 플로팅 플러스 버튼
@@ -98,16 +111,17 @@ struct MainView: View {
                 Spacer()
                 HStack {
                     Spacer()
-                    // 플로팅 버튼을 누르면 ShapeEditView가 모달로 나타납니다 (selectedCoordinate로 제어)
+                    // 플로팅 버튼을 누르면 ShapeEditView가 모달로 나타납니다.
                     Button(action: {
                         let center: NMGLatLng
                         if let mapView = mapView {
                             center = mapView.cameraPosition.target
                         } else {
-                            // mapView가 아직 nil이면 서울 시청 좌표로 대체
                             center = NMGLatLng(lat: 37.5665, lng: 126.9780)
                         }
-                        selectedCoordinate = Coordinate(latitude: center.lat, longitude: center.lng)
+                        self.newShapeCoordinate = nil
+                        self.newShapeAddress = nil // 주소는 nil로 설정
+                        self.showShapeEditView = true
                     }) {
                         Image(systemName: "plus")
                             .font(.system(size: 28, weight: .none))
@@ -123,15 +137,7 @@ struct MainView: View {
                 }
             }
         }
-        
-        
         .onAppear {
-            coordinator = MainViewCoordinator { coordinate in
-                // ⭐️ 상태변이 반드시 defer
-                DispatchQueue.main.async {
-                    selectedCoordinate = coordinate
-                }
-            }
             setupNotifications()
         }
         .onDisappear {
@@ -139,21 +145,74 @@ struct MainView: View {
             viewModel.currentMapView = nil
             viewModel.overlays.removeAll()
         }
-        .sheet(item: $selectedCoordinate, onDismiss: {
-            selectedCoordinate = nil
-        }) { coordinate in
-                ShapeEditView(
-                    coordinate: coordinate,
+        .sheet(isPresented: $showShapeEditView) {
+            ShapeEditView(
+                coordinate: newShapeCoordinate,
                 onAdd: { _ in
-                        viewModel.reloadOverlays()
-                        DispatchQueue.main.async {
-                        selectedCoordinate = nil
-                        }
-                    }
+                    viewModel.reloadOverlays()
+                    showShapeEditView = false
+                    clearNewShapeData()
+                },
+                originalShape: PlaceShape(
+                    id: UUID(),
+                    title: "",
+                    shapeType: .circle,
+                    baseCoordinate: newShapeCoordinate ?? Coordinate(latitude: 0, longitude: 0), // 임시 좌표
+                    radius: nil,
+                    memo: nil,
+                    address: newShapeAddress,
+                    expireDate: nil,
+                    startedAt: Date(),
+                    color: ColorManager.shared.defaultColor.rawValue
                 )
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+            )
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
         }
+        .alert("새 도형 만들기", isPresented: $showNewShapeConfirmAlert) {
+            Button("아니오", role: .cancel) { clearNewShapeData() }
+            Button("예") {
+                showShapeEditView = true
+            }
+        } message: {
+            Text("해당 위치에 새 도형을 만드시겠습니까?")
+        }
+        .alert("주소 검색 실패", isPresented: $showGeocodingFailedAlert) {
+            Button("아니오", role: .cancel) { clearNewShapeData() }
+            Button("예") {
+                showShapeEditView = true
+            }
+        } message: {
+            Text("선택한 위치의 주소를 가져올 수 없습니다. 좌표로만 도형을 만드시겠습니까?")
+        }
+    }
+    
+    private func handleLongPress(at location: CLLocationCoordinate2D) {
+        Task {
+            do {
+                let address = try await NaverGeocodingService.shared.reverseGeocode(
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                )
+                // 성공 시, 좌표와 주소를 저장하고 확인창을 띄웁니다.
+                self.newShapeCoordinate = Coordinate(latitude: location.latitude, longitude: location.longitude)
+                self.newShapeAddress = address
+                self.showNewShapeConfirmAlert = true
+            } catch {
+                // 실패 시, 안내 문구를 주소로 설정하고 실패 알림을 띄웁니다.
+                self.newShapeCoordinate = Coordinate(latitude: location.latitude, longitude: location.longitude)
+                self.newShapeAddress = "해당 위치의 주소가 존재하지 않습니다"
+                self.showGeocodingFailedAlert = true
+            }
+        }
+    }
+    
+    private func clearNewShapeData() {
+        newShapeCoordinate = nil
+        newShapeAddress = nil
+        showNewShapeConfirmAlert = false
+        showGeocodingFailedAlert = false
+        showShapeEditView = false
     }
 
     private func setupMapView(_ mapView: NMFMapView) {
@@ -192,4 +251,3 @@ struct MainView: View {
 #Preview {
     MainView()
 }
-

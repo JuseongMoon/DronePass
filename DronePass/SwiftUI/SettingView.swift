@@ -10,25 +10,10 @@ import CoreLocation
 import Solar
 
 struct SettingView: View {
-    @StateObject private var viewModel = SettingViewModel()
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    @Environment(\.dismiss) private var dismiss
-    
-    // MainTabView와 연동을 위한 상태
-    @State private var shouldOpenSavedTab = false
-    
-    init() {
-        // iOS 기본 설정 스타일 적용
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithDefaultBackground()
-        
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().compactAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-    }
+    @ObservedObject var viewModel: SettingViewModel
+    @Binding var showColorPicker: Bool
 
     var body: some View {
-        NavigationView {
             List {
                 // 현 위치 기반 정보 Section
                 Section {
@@ -52,35 +37,28 @@ struct SettingView: View {
                     Text("현 위치 기반 정보")
                 }
                 
-                // 빠른 액세스 Section
+            // 알림 설정 Section
                 Section {
-                    Button(action: {
-                        // 설정창을 닫고 저장 탭 열기
-                        shouldOpenSavedTab = true
-                    }) {
-                        HStack {
-                            Image(systemName: "tray.full")
-                                .foregroundColor(.blue)
-                            Text("저장 목록 보기")
-                            Spacer()
-                            Image(systemName: "chevron.right")
+                Toggle(isOn: $viewModel.isEndDateAlarmEnabled) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("도형 만료일 알림")
+                        Text("도형 종료일 7일전 알림을 받습니다.")
+                            .font(.caption)
                                 .foregroundColor(.secondary)
-                                .font(.caption)
-                        }
                     }
-                    .buttonStyle(PlainButtonStyle())
-                } header: {
-                    Text("빠른 액세스")
                 }
-                
-                // 알림 설정 Section
-                Section {
-                    Toggle("도형 만료일 알림", isOn: $viewModel.isEndDateAlarmEnabled)
                         .onChange(of: viewModel.isEndDateAlarmEnabled) { newValue in
                             SettingManager.shared.isEndDateAlarmEnabled = newValue
                         }
                     
-                    Toggle("일출/일몰 알림", isOn: $viewModel.isSunriseSunsetAlarmEnabled)
+                Toggle(isOn: $viewModel.isSunriseSunsetAlarmEnabled) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("일출/일몰 알림")
+                        Text("일출/일몰 30분전, 10분전 알림을 받습니다.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
                         .onChange(of: viewModel.isSunriseSunsetAlarmEnabled) { newValue in
                             SettingManager.shared.isSunriseSunsetAlarmEnabled = newValue
                         }
@@ -90,14 +68,9 @@ struct SettingView: View {
 
                 // 일반 설정 Section
                 Section {
-                    NavigationLink {
-                        ColorPickerView(
-                            selected: ColorManager.shared.defaultColor,
-                            onColorSelected: { color in
-                                // 선택된 색상 처리
-                            }
-                        )
-                    } label: {
+                Button(action: {
+                    showColorPicker = true
+                }) {
                         Text("도형 색 바꾸기")
                     }
                     
@@ -113,50 +86,35 @@ struct SettingView: View {
                 // 기타 설정 Section
                 Section {
                     Button {
-                        viewModel.showAppInfoAlert = true
+                        viewModel.showAppInfoSheet = true
                     } label: {
                         Text("앱 정보")
                     }
-                } header: {
-                    Text("기타 설정")
+                
+                Button {
+                    viewModel.fetchAndShowPatchNotes()
+                } label: {
+                    Text("패치노트")
                 }
-            }
-            .navigationTitle("설정")
-            .navigationBarTitleDisplayMode(.large)
-            .alert("만료된 도형을 모두 삭제할까요?", isPresented: $viewModel.showDeleteExpiredShapesAlert) {
-                Button("삭제", role: .destructive) {
-                    viewModel.deleteExpiredShapes()
-                }
-                Button("취소", role: .cancel) {}
-            } message: {
-                Text("종료일이 지난 도형을 모두 삭제합니다. 이 작업은 되돌릴 수 없습니다.")
-            }
-            .alert("앱 정보", isPresented: $viewModel.showAppInfoAlert) {
-                Button("확인", role: .cancel) {}
-            } message: {
-                Text(viewModel.appInfoText)
-            }
-            .onAppear {
-                viewModel.requestLocation()
-            }
-            .onChange(of: shouldOpenSavedTab) { shouldOpen in
-                if shouldOpen {
-                    // MainTabView에 저장 탭 열기 알림 전송
-                    NotificationCenter.default.post(
-                        name: Notification.Name("OpenSavedTabFromSettings"),
-                        object: nil
-                    )
-                    shouldOpenSavedTab = false
-                }
-            }
-            
-            if horizontalSizeClass == .regular {
-                Text("설정 항목을 선택해주세요")
-                    .foregroundColor(.secondary)
+            } header: {
+                Text("기타")
             }
         }
-        .applyNavigationViewStyle(horizontalSizeClass)
     }
+}
+
+struct PatchNote: Identifiable, Hashable {
+    let id = UUID()
+    let version: String
+    let date: String
+    let title: String
+    let features: [Feature]
+}
+
+struct Feature: Identifiable, Hashable {
+    let id = UUID()
+    let title: String
+    var description: String?
 }
 
 // MARK: - ViewModel
@@ -174,7 +132,10 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var selectedColor: Color = .blue
 
     @Published var showDeleteExpiredShapesAlert = false
-    @Published var showAppInfoAlert = false
+    @Published var showAppInfoSheet = false
+    @Published var showPatchNotesSheet = false
+    @Published var patchNotes: [PatchNote] = []
+    @Published var isLoadingPatchNotes = false
 
     var appInfoText: String {
         let features = AppInfo.Description.features.map { "• \($0)" }.joined(separator: "\n")
@@ -196,6 +157,106 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     override init() {
         super.init()
         locationManager.delegate = self
+    }
+
+    func fetchAndShowPatchNotes() {
+        // 데이터가 이미 로드되었다면 다시 로드하지 않고 시트만 보여줍니다.
+        if !patchNotes.isEmpty {
+            showPatchNotesSheet = true
+            return
+        }
+        
+        Task {
+            await fetchPatchNotes()
+            await MainActor.run {
+                self.showPatchNotesSheet = true
+            }
+        }
+    }
+    
+    private func fetchPatchNotes() async {
+        await MainActor.run {
+            isLoadingPatchNotes = true
+        }
+
+        defer {
+            Task {
+                await MainActor.run {
+                    isLoadingPatchNotes = false
+                }
+            }
+        }
+
+        guard let url = URL(string: "https://sciencefiction-homepage-kr.s3.ap-northeast-2.amazonaws.com/dronepass/version-patches.txt") else {
+            print("Invalid URL")
+            return
+        }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let content = String(data: data, encoding: .utf8) else {
+                print("Failed to decode data")
+                return
+            }
+            
+            let parsedNotes = parsePatchNotes(content: content)
+            await MainActor.run {
+                self.patchNotes = parsedNotes
+            }
+        } catch {
+            print("Failed to fetch patch notes: \(error)")
+        }
+    }
+
+    private func parsePatchNotes(content: String) -> [PatchNote] {
+        var allNotes: [PatchNote] = []
+        
+        let notesTextBlocks = content.components(separatedBy: "\nv")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .map { text in text.hasPrefix("v") ? text : "v" + text }
+
+        for noteText in notesTextBlocks {
+            let lines = noteText.components(separatedBy: .newlines)
+            guard let headerLine = lines.first else { continue }
+
+            let headerContentSplit = headerLine.components(separatedBy: ": ")
+            guard headerContentSplit.count > 1 else { continue }
+            
+            let header = headerContentSplit.first ?? ""
+            let title = headerContentSplit.dropFirst().joined(separator: ": ")
+            
+            let versionDateSplit = header.components(separatedBy: CharacterSet(charactersIn: "()"))
+            let version = versionDateSplit.first?.trimmingCharacters(in: .whitespaces) ?? "N/A"
+            let date = versionDateSplit.count > 1 ? versionDateSplit[1] : "N/A"
+
+            var currentNoteFeatures: [Feature] = []
+            let featureLines = lines.dropFirst()
+
+            for line in featureLines {
+                let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+                if trimmedLine.isEmpty { continue }
+
+                if line.hasPrefix("    -") { // Indented: Description
+                    if !currentNoteFeatures.isEmpty {
+                        let descriptionText = String(trimmedLine.dropFirst().trimmingCharacters(in: .whitespaces))
+                        let lastIndex = currentNoteFeatures.count - 1
+                        
+                        // Append to existing description or create a new one
+                        if let existingDescription = currentNoteFeatures[lastIndex].description {
+                            currentNoteFeatures[lastIndex].description = existingDescription + "\n" + descriptionText
+                        } else {
+                            currentNoteFeatures[lastIndex].description = descriptionText
+                        }
+                    }
+                } else if trimmedLine.hasPrefix("-") { // Not indented: New Feature
+                    let featureTitle = String(trimmedLine.dropFirst().trimmingCharacters(in: .whitespaces))
+                    currentNoteFeatures.append(Feature(title: featureTitle, description: nil))
+                }
+            }
+            allNotes.append(PatchNote(version: version, date: date, title: title, features: currentNoteFeatures))
+        }
+        return allNotes
     }
 
     func requestLocation() {
@@ -347,5 +408,5 @@ extension View {
 }
 
 #Preview {
-    SettingView()
+    SettingView(viewModel: SettingViewModel(), showColorPicker: .constant(false))
 }

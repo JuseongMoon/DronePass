@@ -89,32 +89,35 @@ struct SearchingAddressView: View {
                     ErrorView(message: errorMessage)
                 } else if viewModel.addresses.isEmpty {
                     // 검색 결과가 없을 때 안내 메시지 표시
-                    VStack(spacing: 16) {
-       
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("지번 주소나 건물명으로는 검색이 어렵습니다")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            
-                            Text("올바른 검색 예시:")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            
-                            Group {
-                                Text("• 서초대로78길 24")
-                                Text("• 테헤란로 322")
-                                Text("• 종로 1")
-                                Text("• 세종대로 110")
-                            }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("지번 주소나 건물명으로는 검색이 어렵습니다")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        Text("올바른 검색 예시:")
                             .font(.caption)
                             .foregroundColor(.secondary)
+                        
+                        Group {
+                            Text("• 서초대로78길 24")
+                            Text("• 테헤란로 322")
+                            Text("• 종로 1")
+                            Text("• 세종대로 110")
                         }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(20)
-                        .padding(.horizontal)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(maxWidth: 500) // Adjust max width as desired
+                    .background(Color(.systemGray6))
+                    .cornerRadius(20)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.horizontal)
+                    .padding(.top)
+                    
+                    
+                    Spacer()
                 } else {
                     AddressListView(
                         addresses: viewModel.addresses,

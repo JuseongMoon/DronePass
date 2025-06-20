@@ -28,6 +28,7 @@ class MapViewModel: NSObject, ObservableObject {
     private static let moveWithoutZoomNotification = Notification.Name("MoveWithoutZoomNotification")
     private static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
     private static let openSavedTabNotification = Notification.Name("OpenSavedTabNotification")
+    private static let clearMapHighlightNotification = Notification.Name("ClearMapHighlightNotification")
 
     override init() {
         super.init()
@@ -83,6 +84,13 @@ class MapViewModel: NSObject, ObservableObject {
             name: Self.shapeOverlayTappedNotification,
             object: nil
         )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleClearMapHighlight),
+            name: Self.clearMapHighlightNotification,
+            object: nil
+        )
     }
 
     @objc private func handleShapeOverlayTapped(_ notification: Notification) {
@@ -97,6 +105,13 @@ class MapViewModel: NSObject, ObservableObject {
             name: Self.openSavedTabNotification,
             object: shape.id
         )
+    }
+
+    @objc private func handleClearMapHighlight() {
+        if highlightedShapeID != nil {
+            highlightedShapeID = nil
+            reloadOverlays()
+        }
     }
 
     // MARK: - 카메라 이동 처리
@@ -209,9 +224,9 @@ class MapViewModel: NSObject, ObservableObject {
     }
     
     private func addCircleOverlay(for shape: PlaceShape, mapView: NMFMapView) {
-        guard let radius = shape.radius else { return }
+            guard let radius = shape.radius else { return }
         
-        let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+            let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
         let circleOverlay = createCircleOverlay(center: center, radius: radius, shape: shape)
         circleOverlay.mapView = mapView
         overlays.append(circleOverlay)
@@ -239,27 +254,27 @@ class MapViewModel: NSObject, ObservableObject {
     }
     
     private func createCircleOverlay(center: NMGLatLng, radius: Double, shape: PlaceShape) -> NMFCircleOverlay {
-        let circleOverlay = NMFCircleOverlay()
-        circleOverlay.center = center
-        circleOverlay.radius = radius
-        
-        let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
-        let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
-        
-        circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
-        circleOverlay.outlineWidth = 2
-        circleOverlay.outlineColor = mainColor
-        
+            let circleOverlay = NMFCircleOverlay()
+            circleOverlay.center = center
+            circleOverlay.radius = radius
+
+            let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
+            let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
+
+            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
+            circleOverlay.outlineWidth = 2
+            circleOverlay.outlineColor = mainColor
+
         return circleOverlay
     }
-    
+
     private func createHighlightOverlay(center: NMGLatLng, radius: Double) -> NMFCircleOverlay {
-        let highlightOverlay = NMFCircleOverlay()
-        highlightOverlay.center = center
-        highlightOverlay.radius = radius + 2
-        highlightOverlay.fillColor = UIColor.clear
-        highlightOverlay.outlineWidth = 5
-        highlightOverlay.outlineColor = .systemRed
+                let highlightOverlay = NMFCircleOverlay()
+                highlightOverlay.center = center
+                highlightOverlay.radius = radius + 2
+                highlightOverlay.fillColor = UIColor.clear
+                highlightOverlay.outlineWidth = 5
+                highlightOverlay.outlineColor = .systemRed
         
         return highlightOverlay
     }

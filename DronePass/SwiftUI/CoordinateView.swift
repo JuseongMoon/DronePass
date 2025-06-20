@@ -94,32 +94,35 @@ struct CoordinateView: View {
                         .padding(.top, 4)
                 }
                 
-                VStack(spacing: 16) {
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("드론원스탑에서 승인받은 좌표를 그대로 복사&붙여넣기 하세요")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        
-                        Text("지원하는 좌표 형식:")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Group {
-                            Text("• 도/분/초: 37° 38′ 55″ N 126° 41′ 12″ E")
-                            Text("• 십진도: 37.648611°, 126.686667°")
-                            Text("• 단순 십진수: 37.3855 126.4142")
-                            Text("• Geo URI: geo:37.648611,126.686667")
-                        }
-                        .font(.caption2)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("드론원스탑에서 승인받은 좌표를 복사&붙여넣기 하세요")
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                    
+                    Text("지원하는 좌표 형식:")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                    
+                    Group {
+                        Text("• 도/분/초: 37° 38′ 55″ N 126° 41′ 12″ E")
+                        Text("• 십진도: 37.648611°, 126.686667°")
+                        Text("• 단순 십진수: 37.3855 126.4142")
+                        Text("• Geo URI: geo:37.648611,126.686667")
                     }
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(20)
-                    .padding(.horizontal)
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.leading)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: 500) // Adjust max width as desired
+                .background(Color(.systemGray6))
+                .cornerRadius(20)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.horizontal)
+                .padding(.top)
                 
                 if viewModel.isSearching {
                     ProgressView()

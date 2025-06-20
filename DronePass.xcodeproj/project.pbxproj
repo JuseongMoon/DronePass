@@ -10,6 +10,8 @@
 		630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384C82E02B391007684D1 /* NaverGeocodingModels.swift */; };
 		630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384CA2E02C716007684D1 /* CoordinateView.swift */; };
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
+		632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */; };
+		632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56F32E05C23D0029ADE5 /* AppInfoView.swift */; };
 		6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CA2DF9885B00089659 /* SavedTableListView.swift */; };
 		6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */; };
 		6337C4D12DF98F4E00089659 /* ShapeEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4D02DF98F4E00089659 /* ShapeEditView.swift */; };
@@ -74,6 +76,8 @@
 /* Begin PBXFileReference section */
 		630384C82E02B391007684D1 /* NaverGeocodingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingModels.swift; sourceTree = "<group>"; };
 		630384CA2E02C716007684D1 /* CoordinateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateView.swift; sourceTree = "<group>"; };
+		632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchNotesView.swift; sourceTree = "<group>"; };
+		632D56F32E05C23D0029ADE5 /* AppInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoView.swift; sourceTree = "<group>"; };
 		6337C4CA2DF9885B00089659 /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
 		6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailView.swift; sourceTree = "<group>"; };
 		6337C4D02DF98F4E00089659 /* ShapeEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeEditView.swift; sourceTree = "<group>"; };
@@ -160,11 +164,13 @@
 		633F13A82DF833D100BBDD38 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				632D56F32E05C23D0029ADE5 /* AppInfoView.swift */,
+				632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */,
 				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
+				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
 				633F13C62DF842F300BBDD38 /* MapViewModel.swift */,
 				633F13C72DF842F300BBDD38 /* NaverMapView.swift */,
 				633F13A92DF8340400BBDD38 /* MainView.swift */,
-				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
 				633F13CE2DF8941600BBDD38 /* SettingView.swift */,
 				633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */,
 				6337C4CA2DF9885B00089659 /* SavedTableListView.swift */,
@@ -467,6 +473,7 @@
 				63970D492DE9C93400E11238 /* ColorManager.swift in Sources */,
 				63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */,
 				63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */,
+				632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */,
 				63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */,
 				63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */,
 				63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */,
@@ -479,6 +486,7 @@
 				63970D5A2DE9C93400E11238 /* MainTabBarController.swift in Sources */,
 				63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */,
 				63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */,
+				632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
 				63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */,
@@ -557,7 +565,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -594,7 +602,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 27;
+				CURRENT_PROJECT_VERSION = 28;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;

@@ -3,91 +3,103 @@ description:
 globs: 
 alwaysApply: false
 ---
-You are an expert iOS developer using Swift. Follow these guidelines:
+You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines:
 
-# Code Structure
-- Use Swift's latest features and protocol-oriented programming
-- Prefer value types (structs) over classes
-- Use MVC architecture with UIKit
-- Structure: Features/, Core/, UI/, Resources/
-- Follow Apple's Human Interface Guidelines
+  # Code Structure
+  - Prioritize transitioning from UIKit to SwiftUI
+  - Use Swift's latest features and protocol-oriented programming
+  - Prefer value types (structs) over classes
+  - Use MVVM architecture with SwiftUI
+  - Structure: Features/, Core/, UI/, Resources/
+  - Follow Apple's Human Interface Guidelines
 
-# UI Development
-- Use UIKit as the primary UI framework.
-- Develop UI using Storyboards as the main interface builder.
-- Use SwiftUI only for previewing or when explicitly required (e.g., hosting in UIHostingController).
-- Use SF Symbols for icons
-- Support dark mode and dynamic type
-- Use Auto Layout and safeAreaLayoutGuide for responsive layouts
-- Handle all screen sizes and orientations
-- Implement proper keyboard handling
+  
+  # Naming
+  - camelCase for vars/funcs, PascalCase for types
+  - Verbs for methods (fetchData)
+  - Boolean: use is/has/should prefixes
+  - Clear, descriptive names following Apple style
 
-# Naming
-- camelCase for vars/funcs, PascalCase for types
-- Verbs for methods (fetchData)
-- Boolean: use is/has/should prefixes
-- Clear, descriptive names following Apple style
+  # Swift Best Practices
 
-# Swift Best Practices
-- Strong type system, proper optionals
-- Use async/await for concurrency
-- Use Result type for error handling in asynchronous operations
-- Use Combine publishers or NotificationCenter for state updates in UIKit
-- Prefer let over var
-- Protocol extensions for shared code
+  - Strong type system, proper optionals
+  - async/await for concurrency
+  - Result type for errors
+  - @Published, @StateObject for state
+  - Prefer let over var
+  - Protocol extensions for shared code
 
-# Performance
-- Profile with Instruments
-- Lazy load views and images
-- Optimize network requests
-- Handle background tasks properly
-- Ensure proper state and memory management
+  # UI Development
 
-# Data & State
-- Use JSON datatype for complex models
-- Support iCloud backup for user data when necessary
-- Use UserDefaults for preferences
-- Use Combine or NotificationCenter for reactive data flow as needed in UIKit
-- Clean data flow architecture
-- Implement proper dependency injection
-- Handle state restoration
+  - SwiftUI first, UIKit when needed
+  - SF Symbols for icons
+  - Support dark mode, dynamic type
+  - SafeArea and GeometryReader for layout
+  - Handle all screen sizes and orientations
+  - Implement proper keyboard handling
 
-# Security
-- Encrypt sensitive data
-- Use Keychain securely
-- Implement certificate pinning
-- Use biometric authentication when needed
-- Enable App Transport Security
-- Validate all user input
+  # Performance
 
-# Testing & Quality
-- Use XCTest for unit tests
-- Use XCUITest for UI tests
-- Test common user flows
-- Perform performance and error scenario testing
-- Ensure accessibility testing
+  - Profile with Instruments
+  - Lazy load views and images
+  - Optimize network requests
+  - Background task handling
+  - Proper state management
+  - Memory management
 
-# Essential Features
-- Support deep linking
-- Implement push notifications
-- Support background tasks
-- Provide localization
-- Implement error handling
-- Integrate analytics/logging
+  # Data & State
 
-# Development Process
-- Use a clear Git branching strategy
-- Establish a code review process
-- Implement CI/CD pipeline
-- Maintain thorough documentation
-- Ensure unit test coverage
+  - CoreData for complex models
+  - UserDefaults for preferences
+  - Combine for reactive code
+  - Clean data flow architecture
+  - Proper dependency injection
+  - Handle state restoration
 
-# App Store Guidelines
-- Provide privacy descriptions
-- Specify app capabilities
-- Implement in-app purchases as needed
-- Adhere to review guidelines
-- Enable app thinning in Xcode
-- Ensure proper signing
+  # Security
 
-Follow Apple's official documentation for detailed implementation guidance.
+  - Encrypt sensitive data
+  - Use Keychain securely
+  - Certificate pinning
+  - Biometric auth when needed
+  - App Transport Security
+  - Input validation
+
+  # Testing & Quality
+
+  - XCTest for unit tests
+  - XCUITest for UI tests
+  - Test common user flows
+  - Performance testing
+  - Error scenarios
+  - Accessibility testing
+
+  # Essential Features
+
+  - Deep linking support
+  - Push notifications
+  - Background tasks
+  - Localization
+  - Error handling
+  - Analytics/logging
+
+  # Development Process
+
+  - Use SwiftUI previews
+  - Git branching strategy
+  - Code review process
+  - CI/CD pipeline
+  - Documentation
+  - Unit test coverage
+
+  # App Store Guidelines
+
+  - Privacy descriptions
+  - App capabilities
+  - In-app purchases
+  - Review guidelines
+  - App thinning
+  - Proper signing
+
+  Follow Apple's documentation for detailed implementation guidance.
+  

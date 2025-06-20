@@ -89,6 +89,7 @@ struct ShapeDetailView: View {
                 Section {
                     HStack {
                         Text("제목")
+                            .bold()
                         Spacer()
                         Text(shape.title)
                             .foregroundColor(.secondary)
@@ -96,6 +97,7 @@ struct ShapeDetailView: View {
                     
                     HStack {
                         Text("좌표")
+                            .bold()
                         Spacer()
                         Text(shape.baseCoordinate.formattedCoordinate)
                             .foregroundColor(.secondary)
@@ -103,9 +105,16 @@ struct ShapeDetailView: View {
                     
                     HStack {
                         Text("주소")
+                            .bold()
+
                         Spacer()
-                        Button(shape.address ?? "-") {
+                        Button(action: {
                             showActionSheet = true
+                        }) {
+                            Text(shape.address ?? "-")
+                                .multilineTextAlignment(.trailing)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.5)
                         }
                         .foregroundColor(.blue)
                     }
@@ -113,6 +122,8 @@ struct ShapeDetailView: View {
                     if let radius = shape.radius {
                         HStack {
                             Text("반경")
+                                .bold()
+
                             Spacer()
                             Text("\(Int(radius)) m")
                                 .foregroundColor(.secondary)
@@ -121,6 +132,8 @@ struct ShapeDetailView: View {
                     
                     HStack {
                         Text("시작일")
+                            .bold()
+
                         Spacer()
                         Text(DateFormatter.koreanDateTime.string(from: shape.startedAt))
                             .foregroundColor(.secondary)
@@ -129,6 +142,8 @@ struct ShapeDetailView: View {
                     if let expire = shape.expireDate {
                         HStack {
                             Text("종료일")
+                                .bold()
+
                             Spacer()
                             Text(DateFormatter.koreanDateTime.string(from: expire))
                                 .foregroundColor(.secondary)
