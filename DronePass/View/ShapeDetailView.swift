@@ -291,7 +291,7 @@ struct HyperlinkTextView: UIViewRepresentable {
 }
 
 // MARK: - Preview
-#Preview {
+#Preview("기본") {
     let dummy = PlaceShape(
         id: UUID(),
         title: "드론 비행연습 및 테스트촬영",

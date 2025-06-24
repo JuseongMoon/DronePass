@@ -24,31 +24,15 @@
 		633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */; };
 		6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchingAddressView.swift */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
-		63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D332DE9C93400E11238 /* LaunchScreen.storyboard */; };
-		63970D432DE9C93400E11238 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63970D352DE9C93400E11238 /* Main.storyboard */; };
-		63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */; };
 		63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* PlaceShape.swift */; };
 		63970D482DE9C93400E11238 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1F2DE9C93400E11238 /* LocationManager.swift */; };
 		63970D492DE9C93400E11238 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1D2DE9C93400E11238 /* ColorManager.swift */; };
-		63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2E2DE9C93400E11238 /* AppDelegate.swift */; };
-		63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */; };
-		63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */; };
-		63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D052DE9C93400E11238 /* ColorPickerViewController.swift */; };
-		63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0C2DE9C93400E11238 /* SettingViewController.swift */; };
 		63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */; };
-		63970D572DE9C93400E11238 /* SavedBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */; };
 		63970D582DE9C93400E11238 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2F2DE9C93400E11238 /* AppInfo.swift */; };
-		63970D592DE9C93400E11238 /* IntroViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D062DE9C93400E11238 /* IntroViewController.swift */; };
-		63970D5A2DE9C93400E11238 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D072DE9C93400E11238 /* MainTabBarController.swift */; };
 		63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1E2DE9C93400E11238 /* Coordinate.swift */; };
-		63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */; };
 		63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D242DE9C93400E11238 /* SettingManager.swift */; };
 		63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D102DE9C93400E11238 /* NaverGeocodingService.swift */; };
-		63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0B2DE9C93400E11238 /* SavedViewController.swift */; };
 		63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D252DE9C93400E11238 /* ShapeManager.swift */; };
-		63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */; };
-		63970D642DE9C93400E11238 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D382DE9C93400E11238 /* SceneDelegate.swift */; };
-		63970D662DE9C93400E11238 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D082DE9C93400E11238 /* MapViewController.swift */; };
 		63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */; };
 		63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */; };
 		63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D212DE9C93400E11238 /* NotiName.swift */; };
@@ -82,8 +66,6 @@
 		6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailView.swift; sourceTree = "<group>"; };
 		6337C4D02DF98F4E00089659 /* ShapeEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeEditView.swift; sourceTree = "<group>"; };
 		633F13A92DF8340400BBDD38 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
-		633F13AB2DF8354A00BBDD38 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
-		633F13AC2DF8354A00BBDD38 /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Main.strings; sourceTree = "<group>"; };
 		633F13C62DF842F300BBDD38 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		633F13C72DF842F300BBDD38 /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
 		633F13CA2DF885DB00BBDD38 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
@@ -91,16 +73,6 @@
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		6383D99C2E0298C60033550D /* SearchingAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingAddressView.swift; sourceTree = "<group>"; };
-		63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddShapePopupViewController.swift; sourceTree = "<group>"; };
-		63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheetContainerView.swift; sourceTree = "<group>"; };
-		63970D052DE9C93400E11238 /* ColorPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerViewController.swift; sourceTree = "<group>"; };
-		63970D062DE9C93400E11238 /* IntroViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroViewController.swift; sourceTree = "<group>"; };
-		63970D072DE9C93400E11238 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
-		63970D082DE9C93400E11238 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
-		63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewController.swift; sourceTree = "<group>"; };
-		63970D0B2DE9C93400E11238 /* SavedViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedViewController.swift; sourceTree = "<group>"; };
-		63970D0C2DE9C93400E11238 /* SettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingViewController.swift; sourceTree = "<group>"; };
-		63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailViewController.swift; sourceTree = "<group>"; };
 		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
 		63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
@@ -112,17 +84,9 @@
 		63970D222DE9C93400E11238 /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
 		63970D242DE9C93400E11238 /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
 		63970D252DE9C93400E11238 /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
-		63970D272DE9C93400E11238 /* SampleShapeLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleShapeLoader.swift; sourceTree = "<group>"; };
-		63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedShapeViewCell.swift; sourceTree = "<group>"; };
-		63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
-		63970D2E2DE9C93400E11238 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		63970D2F2DE9C93400E11238 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		63970D302DE9C93400E11238 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		63970D312DE9C93400E11238 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		63970D322DE9C93400E11238 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		63970D342DE9C93400E11238 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		63970D372DE9C93400E11238 /* SavedBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedBottomSheetViewModel.swift; sourceTree = "<group>"; };
-		63970D382DE9C93400E11238 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		63970D3A2DE9C93400E11238 /* DronePassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassTests.swift; sourceTree = "<group>"; };
 		63970D3C2DE9C93400E11238 /* DronePassUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITests.swift; sourceTree = "<group>"; };
 		63970D3D2DE9C93400E11238 /* DronePassUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITestsLaunchTests.swift; sourceTree = "<group>"; };
@@ -161,14 +125,12 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		633F13A82DF833D100BBDD38 /* SwiftUI */ = {
+		630379672E0A8D3D00F0A84D /* View */ = {
 			isa = PBXGroup;
 			children = (
 				632D56F32E05C23D0029ADE5 /* AppInfoView.swift */,
 				632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */,
-				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
 				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
-				633F13C62DF842F300BBDD38 /* MapViewModel.swift */,
 				633F13C72DF842F300BBDD38 /* NaverMapView.swift */,
 				633F13A92DF8340400BBDD38 /* MainView.swift */,
 				633F13CE2DF8941600BBDD38 /* SettingView.swift */,
@@ -179,95 +141,47 @@
 				6383D99C2E0298C60033550D /* SearchingAddressView.swift */,
 				630384CA2E02C716007684D1 /* CoordinateView.swift */,
 			);
-			path = SwiftUI;
+			path = View;
 			sourceTree = "<group>";
 		};
-		63970D0E2DE9C93400E11238 /* Controller */ = {
+		630379682E0A8D4C00F0A84D /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				63970D032DE9C93400E11238 /* AddShapePopupViewController.swift */,
-				63970D042DE9C93400E11238 /* BottomSheetContainerView.swift */,
-				63970D052DE9C93400E11238 /* ColorPickerViewController.swift */,
-				63970D062DE9C93400E11238 /* IntroViewController.swift */,
-				63970D072DE9C93400E11238 /* MainTabBarController.swift */,
-				63970D082DE9C93400E11238 /* MapViewController.swift */,
-				63970D0A2DE9C93400E11238 /* SavedBottomSheetViewController.swift */,
-				63970D0B2DE9C93400E11238 /* SavedViewController.swift */,
-				63970D0C2DE9C93400E11238 /* SettingViewController.swift */,
-				63970D0D2DE9C93400E11238 /* ShapeDetailViewController.swift */,
+				633F13C62DF842F300BBDD38 /* MapViewModel.swift */,
+				63970D212DE9C93400E11238 /* NotiName.swift */,
+				63970D222DE9C93400E11238 /* PlaceShape.swift */,
+				63970D242DE9C93400E11238 /* SettingManager.swift */,
+				63970D252DE9C93400E11238 /* ShapeManager.swift */,
+				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
+				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 			);
-			path = Controller;
+			path = Model;
 			sourceTree = "<group>";
 		};
-		63970D122DE9C93400E11238 /* Core */ = {
+		630379692E0A8D5E00F0A84D /* Core */ = {
 			isa = PBXGroup;
 			children = (
 				63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */,
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
 				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
-				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
-			);
-			path = Core;
-			sourceTree = "<group>";
-		};
-		63970D262DE9C93400E11238 /* Model */ = {
-			isa = PBXGroup;
-			children = (
 				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
 				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
-				63970D212DE9C93400E11238 /* NotiName.swift */,
-				63970D222DE9C93400E11238 /* PlaceShape.swift */,
-				63970D242DE9C93400E11238 /* SettingManager.swift */,
-				63970D252DE9C93400E11238 /* ShapeManager.swift */,
-				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
 			);
-			path = Model;
-			sourceTree = "<group>";
-		};
-		63970D282DE9C93400E11238 /* Service */ = {
-			isa = PBXGroup;
-			children = (
-				63970D272DE9C93400E11238 /* SampleShapeLoader.swift */,
-			);
-			path = Service;
-			sourceTree = "<group>";
-		};
-		63970D2B2DE9C93400E11238 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				63970D2A2DE9C93400E11238 /* SavedShapeViewCell.swift */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
-		63970D2D2DE9C93400E11238 /* ViewModel */ = {
-			isa = PBXGroup;
-			children = (
-				63970D2C2DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
-			);
-			path = ViewModel;
+			path = Core;
 			sourceTree = "<group>";
 		};
 		63970D392DE9C93400E11238 /* DronePass */ = {
 			isa = PBXGroup;
 			children = (
-				633F13A82DF833D100BBDD38 /* SwiftUI */,
 				63970D6B2DE9CCA400E11238 /* DronePass.entitlements */,
-				63970D0E2DE9C93400E11238 /* Controller */,
-				63970D122DE9C93400E11238 /* Core */,
-				63970D262DE9C93400E11238 /* Model */,
-				63970D282DE9C93400E11238 /* Service */,
-				63970D2B2DE9C93400E11238 /* View */,
-				63970D2D2DE9C93400E11238 /* ViewModel */,
-				63970D2E2DE9C93400E11238 /* AppDelegate.swift */,
 				63970D2F2DE9C93400E11238 /* AppInfo.swift */,
 				63970D302DE9C93400E11238 /* Assets.xcassets */,
 				63970D312DE9C93400E11238 /* Info.plist */,
-				63970D332DE9C93400E11238 /* LaunchScreen.storyboard */,
-				63970D352DE9C93400E11238 /* Main.storyboard */,
-				63970D372DE9C93400E11238 /* SavedBottomSheetViewModel.swift */,
-				63970D382DE9C93400E11238 /* SceneDelegate.swift */,
+				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
+				630379692E0A8D5E00F0A84D /* Core */,
+				630379672E0A8D3D00F0A84D /* View */,
+				630379682E0A8D4C00F0A84D /* Model */,
 			);
 			path = DronePass;
 			sourceTree = "<group>";
@@ -436,8 +350,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */,
-				63970D412DE9C93400E11238 /* LaunchScreen.storyboard in Resources */,
-				63970D432DE9C93400E11238 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -462,7 +374,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				63970D442DE9C93400E11238 /* ShapeDetailViewController.swift in Sources */,
 				630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */,
 				633F13C82DF842F300BBDD38 /* MapViewModel.swift in Sources */,
 				633F13C92DF842F300BBDD38 /* NaverMapView.swift in Sources */,
@@ -471,30 +382,17 @@
 				63970D482DE9C93400E11238 /* LocationManager.swift in Sources */,
 				633F13CF2DF8941600BBDD38 /* SettingView.swift in Sources */,
 				63970D492DE9C93400E11238 /* ColorManager.swift in Sources */,
-				63970D4A2DE9C93400E11238 /* AppDelegate.swift in Sources */,
-				63970D4B2DE9C93400E11238 /* SavedShapeViewCell.swift in Sources */,
 				632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */,
-				63970D4D2DE9C93400E11238 /* BottomSheetContainerView.swift in Sources */,
-				63970D512DE9C93400E11238 /* ColorPickerViewController.swift in Sources */,
-				63970D522DE9C93400E11238 /* SettingViewController.swift in Sources */,
 				63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */,
 				6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */,
-				63970D572DE9C93400E11238 /* SavedBottomSheetViewModel.swift in Sources */,
 				63970D582DE9C93400E11238 /* AppInfo.swift in Sources */,
 				6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */,
-				63970D592DE9C93400E11238 /* IntroViewController.swift in Sources */,
-				63970D5A2DE9C93400E11238 /* MainTabBarController.swift in Sources */,
 				63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */,
-				63970D5C2DE9C93400E11238 /* AddShapePopupViewController.swift in Sources */,
 				632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
-				63970D602DE9C93400E11238 /* SavedViewController.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
-				63970D632DE9C93400E11238 /* SavedBottomSheetViewController.swift in Sources */,
 				6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */,
-				63970D642DE9C93400E11238 /* SceneDelegate.swift in Sources */,
-				63970D662DE9C93400E11238 /* MapViewController.swift in Sources */,
 				63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */,
 				633F13AA2DF8340400BBDD38 /* MainView.swift in Sources */,
 				63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */,
@@ -535,27 +433,6 @@
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		63970D332DE9C93400E11238 /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				63970D322DE9C93400E11238 /* Base */,
-				633F13AB2DF8354A00BBDD38 /* ko */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-		63970D352DE9C93400E11238 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				63970D342DE9C93400E11238 /* Base */,
-				633F13AC2DF8354A00BBDD38 /* ko */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		63C0576F2DD2F6540044CF9B /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -565,7 +442,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -583,7 +460,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -602,7 +479,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 30;
+				CURRENT_PROJECT_VERSION = 31;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -620,7 +497,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

@@ -410,3 +410,4 @@ extension View {
 #Preview {
     SettingView(viewModel: SettingViewModel(), showColorPicker: .constant(false))
 }
+
