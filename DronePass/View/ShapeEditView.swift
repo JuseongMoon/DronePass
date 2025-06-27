@@ -9,7 +9,6 @@ import SwiftUI
 import CoreLocation
 import Combine
 
-
 // 동적으로 높이가 변하는 TextEditor
 struct GrowingTextEditor: View {
     @Binding var text: String
@@ -31,9 +30,7 @@ struct GrowingTextEditor: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color(UIColor.systemGray3))
                 )
-                .onChange(of: text) { _ in
-                    recalculateHeight()
-                }
+                .onChange(of: text) { recalculateHeight() }
                 .onAppear {
                     recalculateHeight()
                 }
@@ -88,10 +85,205 @@ struct AddressField: View {
     }
 }
 
+// 기본 정보 섹션
+struct BasicInfoSection: View {
+    @Binding var title: String
+    @Binding var coordinateText: String
+    @Binding var address: String
+    @Binding var radius: String
+    let onCoordinateTap: () -> Void
+    let onAddressTap: () -> Void
+    
+    var body: some View {
+        Section {
+            // 제목
+            HStack {
+                Text("제목")
+                    .bold()
+                TextField("제목을 입력하세요", text: $title)
+                    .multilineTextAlignment(.trailing)
+            }
+            .frame(height: 30)
+            
+            // 좌표
+            Button(action: onCoordinateTap) {
+                HStack {
+                    Text("좌표")
+                        .bold()
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(coordinateText.isEmpty ? "좌표를 입력하세요" : coordinateText)
+                        .foregroundColor(coordinateText.isEmpty ? .gray : .primary)
+                        .multilineTextAlignment(.trailing)
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                        .font(.footnote)
+                }
+            }
+            .buttonStyle(.plain)
+            .frame(height: 30)
+            
+            // 주소
+            Button(action: onAddressTap) {
+                HStack {
+                    Text("주소")
+                        .bold()
+                        .foregroundColor(.primary)
+                    Spacer()
+                    Text(address.isEmpty ? "주소를 검색하세요" : address)
+                        .foregroundColor(address.isEmpty ? .gray : .primary)
+                        .multilineTextAlignment(.trailing)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    Image(systemName: "chevron.right")
+                        .foregroundColor(.gray)
+                        .font(.footnote)
+                }
+            }
+            .buttonStyle(.plain)
+            .frame(height: 30)
+            
+            // 반경
+            HStack {
+                Text("반경(m)")
+                    .bold()
+                TextField("반경을 입력하세요", text: $radius)
+                    .keyboardType(.decimalPad)
+                    .multilineTextAlignment(.trailing)
+            }
+            .frame(height: 30)
+        }
+    }
+}
+
+// 날짜 섹션
+struct DateSection: View {
+    @Binding var startDate: Date
+    @Binding var endDate: Date
+    @Binding var isDateOnly: Bool
+    @Binding var showingStartDatePicker: Bool
+    @Binding var showingEndDatePicker: Bool
+    let isIPhone12: Bool
+    let dateFormatterDateOnly: DateFormatter
+    let dateFormatterDateTime: DateFormatter
+    let dateOnlyKey: String
+    let onDateOnlyChange: () -> Void
+    
+    var body: some View {
+        Section {
+            // 시작일
+            Group {
+                if isIPhone12 {
+                    Button(action: { showingStartDatePicker = true }) {
+                        HStack {
+                            Text("시작일")
+                                .bold()
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text(startDate, formatter: isDateOnly ? dateFormatterDateOnly : dateFormatterDateTime)
+                                .foregroundColor(.primary)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .font(.footnote)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(height: 30)
+                    .sheet(isPresented: $showingStartDatePicker) {
+                        DateTimeSelectionView(selectedDate: $startDate, isDateOnly: isDateOnly, title: "시작일 선택")
+                    }
+                    .onChange(of: startDate) { oldValue, newValue in
+                        if endDate < newValue {
+                            endDate = newValue
+                        }
+                    }
+                } else {
+                    DatePicker("시작일", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                        .onChange(of: startDate) { oldValue, newValue in
+                            if endDate < newValue {
+                                endDate = newValue
+                            }
+                        }
+                        .frame(height: 30)
+                        .bold()
+                }
+            }
+
+            
+            // 종료일
+            Group {
+                if isIPhone12 {
+                    Button(action: { showingEndDatePicker = true }) {
+                        HStack {
+                            Text("종료일")
+                                .bold()
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Text(endDate, formatter: isDateOnly ? dateFormatterDateOnly : dateFormatterDateTime)
+                                .foregroundColor(.primary)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .font(.footnote)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(height: 30)
+                    .sheet(isPresented: $showingEndDatePicker) {
+                        DateTimeSelectionView(selectedDate: $endDate, isDateOnly: isDateOnly, title: "종료일 선택")
+                    }
+                } else {
+                    DatePicker("종료일", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
+                        .frame(height: 30)
+                        .bold()
+                }
+            }
+
+            
+            // 날짜 설정
+            Toggle("일단위 입력", isOn: $isDateOnly)
+                .onChange(of: isDateOnly) { newValue in
+                    UserDefaults.standard.set(newValue, forKey: dateOnlyKey)
+                    onDateOnlyChange()
+                }
+                .frame(height: 30)
+                .bold()
+        }
+    }
+}
+
+// 메모 섹션
+struct MemoSection: View {
+    @Binding var memo: String
+    
+    var body: some View {
+        Section {
+            VStack(alignment: .leading) {
+                Text("메모")
+                    .bold()
+                TextEditor(text: $memo)
+                    .frame(minHeight: 170)
+                    .overlay(
+                        Group {
+                            if memo.isEmpty {
+                                Text("메모를 입력하세요")
+                                    .foregroundColor(.gray)
+                                    .padding(.horizontal, 4)
+                                    .padding(.vertical, 8)
+                            }
+                        },
+                        alignment: .topLeading
+                    )
+            }
+        }
+    }
+}
+
 struct ShapeEditView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = PlaceShapeStore.shared
     @FocusState private var isFocused: Bool
+    @State private var showingStartDatePicker = false
+    @State private var showingEndDatePicker = false
     @State private var showingCoordinateInput = false
     @State private var showingAddressSearch = false
     @State private var selectedDetent: PresentationDetent = .large
@@ -124,6 +316,24 @@ struct ShapeEditView: View {
     private let dateOnlyKey = "isDateOnlyMode"
     private let lastStartDateKey = "lastStartDate"
     private let lastEndDateKey = "lastEndDate"
+
+    private var isIPhone12: Bool {
+        UIDevice.current.userInterfaceIdiom == .phone && UIScreen.main.nativeBounds.height == 2532 // iPhone 12, 12 Pro
+    }
+
+    private var dateFormatterDateOnly: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        return formatter
+    }
+
+    private var dateFormatterDateTime: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }
 
     init(coordinate: Coordinate?, onAdd: ((PlaceShape) -> Void)? = nil, originalShape: PlaceShape? = nil) {
         self._coordinate = State(initialValue: coordinate)
@@ -168,8 +378,10 @@ struct ShapeEditView: View {
             self._initialCoordinate = State(initialValue: coordinate)
         }
         
+        let isOriginalShapeTitleEmpty: Bool = (originalShape?.title.isEmpty ?? false)
+        
         // long press로 진입 시 주소만 업데이트
-        if originalShape?.title.isEmpty ?? false { // nil coalescing
+        if isOriginalShapeTitleEmpty {
             self._address = State(initialValue: originalShape?.address ?? "")
             self._initialAddress = State(initialValue: originalShape?.address ?? "")
         }
@@ -178,114 +390,29 @@ struct ShapeEditView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section {
-                    // 제목
-                    HStack {
-                        Text("제목")
-                            .bold()
-                        TextField("제목을 입력하세요", text: $title)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    .frame(height: 30)
-                    
-                    // 좌표
-                    Button(action: { showingCoordinateInput = true }) {
-                        HStack {
-                            Text("좌표")
-                                .bold()
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text(coordinateText.isEmpty ? "좌표를 입력하세요" : coordinateText)
-                                .foregroundColor(coordinateText.isEmpty ? .gray : .primary)
-                                .multilineTextAlignment(.trailing)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .font(.footnote)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(height: 30)
-                    
-                    // 주소
-                    Button(action: { showingAddressSearch = true }) {
-                        HStack {
-                            Text("주소")
-                                .bold()
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Text(address.isEmpty ? "주소를 검색하세요" : address)
-                                .foregroundColor(address.isEmpty ? .gray : .primary)
-                                .multilineTextAlignment(.trailing)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.5)
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .font(.footnote)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(height: 30)
-                    
-                    // 반경
-                    HStack {
-                        Text("반경(m)")
-                            .bold()
-                        TextField("반경을 입력하세요", text: $radius)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    .frame(height: 30)
-                }
+                BasicInfoSection(
+                    title: $title,
+                    coordinateText: $coordinateText,
+                    address: $address,
+                    radius: $radius,
+                    onCoordinateTap: { showingCoordinateInput = true },
+                    onAddressTap: { showingAddressSearch = true }
+                )
                 
-                Section {
-                    // 시작일
-                    DatePicker("시작일", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                        .onChange(of: startDate) { oldValue, newValue in
-                            if endDate < newValue {
-                                endDate = newValue
-                            }
-                        }
-                        .frame(height: 30)
-                        .bold()
-
-                    
-                    // 종료일
-                    DatePicker("종료일", selection: $endDate, in: startDate..., displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                        .frame(height: 30)
-                        .bold()
-
-                    
-                    // 날짜 설정
-                    Toggle("일단위 입력", isOn: $isDateOnly)
-                        .onChange(of: isDateOnly) { newValue in
-                            UserDefaults.standard.set(newValue, forKey: dateOnlyKey)
-                            updateDates()
-                        }
-                        .frame(height: 30)
-                        .bold()
-
-                }
+                DateSection(
+                    startDate: $startDate,
+                    endDate: $endDate,
+                    isDateOnly: $isDateOnly,
+                    showingStartDatePicker: $showingStartDatePicker,
+                    showingEndDatePicker: $showingEndDatePicker,
+                    isIPhone12: isIPhone12,
+                    dateFormatterDateOnly: dateFormatterDateOnly,
+                    dateFormatterDateTime: dateFormatterDateTime,
+                    dateOnlyKey: dateOnlyKey,
+                    onDateOnlyChange: updateDates
+                )
                 
-                Section {
-                    // 메모
-                    VStack(alignment: .leading) {
-                        Text("메모")
-                            .bold()
-                        TextEditor(text: $memo)
-                            .frame(minHeight: 170)
-                            .overlay(
-                                Group {
-                                    if memo.isEmpty {
-                                        Text("메모를 입력하세요")
-                                            .foregroundColor(.gray)
-                                            .padding(.horizontal, 4)
-                                            .padding(.vertical, 8)
-                                    }
-                                },
-                                alignment: .topLeading
-                            )
-                    }
-                }
+                MemoSection(memo: $memo)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -472,4 +599,3 @@ struct ShapeEditView: View {
         onAdd: { _ in }
     )
 }
-
