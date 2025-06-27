@@ -6,7 +6,6 @@ alwaysApply: false
 You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines:
 
   # Code Structure
-  - Prioritize transitioning from UIKit to SwiftUI
   - Use Swift's latest features and protocol-oriented programming
   - Prefer value types (structs) over classes
   - Use MVVM architecture with SwiftUI

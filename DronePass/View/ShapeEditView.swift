@@ -92,8 +92,8 @@ struct ShapeEditView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = PlaceShapeStore.shared
     @FocusState private var isFocused: Bool
-    @State private var showingAddressSearch = false
     @State private var showingCoordinateInput = false
+    @State private var showingAddressSearch = false
     @State private var selectedDetent: PresentationDetent = .large
     
     @State var coordinate: Coordinate?
@@ -102,7 +102,7 @@ struct ShapeEditView: View {
     
     @State private var title: String = ""
     @State private var address: String = ""
-    @State private var radius: String = "200"
+    @State private var radius: String = ""
     @State private var memo: String = ""
     @State private var startDate = Date()
     @State private var endDate = Date()
@@ -114,10 +114,17 @@ struct ShapeEditView: View {
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
+    // 초기값 추적을 위한 변수들
+    @State private var initialTitle: String = ""
+    @State private var initialAddress: String = ""
+    @State private var initialRadius: String = ""
+    @State private var initialMemo: String = ""
+    @State private var initialCoordinate: Coordinate?
+    
     private let dateOnlyKey = "isDateOnlyMode"
     private let lastStartDateKey = "lastStartDate"
     private let lastEndDateKey = "lastEndDate"
-    
+
     init(coordinate: Coordinate?, onAdd: ((PlaceShape) -> Void)? = nil, originalShape: PlaceShape? = nil) {
         self._coordinate = State(initialValue: coordinate)
         self.onAdd = onAdd
@@ -127,7 +134,7 @@ struct ShapeEditView: View {
         if let shape = originalShape {
             self._title = State(initialValue: shape.title)
             self._address = State(initialValue: shape.address ?? "")
-            self._radius = State(initialValue: String(format: "%.0f", shape.radius ?? 200))
+            self._radius = State(initialValue: shape.radius != nil ? String(format: "%.0f", shape.radius!) : "")
             self._memo = State(initialValue: shape.memo ?? "")
             self._startDate = State(initialValue: shape.startedAt)
             self._endDate = State(initialValue: shape.expireDate ?? Date())
@@ -138,6 +145,13 @@ struct ShapeEditView: View {
             } else {
                 self._coordinateText = State(initialValue: "")
             }
+            
+            // 초기값 추적 변수 설정
+            self._initialTitle = State(initialValue: shape.title)
+            self._initialAddress = State(initialValue: shape.address ?? "")
+            self._initialRadius = State(initialValue: shape.radius != nil ? String(format: "%.0f", shape.radius!) : "")
+            self._initialMemo = State(initialValue: shape.memo ?? "")
+            self._initialCoordinate = State(initialValue: coordinate)
         } else {
             // originalShape이 nil인 경우 (새로운 생성)
             if let coord = coordinate {
@@ -145,11 +159,19 @@ struct ShapeEditView: View {
             } else {
                 self._coordinateText = State(initialValue: "")
             }
+            
+            // 초기값 추적 변수 설정 (새로운 생성 시 모두 빈 값)
+            self._initialTitle = State(initialValue: "")
+            self._initialAddress = State(initialValue: "")
+            self._initialRadius = State(initialValue: "")
+            self._initialMemo = State(initialValue: "")
+            self._initialCoordinate = State(initialValue: coordinate)
         }
         
         // long press로 진입 시 주소만 업데이트
         if originalShape?.title.isEmpty ?? false { // nil coalescing
             self._address = State(initialValue: originalShape?.address ?? "")
+            self._initialAddress = State(initialValue: originalShape?.address ?? "")
         }
     }
     
@@ -173,7 +195,7 @@ struct ShapeEditView: View {
                                 .bold()
                                 .foregroundColor(.primary)
                             Spacer()
-                            Text(coordinateText.isEmpty ? "터치해서 좌표를 입력하세요" : coordinateText)
+                            Text(coordinateText.isEmpty ? "좌표를 입력하세요" : coordinateText)
                                 .foregroundColor(coordinateText.isEmpty ? .gray : .primary)
                                 .multilineTextAlignment(.trailing)
                             Image(systemName: "chevron.right")
@@ -191,7 +213,7 @@ struct ShapeEditView: View {
                                 .bold()
                                 .foregroundColor(.primary)
                             Spacer()
-                            Text(address.isEmpty ? "터치해서 주소를 검색하세요" : address)
+                            Text(address.isEmpty ? "주소를 검색하세요" : address)
                                 .foregroundColor(address.isEmpty ? .gray : .primary)
                                 .multilineTextAlignment(.trailing)
                                 .lineLimit(1)
@@ -208,7 +230,7 @@ struct ShapeEditView: View {
                     HStack {
                         Text("반경(m)")
                             .bold()
-                        TextField("미터 단위로 입력해주세요", text: $radius)
+                        TextField("반경을 입력하세요", text: $radius)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
                     }
@@ -218,9 +240,9 @@ struct ShapeEditView: View {
                 Section {
                     // 시작일
                     DatePicker("시작일", selection: $startDate, displayedComponents: isDateOnly ? .date : [.date, .hourAndMinute])
-                        .onChange(of: startDate) { _ in
-                            if endDate < startDate {
-                                endDate = startDate
+                        .onChange(of: startDate) { oldValue, newValue in
+                            if endDate < newValue {
+                                endDate = newValue
                             }
                         }
                         .frame(height: 30)
@@ -345,12 +367,9 @@ struct ShapeEditView: View {
         } else {
             // '새로운' 도형 생성 시 (long press 포함)
             isDateOnly = UserDefaults.standard.bool(forKey: dateOnlyKey)
-            if let lastStart = UserDefaults.standard.object(forKey: lastStartDateKey) as? Date {
-                startDate = lastStart
-            }
-            if let lastEnd = UserDefaults.standard.object(forKey: lastEndDateKey) as? Date {
-                endDate = lastEnd
-            }
+            // 새로운 도형 생성 시에는 현재 시간을 기본값으로 사용
+            startDate = Date()
+            endDate = Date()
         }
         
         // 공통 좌표 설정 - coordinate가 nil이면 빈 문자열 유지
@@ -380,20 +399,25 @@ struct ShapeEditView: View {
     }
     
     private func hasChanges() -> Bool {
-        guard let original = originalShape else { return false }
-        
-        return title != original.title ||
-               address != (original.address ?? "") ||
-               memo != (original.memo ?? "") ||
-               Double(radius) != original.radius ||
-               startDate != original.startedAt ||
-               endDate != (original.expireDate ?? Date())
+        // 초기값과 현재값을 비교하여 실제 변경사항이 있는지 확인
+        return title != initialTitle ||
+               address != initialAddress ||
+               radius != initialRadius ||
+               memo != initialMemo ||
+               coordinate != initialCoordinate
     }
     
     private func saveShape() {
         // 좌표와 주소가 모두 비어있는지 확인
         if coordinate == nil && address.isEmpty {
             alertMessage = "좌표나 주소를 반드시 입력해주세요!"
+            showingAlert = true
+            return
+        }
+        
+        // 반경이 비어있는지 확인
+        if radius.isEmpty {
+            alertMessage = "반경을 반드시 입력해주세요!"
             showingAlert = true
             return
         }
@@ -413,7 +437,7 @@ struct ShapeEditView: View {
             title: title.isEmpty ? "새 도형" : title,
             shapeType: .circle,
             baseCoordinate: finalCoordinate,
-            radius: Double(radius) ?? 200,
+            radius: Double(radius) ?? 0,
             memo: memo.isEmpty ? nil : memo,
             address: addressToSave,
             expireDate: endDate,
