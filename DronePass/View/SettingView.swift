@@ -13,32 +13,48 @@ struct SettingView: View {
     @ObservedObject var viewModel: SettingViewModel
     @Binding var showColorPicker: Bool
 
+    @State private var showLoginSheet = false
+    @State private var showTermsAndPolicies = false
+
     var body: some View {
-            List {
-                // 현 위치 기반 정보 Section
-                Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text("일출: \(viewModel.sunriseTime)")
-                            Spacer()
-                            Text(viewModel.sunriseSuffix)
-                                .foregroundColor(viewModel.sunriseSuffixColor)
-                                .font(.caption)
-                        }
-                        HStack {
-                            Text("일몰: \(viewModel.sunsetTime)")
-                            Spacer()
-                            Text(viewModel.sunsetSuffix)
-                                .foregroundColor(viewModel.sunsetSuffixColor)
-                                .font(.caption)
-                        }
+        List {
+            // 로그인/회원가입 Section
+            Section {
+                Button {
+                    showLoginSheet = true
+                } label: {
+                    HStack {
+                        Text("로그인 / 회원가입")
+                            .foregroundColor(.primary)
+                        Spacer()
                     }
-                } header: {
-                    Text("현 위치 기반 정보")
                 }
-                
+            }
+            
+            // 현 위치 기반 정보 Section
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("일출: \(viewModel.sunriseTime)")
+                        Spacer()
+                        Text(viewModel.sunriseSuffix)
+                            .foregroundColor(viewModel.sunriseSuffixColor)
+                            .font(.caption)
+                    }
+                    HStack {
+                        Text("일몰: \(viewModel.sunsetTime)")
+                        Spacer()
+                        Text(viewModel.sunsetSuffix)
+                            .foregroundColor(viewModel.sunsetSuffixColor)
+                            .font(.caption)
+                    }
+                }
+            } header: {
+                Text("현 위치 기반 정보")
+            }
+            
             // 알림 설정 Section
-                Section {
+            Section {
                 Toggle(isOn: $viewModel.isEndDateAlarmEnabled) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("도형 만료일 알림")
@@ -96,8 +112,28 @@ struct SettingView: View {
                 } label: {
                     Text("패치노트")
                 }
+                // 약관 및 정책 버튼 추가
+                Button {
+                    showTermsAndPolicies = true
+                } label: {
+                    Text("약관 및 정책")
+                }
             } header: {
                 Text("기타")
+            }
+        }
+        // 모든 기기에서 sheet로 LoginView 표시
+        .sheet(isPresented: $showLoginSheet) {
+            LoginView()
+        }
+        .sheet(isPresented: $showTermsAndPolicies) {
+            NavigationView {
+                TermsAndPoliciesView()
+                    .navigationTitle("약관 및 정책")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            .if(UIDevice.current.userInterfaceIdiom == .phone) { view in
+                view.presentationDetents([.fraction(0.5)])
             }
         }
     }
@@ -174,6 +210,8 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
     }
     
+    // MARK: - 패치노트 불러오기
+
     private func fetchPatchNotes() async {
         await MainActor.run {
             isLoadingPatchNotes = true
@@ -403,6 +441,18 @@ extension View {
             self.navigationViewStyle(DoubleColumnNavigationViewStyle())
         } else {
             self.navigationViewStyle(StackNavigationViewStyle())
+        }
+    }
+}
+
+// ViewModifier를 위한 if extension
+extension View {
+    @ViewBuilder
+    func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
         }
     }
 }
