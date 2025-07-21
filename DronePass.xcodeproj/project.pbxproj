@@ -22,6 +22,11 @@
 		633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CC2DF888C700BBDD38 /* DronePassApp.swift */; };
 		633F13CF2DF8941600BBDD38 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CE2DF8941600BBDD38 /* SettingView.swift */; };
 		633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */; };
+		634E3FB62E2E760300C60E43 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */; };
+		634E3FB92E2E7E5600C60E43 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FB82E2E7E5600C60E43 /* FirebaseAnalytics */; };
+		634E3FBB2E2E7E5600C60E43 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBA2E2E7E5600C60E43 /* FirebaseAuth */; };
+		634E3FBD2E2E7E5600C60E43 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBC2E2E7E5600C60E43 /* FirebaseFirestore */; };
+		634E3FBF2E2E7E5600C60E43 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */; };
 		6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchingAddressView.swift */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
 		63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* PlaceShape.swift */; };
@@ -79,6 +84,7 @@
 		633F13CC2DF888C700BBDD38 /* DronePassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassApp.swift; sourceTree = "<group>"; };
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
+		634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		6383D99C2E0298C60033550D /* SearchingAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingAddressView.swift; sourceTree = "<group>"; };
 		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
@@ -94,9 +100,6 @@
 		63970D2F2DE9C93400E11238 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
 		63970D302DE9C93400E11238 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		63970D312DE9C93400E11238 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		63970D3A2DE9C93400E11238 /* DronePassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassTests.swift; sourceTree = "<group>"; };
-		63970D3C2DE9C93400E11238 /* DronePassUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITests.swift; sourceTree = "<group>"; };
-		63970D3D2DE9C93400E11238 /* DronePassUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		63970D6B2DE9CCA400E11238 /* DronePass.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DronePass.entitlements; sourceTree = "<group>"; };
 		63AB0F892E1D5ADF001F304E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -117,8 +120,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				63C805A12DE30E9000F3428B /* Solar in Frameworks */,
+				634E3FBB2E2E7E5600C60E43 /* FirebaseAuth in Frameworks */,
 				63F3F6012DD3525A004C546F /* WebKit.framework in Frameworks */,
+				634E3FB92E2E7E5600C60E43 /* FirebaseAnalytics in Frameworks */,
+				634E3FBF2E2E7E5600C60E43 /* FirebaseStorage in Frameworks */,
 				631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */,
+				634E3FBD2E2E7E5600C60E43 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,40 +203,22 @@
 			children = (
 				63970D6B2DE9CCA400E11238 /* DronePass.entitlements */,
 				63970D2F2DE9C93400E11238 /* AppInfo.swift */,
+				63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */,
 				63970D302DE9C93400E11238 /* Assets.xcassets */,
 				63970D312DE9C93400E11238 /* Info.plist */,
 				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
 				630379692E0A8D5E00F0A84D /* Core */,
 				630379672E0A8D3D00F0A84D /* View */,
 				630379682E0A8D4C00F0A84D /* Model */,
-				63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */,
+				634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */,
 			);
 			path = DronePass;
-			sourceTree = "<group>";
-		};
-		63970D3B2DE9C93400E11238 /* DronePassTests */ = {
-			isa = PBXGroup;
-			children = (
-				63970D3A2DE9C93400E11238 /* DronePassTests.swift */,
-			);
-			path = DronePassTests;
-			sourceTree = "<group>";
-		};
-		63970D3E2DE9C93400E11238 /* DronePassUITests */ = {
-			isa = PBXGroup;
-			children = (
-				63970D3C2DE9C93400E11238 /* DronePassUITests.swift */,
-				63970D3D2DE9C93400E11238 /* DronePassUITestsLaunchTests.swift */,
-			);
-			path = DronePassUITests;
 			sourceTree = "<group>";
 		};
 		63C057392DD2F6530044CF9B = {
 			isa = PBXGroup;
 			children = (
 				63970D392DE9C93400E11238 /* DronePass */,
-				63970D3B2DE9C93400E11238 /* DronePassTests */,
-				63970D3E2DE9C93400E11238 /* DronePassUITests */,
 				63F3F5FE2DD35156004C546F /* Frameworks */,
 				63C057432DD2F6530044CF9B /* Products */,
 			);
@@ -272,6 +261,10 @@
 			packageProductDependencies = (
 				631AB35A2DD389FC005AA749 /* NMapsMap */,
 				63C805A02DE30E9000F3428B /* Solar */,
+				634E3FB82E2E7E5600C60E43 /* FirebaseAnalytics */,
+				634E3FBA2E2E7E5600C60E43 /* FirebaseAuth */,
+				634E3FBC2E2E7E5600C60E43 /* FirebaseFirestore */,
+				634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */,
 			);
 			productName = MapSketch;
 			productReference = 63C057422DD2F6530044CF9B /* DronePass.app */;
@@ -352,6 +345,7 @@
 			packageReferences = (
 				631AB3592DD389FC005AA749 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				63C8059F2DE30D1E00F3428B /* XCRemoteSwiftPackageReference "Solar" */,
+				634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 63C057432DD2F6530044CF9B /* Products */;
@@ -372,6 +366,7 @@
 			files = (
 				63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */,
 				63D1F39C2E0AB5B700E1E51E /* LaunchScreen.storyboard in Resources */,
+				634E3FB62E2E760300C60E43 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,7 +465,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -506,7 +501,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 32;
+				CURRENT_PROJECT_VERSION = 33;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -779,6 +774,14 @@
 				minimumVersion = 3.21.0;
 			};
 		};
+		634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
 		63C8059F2DE30D1E00F3428B /* XCRemoteSwiftPackageReference "Solar" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/ceeK/Solar.git";
@@ -794,6 +797,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 631AB3592DD389FC005AA749 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
 			productName = NMapsMap;
+		};
+		634E3FB82E2E7E5600C60E43 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		634E3FBA2E2E7E5600C60E43 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		634E3FBC2E2E7E5600C60E43 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 634E3FB72E2E7E5600C60E43 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 		63C805A02DE30E9000F3428B /* Solar */ = {
 			isa = XCSwiftPackageProductDependency;
