@@ -27,6 +27,7 @@
 		634E3FBB2E2E7E5600C60E43 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBA2E2E7E5600C60E43 /* FirebaseAuth */; };
 		634E3FBD2E2E7E5600C60E43 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBC2E2E7E5600C60E43 /* FirebaseFirestore */; };
 		634E3FBF2E2E7E5600C60E43 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */; };
+		634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634E3FC12E2E96C000C60E43 /* LoginManager.swift */; };
 		6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchingAddressView.swift */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
 		63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* PlaceShape.swift */; };
@@ -52,23 +53,6 @@
 		63F3F6012DD3525A004C546F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 63F3F5FF2DD35156004C546F /* WebKit.framework */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		63C0575C2DD2F6540044CF9B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 63C0573A2DD2F6530044CF9B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 63C057412DD2F6530044CF9B;
-			remoteInfo = MapSketch;
-		};
-		63C057662DD2F6540044CF9B /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 63C0573A2DD2F6530044CF9B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 63C057412DD2F6530044CF9B;
-			remoteInfo = MapSketch;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		630384C82E02B391007684D1 /* NaverGeocodingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingModels.swift; sourceTree = "<group>"; };
 		630384CA2E02C716007684D1 /* CoordinateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateView.swift; sourceTree = "<group>"; };
@@ -85,6 +69,7 @@
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		634E3FC12E2E96C000C60E43 /* LoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginManager.swift; sourceTree = "<group>"; };
 		6383D99C2E0298C60033550D /* SearchingAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingAddressView.swift; sourceTree = "<group>"; };
 		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
@@ -107,8 +92,6 @@
 		63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTermsView.swift; sourceTree = "<group>"; };
 		63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPoliciesView.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		63C057652DD2F6540044CF9B /* DronePassUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DronePassUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTimeSelectionView.swift; sourceTree = "<group>"; };
 		63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		63F3F5FF2DD35156004C546F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -129,44 +112,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		63C057582DD2F6540044CF9B /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		63C057622DD2F6540044CF9B /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		630379672E0A8D3D00F0A84D /* View */ = {
 			isa = PBXGroup;
 			children = (
-				63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */,
-				63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */,
-				63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */,
-				63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */,
-				632D56F32E05C23D0029ADE5 /* AppInfoView.swift */,
-				632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */,
+				634E3FC52E2E976200C60E43 /* Setting */,
 				633F13C72DF842F300BBDD38 /* NaverMapView.swift */,
-				633F13A92DF8340400BBDD38 /* MainView.swift */,
-				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
-				633F13CE2DF8941600BBDD38 /* SettingView.swift */,
 				633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */,
 				6337C4CA2DF9885B00089659 /* SavedTableListView.swift */,
-				6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */,
-				6337C4D02DF98F4E00089659 /* ShapeEditView.swift */,
-				6383D99C2E0298C60033550D /* SearchingAddressView.swift */,
-				630384CA2E02C716007684D1 /* CoordinateView.swift */,
-				63AB0F892E1D5ADF001F304E /* LoginView.swift */,
-				63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -176,11 +131,6 @@
 			children = (
 				633F13C62DF842F300BBDD38 /* MapViewModel.swift */,
 				63970D212DE9C93400E11238 /* NotiName.swift */,
-				63970D222DE9C93400E11238 /* PlaceShape.swift */,
-				63970D242DE9C93400E11238 /* SettingManager.swift */,
-				63970D252DE9C93400E11238 /* ShapeManager.swift */,
-				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
-				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -188,14 +138,85 @@
 		630379692E0A8D5E00F0A84D /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */,
+				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
 				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
 				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
 				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
+				63970D252DE9C93400E11238 /* ShapeManager.swift */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		634E3FC02E2E96AF00C60E43 /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				63AB0F892E1D5ADF001F304E /* LoginView.swift */,
+				634E3FC12E2E96C000C60E43 /* LoginManager.swift */,
+			);
+			path = Login;
+			sourceTree = "<group>";
+		};
+		634E3FC32E2E974600C60E43 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		634E3FC42E2E975E00C60E43 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */,
+				63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */,
+				63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */,
+				63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */,
+				633F13CE2DF8941600BBDD38 /* SettingView.swift */,
+				632D56F32E05C23D0029ADE5 /* AppInfoView.swift */,
+				632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */,
+				63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		634E3FC52E2E976200C60E43 /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				634E3FC42E2E975E00C60E43 /* View */,
+				634E3FC72E2E979500C60E43 /* Manager */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		634E3FC62E2E978600C60E43 /* Shape */ = {
+			isa = PBXGroup;
+			children = (
+				63970D222DE9C93400E11238 /* PlaceShape.swift */,
+				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
+				634E3FC82E2E982B00C60E43 /* View */,
+			);
+			path = Shape;
+			sourceTree = "<group>";
+		};
+		634E3FC72E2E979500C60E43 /* Manager */ = {
+			isa = PBXGroup;
+			children = (
+				63970D242DE9C93400E11238 /* SettingManager.swift */,
+			);
+			path = Manager;
+			sourceTree = "<group>";
+		};
+		634E3FC82E2E982B00C60E43 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */,
+				6337C4D02DF98F4E00089659 /* ShapeEditView.swift */,
+				6383D99C2E0298C60033550D /* SearchingAddressView.swift */,
+				630384CA2E02C716007684D1 /* CoordinateView.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		63970D392DE9C93400E11238 /* DronePass */ = {
@@ -207,9 +228,14 @@
 				63970D302DE9C93400E11238 /* Assets.xcassets */,
 				63970D312DE9C93400E11238 /* Info.plist */,
 				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
+				633F13A92DF8340400BBDD38 /* MainView.swift */,
+				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
+				634E3FC02E2E96AF00C60E43 /* Login */,
 				630379692E0A8D5E00F0A84D /* Core */,
 				630379672E0A8D3D00F0A84D /* View */,
+				634E3FC62E2E978600C60E43 /* Shape */,
 				630379682E0A8D4C00F0A84D /* Model */,
+				634E3FC32E2E974600C60E43 /* Extension */,
 				634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */,
 			);
 			path = DronePass;
@@ -228,8 +254,6 @@
 			isa = PBXGroup;
 			children = (
 				63C057422DD2F6530044CF9B /* DronePass.app */,
-				63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */,
-				63C057652DD2F6540044CF9B /* DronePassUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -270,46 +294,6 @@
 			productReference = 63C057422DD2F6530044CF9B /* DronePass.app */;
 			productType = "com.apple.product-type.application";
 		};
-		63C0575A2DD2F6540044CF9B /* DronePassTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassTests" */;
-			buildPhases = (
-				63C057572DD2F6540044CF9B /* Sources */,
-				63C057582DD2F6540044CF9B /* Frameworks */,
-				63C057592DD2F6540044CF9B /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				63C0575D2DD2F6540044CF9B /* PBXTargetDependency */,
-			);
-			name = DronePassTests;
-			packageProductDependencies = (
-			);
-			productName = MapSketchTests;
-			productReference = 63C0575B2DD2F6540044CF9B /* DronePassTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		63C057642DD2F6540044CF9B /* DronePassUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassUITests" */;
-			buildPhases = (
-				63C057612DD2F6540044CF9B /* Sources */,
-				63C057622DD2F6540044CF9B /* Frameworks */,
-				63C057632DD2F6540044CF9B /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				63C057672DD2F6540044CF9B /* PBXTargetDependency */,
-			);
-			name = DronePassUITests;
-			packageProductDependencies = (
-			);
-			productName = MapSketchUITests;
-			productReference = 63C057652DD2F6540044CF9B /* DronePassUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -322,14 +306,6 @@
 				TargetAttributes = {
 					63C057412DD2F6530044CF9B = {
 						CreatedOnToolsVersion = 16.3;
-					};
-					63C0575A2DD2F6540044CF9B = {
-						CreatedOnToolsVersion = 16.3;
-						TestTargetID = 63C057412DD2F6530044CF9B;
-					};
-					63C057642DD2F6540044CF9B = {
-						CreatedOnToolsVersion = 16.3;
-						TestTargetID = 63C057412DD2F6530044CF9B;
 					};
 				};
 			};
@@ -353,8 +329,6 @@
 			projectRoot = "";
 			targets = (
 				63C057412DD2F6530044CF9B /* DronePass */,
-				63C0575A2DD2F6540044CF9B /* DronePassTests */,
-				63C057642DD2F6540044CF9B /* DronePassUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -367,20 +341,6 @@
 				63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */,
 				63D1F39C2E0AB5B700E1E51E /* LaunchScreen.storyboard in Resources */,
 				634E3FB62E2E760300C60E43 /* GoogleService-Info.plist in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		63C057592DD2F6540044CF9B /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		63C057632DD2F6540044CF9B /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,6 +373,7 @@
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63AB0F8A2E1D5ADF001F304E /* LoginView.swift in Sources */,
 				63AB0F922E1D69E7001F304E /* TermsAndPoliciesView.swift in Sources */,
+				634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
 				6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */,
@@ -427,34 +388,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		63C057572DD2F6540044CF9B /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		63C057612DD2F6540044CF9B /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		63C0575D2DD2F6540044CF9B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 63C057412DD2F6530044CF9B /* DronePass */;
-			targetProxy = 63C0575C2DD2F6540044CF9B /* PBXContainerItemProxy */;
-		};
-		63C057672DD2F6540044CF9B /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 63C057412DD2F6530044CF9B /* DronePass */;
-			targetProxy = 63C057662DD2F6540044CF9B /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		63C0576F2DD2F6540044CF9B /* Debug */ = {
@@ -465,7 +399,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -482,11 +416,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -501,7 +436,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -518,11 +453,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.3;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -652,78 +588,6 @@
 			};
 			name = Release;
 		};
-		63C057742DD2F6540044CF9B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4823B5JB69;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DronePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DronePass";
-			};
-			name = Debug;
-		};
-		63C057752DD2F6540044CF9B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4823B5JB69;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DronePass.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DronePass";
-			};
-			name = Release;
-		};
-		63C057772DD2F6540044CF9B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4823B5JB69;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MapSketch;
-			};
-			name = Debug;
-		};
-		63C057782DD2F6540044CF9B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4823B5JB69;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ScienceFiction.DronePassUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MapSketch;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -741,24 +605,6 @@
 			buildConfigurations = (
 				63C0576F2DD2F6540044CF9B /* Debug */,
 				63C057702DD2F6540044CF9B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		63C057732DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				63C057742DD2F6540044CF9B /* Debug */,
-				63C057752DD2F6540044CF9B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		63C057762DD2F6540044CF9B /* Build configuration list for PBXNativeTarget "DronePassUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				63C057772DD2F6540044CF9B /* Debug */,
-				63C057782DD2F6540044CF9B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

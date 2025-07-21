@@ -6,12 +6,16 @@
 //
 
 import SwiftUI
+import AuthenticationServices
+import FirebaseAuth
 
 struct LoginView: View {
     @State private var showTerms = false
     @State private var showPrivacy = false
     @State private var showLocationTerms = false
-
+    @State private var isLogin = false
+    @State private var loginError: Error?
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -35,24 +39,11 @@ struct LoginView: View {
                     .padding(.horizontal, 22)
                     .padding(.bottom, 10)
                 
-                // Apple 로그인 버튼 (목업)
-                Button(action: {}) {
-                    HStack {
-                        Image(systemName: "apple.logo")
-                            .font(.title2)
-                        Text("Apple로 계속하기")
-                            .fontWeight(.semibold)
-                            .font(.body)
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.black)
-                    .cornerRadius(12)
-                }
-                .padding(.horizontal, 24)
-                .padding(.bottom, 8)
-                .disabled(true) // 목업
+                // SwiftUI용 Apple 로그인 버튼
+                SignInWithAppleButtonView(isLogin: $isLogin, loginError: $loginError)
+                    .frame(height: 50)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 8)
                 
                 // 약관 안내 (Apple 버튼 바로 아래로 이동)
                 VStack(spacing: 0) {
@@ -112,11 +103,58 @@ struct LoginView: View {
                     NavigationLink(destination: LocationTermsView(), isActive: $showLocationTerms) { EmptyView() }.hidden()
                 }
             )
+            .alert(isPresented: Binding<Bool>(get: { loginError != nil }, set: { _ in loginError = nil })) {
+                Alert(title: Text("로그인 오류"), message: Text(loginError?.localizedDescription ?? "알 수 없는 오류"), dismissButton: .default(Text("확인")))
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            isLogin = Auth.auth().currentUser != nil
+        }
     }
 }
 
-#Preview {
-    LoginView()
+// SwiftUI용 Apple 로그인 버튼 구현
+struct SignInWithAppleButtonView: View {
+    @Binding var isLogin: Bool
+    @Binding var loginError: Error?
+    @State private var currentNonce: String?
+    let loginManager = LoginManager()
+    
+    var body: some View {
+        SignInWithAppleButton(
+            .signIn,
+            onRequest: { request in
+                let nonce = loginManager.randomNonceString()
+                currentNonce = nonce
+                request.requestedScopes = [.fullName, .email]
+                request.nonce = loginManager.sha256(nonce)
+            },
+            onCompletion: { result in
+                switch result {
+                case .success(let authResults):
+                    if let appleIDCredential = authResults.credential as? ASAuthorizationAppleIDCredential,
+                       let nonce = currentNonce,
+                       let appleIDToken = appleIDCredential.identityToken,
+                       let idTokenString = String(data: appleIDToken, encoding: .utf8) {
+                        Task {
+                            do {
+                                try await loginManager.loginWithApple(idTokenString: idTokenString, nonce: nonce, fullName: appleIDCredential.fullName)
+                                await MainActor.run { self.isLogin = true }
+                            } catch {
+                                await MainActor.run { self.loginError = error }
+                            }
+                        }
+                    } else {
+                        self.loginError = NSError(domain: "AppleLogin", code: -1, userInfo: [NSLocalizedDescriptionKey: "Apple 로그인 토큰을 가져올 수 없습니다."])
+                    }
+                case .failure(let error):
+                    self.loginError = error
+                }
+            }
+        )
+        .signInWithAppleButtonStyle(.black)
+        .cornerRadius(12)
+        .accessibilityLabel("Apple로 계속하기")
+    }
 }

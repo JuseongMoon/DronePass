@@ -12,8 +12,8 @@ You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines
   - Structure: Features/, Core/, UI/, Resources/
   - Follow Apple's Human Interface Guidelines
 
-  
   # Naming
+
   - camelCase for vars/funcs, PascalCase for types
   - Verbs for methods (fetchData)
   - Boolean: use is/has/should prefixes
@@ -81,6 +81,22 @@ You are an expert iOS developer using Swift and SwiftUI. Follow these guidelines
   - Localization
   - Error handling
   - Analytics/logging
+
+  # Firebase SDK
+
+  - Install via Swift Package Manager, CocoaPods, or Carthage: specify Firebase version ~> 12.0.0.
+  - Include only required modules (e.g., FirebaseAuth, FirebaseFirestore, FirebaseStorage).
+  - Initialize in SwiftUI App or AppDelegate: call FirebaseApp.configure() before using any Firebase services.
+  - Ensure compatibility with Swift 5.7+ and iOS 13+; update deployment targets accordingly.
+  - Version consistency: maintain the same version across all Firebase libraries to avoid conflicts.
+  - Asynchronous API: wrap Firebase asynchronous callbacks in async/await or use Combine publishers.
+  - Error handling: use Result type or do/catch and log errors with Crashlytics.
+  - Security: review and configure Firestore and Storage security rules; minimize ATS exceptions.
+  - Testing: integrate Firebase Emulator Suite for local development; write unit and integration tests.
+  - Performance: add Firebase Performance Monitoring and custom traces to critical code paths.
+  - Manage GoogleService-Info.plist appropriately: include in target and add URL Types in Info.plist.
+  - CI/CD: cache Firebase SDK artifacts and validate GoogleService-Info.plist via environment variables.
+  - Build Settings: verify excluded architectures and bitcode settings to avoid M1/M2 simulator issues.
 
   # Development Process
 
