@@ -13,8 +13,9 @@ struct LoginView: View {
     @State private var showTerms = false
     @State private var showPrivacy = false
     @State private var showLocationTerms = false
-    @State private var isLogin = false
-    @State private var loginError: Error?
+    @StateObject private var loginManager = LoginManager.shared
+    @Environment(\.dismiss) private var dismiss
+
     
     var body: some View {
         NavigationView {
@@ -23,9 +24,10 @@ struct LoginView: View {
                 Spacer(minLength: 16)
                 
                 // 앱 아이콘
-                Image("DronePass_AppIcon_v2.2")
+                
+                Image("LaunchLogo")
                     .resizable()
-                    .frame(width: 100, height: 100)
+                    .frame(width: 200, height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 24))
                     .padding(.bottom, 32)
                 
@@ -40,7 +42,7 @@ struct LoginView: View {
                     .padding(.bottom, 10)
                 
                 // SwiftUI용 Apple 로그인 버튼
-                SignInWithAppleButtonView(isLogin: $isLogin, loginError: $loginError)
+                SignInWithAppleButtonView(isLogin: $loginManager.isLogin, loginError: $loginManager.loginError)
                     .frame(height: 50)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)
@@ -103,13 +105,18 @@ struct LoginView: View {
                     NavigationLink(destination: LocationTermsView(), isActive: $showLocationTerms) { EmptyView() }.hidden()
                 }
             )
-            .alert(isPresented: Binding<Bool>(get: { loginError != nil }, set: { _ in loginError = nil })) {
-                Alert(title: Text("로그인 오류"), message: Text(loginError?.localizedDescription ?? "알 수 없는 오류"), dismissButton: .default(Text("확인")))
+            .alert(isPresented: Binding<Bool>(get: { loginManager.loginError != nil }, set: { _ in loginManager.loginError = nil })) {
+                Alert(title: Text("로그인 오류"), message: Text(loginManager.loginError?.localizedDescription ?? "알 수 없는 오류"), dismissButton: .default(Text("확인")))
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            isLogin = Auth.auth().currentUser != nil
+            loginManager.isLogin = Auth.auth().currentUser != nil
+        }
+        .onChange(of: loginManager.isLogin) { newValue in
+            if newValue {
+                dismiss()
+            }
         }
     }
 }

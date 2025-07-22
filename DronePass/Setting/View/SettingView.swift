@@ -8,6 +8,7 @@
 import SwiftUI
 import CoreLocation
 import Solar
+import Combine // Added for Combine
 
 struct SettingView: View {
     @ObservedObject var viewModel: SettingViewModel
@@ -15,18 +16,29 @@ struct SettingView: View {
 
     @State private var showLoginSheet = false
     @State private var showTermsAndPolicies = false
+    @State private var navigateToProfile = false
 
     var body: some View {
         List {
             // 로그인/회원가입 Section
             Section {
-                Button {
-                    showLoginSheet = true
-                } label: {
-                    HStack {
-                        Text("로그인 / 회원가입")
-                            .foregroundColor(.primary)
-                        Spacer()
+                if viewModel.isLoggedIn {
+                    NavigationLink(destination: ProfileView()) {
+                        HStack {
+                            Text("내 프로필")
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                    }
+                } else {
+                    Button {
+                        showLoginSheet = true
+                    } label: {
+                        HStack {
+                            Text("로그인 / 회원가입")
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
                     }
                 }
             }
@@ -172,6 +184,9 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var showPatchNotesSheet = false
     @Published var patchNotes: [PatchNote] = []
     @Published var isLoadingPatchNotes = false
+    @Published var isLoggedIn: Bool = LoginManager.shared.isLogin // 로그인 상태 관리
+
+    private var loginCancellable: AnyCancellable?
 
     var appInfoText: String {
         let features = AppInfo.Description.features.map { "• \($0)" }.joined(separator: "\n")
@@ -193,6 +208,10 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     override init() {
         super.init()
         locationManager.delegate = self
+        // LoginManager의 isLogin을 구독하여 isLoggedIn과 동기화
+        loginCancellable = LoginManager.shared.$isLogin
+            .receive(on: RunLoop.main)
+            .assign(to: \Self.isLoggedIn, on: self)
     }
 
     func fetchAndShowPatchNotes() {

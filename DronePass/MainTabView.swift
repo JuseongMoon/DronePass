@@ -521,11 +521,14 @@ struct SettingsOverlayView: View {
                         .zIndex(1)
                         
                         // 설정 내용
-                        SettingView(
-                            viewModel: viewModel,
-                            showColorPicker: $showColorPicker
-                        )
-                        .zIndex(0)
+                        NavigationView {
+                            SettingView(
+                                viewModel: viewModel,
+                                showColorPicker: $showColorPicker
+                            )
+                            .zIndex(0)
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
                     }
                     .frame(width: min(geometry.size.width * 0.4, 400))
                     .frame(maxHeight: geometry.size.height * 0.75)
@@ -590,11 +593,14 @@ struct SettingsOverlayView: View {
                         .zIndex(1)
                         
                         // 설정 내용
-                        SettingView(
-                            viewModel: viewModel,
-                            showColorPicker: $showColorPicker
-                        )
-                        .zIndex(0)
+                        NavigationView {
+                            SettingView(
+                                viewModel: viewModel,
+                                showColorPicker: $showColorPicker
+                            )
+                            .zIndex(0)
+                        }
+                        .navigationViewStyle(StackNavigationViewStyle())
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: min(geometry.size.height * 0.5, 500))

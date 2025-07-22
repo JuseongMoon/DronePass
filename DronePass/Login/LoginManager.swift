@@ -9,8 +9,25 @@ import Foundation
 import FirebaseAuth
 import CryptoKit
 
-public class LoginManager {
-    public init() {}
+import Combine
+
+public class LoginManager: ObservableObject {
+    public static let shared = LoginManager()
+    public init() {
+        // 앱 시작 시 로그인 상태 동기화
+        self.isLogin = Auth.auth().currentUser != nil
+        // Firebase Auth 상태 변경 리스너 등록
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            DispatchQueue.main.async {
+                self?.isLogin = (user != nil)
+            }
+        }
+    }
+
+    // 로그인 상태 및 에러를 전역에서 관찰 가능하게 관리
+    @Published public var isLogin: Bool = false
+    @Published public var loginError: Error? = nil
+    public var currentNonce: String? = nil
 
     // Nonce 생성
     public func randomNonceString(length: Int = 32) -> String {
