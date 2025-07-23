@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384C82E02B391007684D1 /* NaverGeocodingModels.swift */; };
 		630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 630384CA2E02C716007684D1 /* CoordinateView.swift */; };
+		631894412E31021100BD7856 /* FetchWebDocuments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631894402E3101FC00BD7856 /* FetchWebDocuments.swift */; };
+		631894502E3102FC00BD7856 /* MarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631894512E31030100BD7856 /* MarkdownView.swift */; };
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */; };
 		632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56F32E05C23D0029ADE5 /* AppInfoView.swift */; };
@@ -63,6 +65,8 @@
 /* Begin PBXFileReference section */
 		630384C82E02B391007684D1 /* NaverGeocodingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingModels.swift; sourceTree = "<group>"; };
 		630384CA2E02C716007684D1 /* CoordinateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateView.swift; sourceTree = "<group>"; };
+		631894402E3101FC00BD7856 /* FetchWebDocuments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchWebDocuments.swift; sourceTree = "<group>"; };
+		631894512E31030100BD7856 /* MarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownView.swift; sourceTree = "<group>"; };
 		632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchNotesView.swift; sourceTree = "<group>"; };
 		632D56F32E05C23D0029ADE5 /* AppInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoView.swift; sourceTree = "<group>"; };
 		6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailView.swift; sourceTree = "<group>"; };
@@ -151,6 +155,15 @@
 				63970D252DE9C93400E11238 /* ShapeUserDefaultsStore.swift */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		6318943F2E3101E800BD7856 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				631894402E3101FC00BD7856 /* FetchWebDocuments.swift */,
+				631894512E31030100BD7856 /* MarkdownView.swift */,
+			);
+			path = Web;
 			sourceTree = "<group>";
 		};
 		634E3FC02E2E96AF00C60E43 /* Login */ = {
@@ -255,6 +268,7 @@
 				634E3FC62E2E978600C60E43 /* Shape */,
 				630379682E0A8D4C00F0A84D /* Model */,
 				634E3FC32E2E974600C60E43 /* Extension */,
+				6318943F2E3101E800BD7856 /* Web */,
 				634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */,
 			);
 			path = DronePass;
@@ -420,6 +434,8 @@
 				633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */,
 				63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */,
 				630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */,
+				631894412E31021100BD7856 /* FetchWebDocuments.swift in Sources */,
+				631894502E3102FC00BD7856 /* MarkdownView.swift in Sources */,
 				633F13CB2DF885DB00BBDD38 /* MainTabView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -435,7 +451,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -472,7 +488,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;

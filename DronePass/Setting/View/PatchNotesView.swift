@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct PatchNotesView: View {
-    let patchNotes: [PatchNote]
-    let isLoading: Bool
     @Environment(\.dismiss) private var dismiss
-    
+    let patchNotes: [FetchWebDocuments.PatchNote]
+    let isLoading: Bool
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -32,7 +32,7 @@ struct PatchNotesView: View {
                                     
                                     if !note.features.allSatisfy({ $0.title.isEmpty }) {
                                         VStack(alignment: .leading, spacing: 12) {
-                                            ForEach(note.features) { feature in
+                                            ForEach(note.features, id: \.self) { feature in
                                                 VStack(alignment: .leading, spacing: 6) {
                                                     HStack(alignment: .center, spacing: 6) {
                                                         Image(systemName: "checkmark.circle")
@@ -85,8 +85,8 @@ struct PatchNotesView: View {
 }
 
 fileprivate struct PatchNoteHeader: View {
-    let note: PatchNote
-    
+    let note: FetchWebDocuments.PatchNote
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(alignment: .firstTextBaseline) {
@@ -98,35 +98,16 @@ fileprivate struct PatchNoteHeader: View {
                     .font(.callout)
                     .foregroundColor(.secondary)
                     .padding(.trailing, 10)
-                
             }
-            
             if !note.title.isEmpty {
                 Text(note.title)
                     .font(.headline)
                     .foregroundColor(.secondary)
                     .padding(.top, 2)
             }
-            
         }
         .padding(.leading, 5)
-
     }
-    
-}
-
-#Preview {
-    PatchNotesView(patchNotes: [
-        .init(version: "v2.0.0", date: "2025.06", title: "DronePass 2.0 업데이트", features: [
-            .init(title: "새로운 UI/UX 디자인 적용", description: "앱 전반의 디자인을 더 직관적으로 개선했습니다."),
-            .init(title: "성능 최적화 및 버그 수정", description: "앱 로딩 속도를 개선하고, 알려진 자잘한 버그들을 수정했습니다. 수정했습니다. 수정했습니다."),
-            .init(title: "다크모드 지원 추가", description: nil)
-        ]),
-        .init(version: "v1.0.0", date: "2025.06", title: "DronePass 첫 출시", features: [
-            .init(title: "드론 비행 허가지 시각화 기능", description: "지도 위에 드론 비행 허가 구역을 표시하여 쉽게 확인할 수 있습니다."),
-            .init(title: "반경 기반 도형 생성", description: "원하는 위치를 중심으로 원형 비행 구역을 설정할 수 있습니다.")
-        ])
-    ], isLoading: false)
 }
 
 #Preview("Loading") {
