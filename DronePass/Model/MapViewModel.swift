@@ -54,7 +54,7 @@ class MapViewModel: NSObject, ObservableObject {
     }
 
     private func setupShapeStoreObserver() {
-        ShapeLocalManager.shared.$shapes
+        ShapeFileStore.shared.$shapes
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 // ⭐️ 상태변이 defer 필요 없음 (이미 MainQueue) – but 코어 함수만 사용
@@ -158,7 +158,7 @@ class MapViewModel: NSObject, ObservableObject {
     
     private func shouldSkipMove(for moveData: SavedTableListView.MoveToShapeData) -> Bool {
         guard let shapeID = highlightedShapeID,
-              let currentShape = ShapeLocalManager.shared.shapes.first(where: { $0.id == shapeID }) else {
+              let currentShape = ShapeFileStore.shared.shapes.first(where: { $0.id == shapeID }) else {
             return false
         }
         return currentShape.baseCoordinate == moveData.coordinate
@@ -254,16 +254,16 @@ class MapViewModel: NSObject, ObservableObject {
     }
     
     private func createCircleOverlay(center: NMGLatLng, radius: Double, shape: ShapeModel) -> NMFCircleOverlay {
-            let circleOverlay = NMFCircleOverlay()
-            circleOverlay.center = center
-            circleOverlay.radius = radius
+        let circleOverlay = NMFCircleOverlay()
+        circleOverlay.center = center
+        circleOverlay.radius = radius
 
-            let isExpired = shape.expireDate?.compare(Date()) == .orderedAscending
-            let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
+        let isExpired = shape.isExpired
+        let mainColor: UIColor = isExpired ? .systemGray : (UIColor(hex: shape.color) ?? .black)
 
-            circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
-            circleOverlay.outlineWidth = 2
-            circleOverlay.outlineColor = mainColor
+        circleOverlay.fillColor = mainColor.withAlphaComponent(0.3)
+        circleOverlay.outlineWidth = 2
+        circleOverlay.outlineColor = mainColor
 
         return circleOverlay
     }
@@ -286,7 +286,7 @@ class MapViewModel: NSObject, ObservableObject {
         // 새로운 오버레이 추가
         guard let mapView = currentMapView else { return }
         
-        let savedShapes = ShapeLocalManager.shared.shapes
+        let savedShapes = ShapeFileStore.shared.shapes
         for shape in savedShapes {
             addOverlay(for: shape, mapView: mapView)
         }

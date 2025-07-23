@@ -5,8 +5,6 @@
 //  Created by 문주성 on 5/19/25.
 //
 
-
-
 import Foundation
 import CoreLocation
 import Combine
@@ -50,8 +48,10 @@ struct Shape: Codable {
     }
 }
 
-final class ShapeManager {
-    static let shared = ShapeManager()
+
+final class ShapeUserDefaultsStore {
+    
+    static let shared = ShapeUserDefaultsStore()
     private init() {
         loadShapes()
     }

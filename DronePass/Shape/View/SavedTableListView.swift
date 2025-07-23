@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct SavedTableListView: View {
-    @StateObject private var placeShapeStore = ShapeLocalManager.shared
+    @StateObject private var placeShapeStore = ShapeFileStore.shared
     @Binding var selectedShapeID: UUID?
     @Binding var shapeIDToScrollTo: UUID?
     
@@ -156,7 +156,7 @@ private struct ShapeListRow: View {
             
             HStack(spacing: 8) {
                 // 왼쪽: 색상 인디케이터
-                ShapeColorIndicator(color: shape.color)
+                ShapeColorIndicator(color: shape.isExpired ? "#8E8E93" : shape.color)
                     .padding(.leading, 4)
                 
                 // 중앙: 도형 정보
@@ -350,7 +350,7 @@ private struct ShapeInfo: View {
                 )
             ]
             
-            ShapeLocalManager.shared.shapes = dummyShapes
+            ShapeFileStore.shared.shapes = dummyShapes
         }
 }
 
@@ -360,7 +360,7 @@ private struct ShapeInfo: View {
         shapeIDToScrollTo: .constant(nil)
     )
         .onAppear {
-            ShapeLocalManager.shared.shapes = []
+            ShapeFileStore.shared.shapes = []
         }
 }
 

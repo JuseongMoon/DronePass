@@ -5,18 +5,12 @@
 //  Created by 문주성 on 5/19/25.
 //
 
-// 역할: 도형 데이터의 메모리 저장 및 관리
-// 연관기능: 도형 추가, 삭제, 저장, 불러오기
-
 import Foundation
 import Combine
 import SwiftUI
 
-// PlaceShape 모델 직접 import
-//import DronePass
-
-final class ShapeLocalManager: ObservableObject {
-    static let shared = ShapeLocalManager()
+final class ShapeFileStore: ObservableObject {
+    static let shared = ShapeFileStore()
     @Published var shapes: [ShapeModel] = []
     @Published var selectedShapeID: UUID? = nil
 
@@ -108,13 +102,7 @@ final class ShapeLocalManager: ObservableObject {
     }
     
     public func deleteExpiredShapes() {
-        let now = Date()
-        let filtered = shapes.filter { shape in
-            if let expire = shape.expireDate {
-                return expire >= now
-            }
-            return true
-        }
+        let filtered = shapes.filter { !$0.isExpired }
         self.shapes = filtered
         saveShapes()
         // UI 갱신을 위해 Notification 전송
@@ -174,7 +162,7 @@ final class ShapeLocalManager: ObservableObject {
     }
 }
 
-extension ShapeLocalManager {
+extension ShapeFileStore {
     /// 저장된 모든 도형의 색상을 새로운 색상(hex)으로 변경하고 저장/갱신
 
     /// 특정 id의 도형을 반환

@@ -20,28 +20,28 @@ struct SettingView: View {
 
     var body: some View {
         List {
-            // 로그인/회원가입 Section
-            Section {
-                if viewModel.isLoggedIn {
-                    NavigationLink(destination: ProfileView()) {
-                        HStack {
-                            Text("내 프로필")
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                    }
-                } else {
-                    Button {
-                        showLoginSheet = true
-                    } label: {
-                        HStack {
-                            Text("로그인 / 회원가입")
-                                .foregroundColor(.primary)
-                            Spacer()
-                        }
-                    }
-                }
-            }
+            /// 로그인/회원가입 Section (잠시 비활성화)
+//            Section {
+//                if viewModel.isLoggedIn {
+//                    NavigationLink(destination: ProfileView()) {
+//                        HStack {
+//                            Text("내 프로필")
+//                                .foregroundColor(.primary)
+//                            Spacer()
+//                        }
+//                    }
+//                } else {
+//                    Button {
+//                        showLoginSheet = true
+//                    } label: {
+//                        HStack {
+//                            Text("로그인 / 회원가입")
+//                                .foregroundColor(.primary)
+//                            Spacer()
+//                        }
+//                    }
+//                }
+//            }
             
             // 현 위치 기반 정보 Section
             Section {

@@ -181,7 +181,7 @@ final class SettingManager {
 
     /// 앱의 ShapeManager를 호출하여, 종료일이 지난 도형을 일괄 삭제
     func deleteExpiredShapes() {
-        ShapeManager.shared.deleteExpiredShapes()
+        ShapeFileStore.shared.deleteExpiredShapes()
     }
     
     // MARK: - 알림 예약을 위한 공통 함수

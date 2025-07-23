@@ -48,6 +48,12 @@ public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형�
     /// **팔레트 컬러 (색상 팔레트에서 고름)**
     public var color: String // 도형의 색상입니다. (16진수 색상 코드)
 
+    /// 만료 여부 (오늘 날짜 기준)
+    public var isExpired: Bool {
+        guard let expireDate = expireDate else { return false }
+        return expireDate < Date()
+    }
+
     public init( // 초기화 메서드입니다.
         id: UUID = UUID(), // UUID를 생성합니다. 기본값으로 새로운 UUID를 사용합니다.
         title: String, // 도형의 제목을 설정합니다.

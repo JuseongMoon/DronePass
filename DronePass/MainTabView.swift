@@ -320,7 +320,7 @@ struct SavedListOverlayView: View {
     @Binding var selectedShapeID: UUID?
     @Binding var isPresented: Bool
     @Binding var shapeIDToScrollTo: UUID?
-    @StateObject private var placeShapeStore = ShapeLocalManager.shared
+    @StateObject private var placeShapeStore = ShapeFileStore.shared
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging = false
     

@@ -15,7 +15,7 @@ import SafariServices
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @StateObject private var store = ShapeLocalManager.shared
+    @StateObject private var store = ShapeFileStore.shared
     
     @State private var shape: ShapeModel
     private let originalShape: ShapeModel

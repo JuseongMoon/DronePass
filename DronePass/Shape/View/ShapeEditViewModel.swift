@@ -30,7 +30,7 @@ final class ShapeEditViewModel: ObservableObject {
     private var initialCoordinate: CoordinateManager?
 
     // 외부 의존성
-    private let store = ShapeLocalManager.shared
+    private let store = ShapeFileStore.shared
     var onAdd: ((ShapeModel) -> Void)?
     var originalShape: ShapeModel?
 
