@@ -28,18 +28,18 @@ public enum ShapeType: String, Codable { // 도형의 타입을 정의하는 열
 }
 
 // ✅ color: PaletteColor(컬러매니저 기반 enum)로 변경
-public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형의 데이터 모델입니다. Codable과 Identifiable 프로토콜을 준수합니다.
+public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형의 데이터 모델입니다. Codable과 Identifiable 프로토콜을 준수합니다.
     public let id: UUID // 도형의 고유 식별자입니다.
     public var title: String // 도형의 제목입니다.
     public var shapeType: ShapeType // 도형의 타입입니다.
-    public var baseCoordinate: Coordinate // 도형의 기준 좌표입니다.
+    public var baseCoordinate: CoordinateManager // 도형의 기준 좌표입니다.
     public var address: String? // 도형의 주소 정보입니다. (선택적)
 
     // 추가 도형 타입별 옵션
     public var radius: Double? // 원형 도형의 반경입니다. (선택적)
-    public var secondCoordinate: Coordinate? // 사각형 도형의 두 번째 좌표입니다. (선택적)
-    public var polygonCoordinates: [Coordinate]? // 다각형 도형의 좌표 배열입니다. (선택적)
-    public var polylineCoordinates: [Coordinate]? // 선형 도형의 좌표 배열입니다. (선택적)
+    public var secondCoordinate: CoordinateManager? // 사각형 도형의 두 번째 좌표입니다. (선택적)
+    public var polygonCoordinates: [CoordinateManager]? // 다각형 도형의 좌표 배열입니다. (선택적)
+    public var polylineCoordinates: [CoordinateManager]? // 선형 도형의 좌표 배열입니다. (선택적)
 
     public var memo: String? // 도형에 대한 메모입니다. (선택적)
     public var expireDate: Date? // 도형의 만료 날짜입니다.
@@ -52,11 +52,11 @@ public struct PlaceShape: Codable, Identifiable { // 지도에 표시될 도형�
         id: UUID = UUID(), // UUID를 생성합니다. 기본값으로 새로운 UUID를 사용합니다.
         title: String, // 도형의 제목을 설정합니다.
         shapeType: ShapeType = .circle, // 도형의 타입을 설정합니다. 기본값은 원형입니다.
-        baseCoordinate: Coordinate, // 도형의 기준 좌표를 설정합니다.
+        baseCoordinate: CoordinateManager, // 도형의 기준 좌표를 설정합니다.
         radius: Double? = nil, // 원형 도형의 반경을 설정합니다. (선택적)
-        secondCoordinate: Coordinate? = nil, // 사각형 도형의 두 번째 좌표를 설정합니다. (선택적)
-        polygonCoordinates: [Coordinate]? = nil, // 다각형 도형의 좌표 배열을 설정합니다. (선택적)
-        polylineCoordinates: [Coordinate]? = nil, // 선형 도형의 좌표 배열을 설정합니다. (선택적)
+        secondCoordinate: CoordinateManager? = nil, // 사각형 도형의 두 번째 좌표를 설정합니다. (선택적)
+        polygonCoordinates: [CoordinateManager]? = nil, // 다각형 도형의 좌표 배열을 설정합니다. (선택적)
+        polylineCoordinates: [CoordinateManager]? = nil, // 선형 도형의 좌표 배열을 설정합니다. (선택적)
         memo: String? = nil, // 도형에 대한 메모를 설정합니다. (선택적)
         address: String? = nil, // 도형의 주소를 설정합니다. (선택적)
         expireDate: Date?, // 도형의 만료 날짜를 설정합니다. (선택적)

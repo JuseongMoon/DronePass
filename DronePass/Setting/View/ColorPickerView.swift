@@ -57,7 +57,7 @@ struct ColorPickerView: View {
                 .onTapGesture {
                     selectedColor = color
                     // 전체 도형 색상 변경
-                    PlaceShapeStore.shared.updateAllShapesColor(to: color.hex)
+                    ShapeLocalManager.shared.updateAllShapesColor(to: color.hex)
                     ColorManager.shared.defaultColor = color
                     onColorSelected(color)
                     presentationMode.wrappedValue.dismiss()

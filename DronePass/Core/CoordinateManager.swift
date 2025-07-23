@@ -13,7 +13,7 @@ import CoreLocation // CoreLocation 프레임워크를 가져옵니다. (위치 
 import NMapsMap // 네이버 지도 SDK를 가져옵니다. (지도 표시 기능을 사용하기 위함)
 
 /// GPS 좌표값을 저장하는 모델
-public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구조체입니다. Codable과 Equatable 프로토콜을 준수합니다.
+public struct CoordinateManager: Codable, Equatable { // GPS 좌표를 나타내는 구조체입니다. Codable과 Equatable 프로토콜을 준수합니다.
     public let latitude: Double // 위도 값입니다.
     public let longitude: Double // 경도 값입니다.
 
@@ -44,7 +44,7 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
     // MARK: - 좌표 파싱
     
     /// 다양한 형식의 좌표 문자열을 파싱하여 Coordinate 객체로 변환
-    public static func parse(_ input: String) -> Coordinate? {
+    public static func parse(_ input: String) -> CoordinateManager? {
         let cleanedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
         
         if let coordinate = parseDegreesMinutesSeconds(cleanedInput) { return coordinate }
@@ -58,7 +58,7 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
     }
     
     /// 도/분/초 형식 파싱 (예: 37° 38′ 55″ N 126° 41′ 12″ E)
-    private static func parseDegreesMinutesSeconds(_ input: String) -> Coordinate? {
+    private static func parseDegreesMinutesSeconds(_ input: String) -> CoordinateManager? {
         let pattern = #"(\d+)°\s*(\d+)′\s*(\d+)″\s*([NS])\s*(\d+)°\s*(\d+)′\s*(\d+)″\s*([EW])"#
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) else {
@@ -83,11 +83,11 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
         let latitude = (latDegrees + latMinutes/60 + latSeconds/3600) * (latDirection == "N" ? 1 : -1)
         let longitude = (lonDegrees + lonMinutes/60 + lonSeconds/3600) * (lonDirection == "E" ? 1 : -1)
         
-        return Coordinate(latitude: latitude, longitude: longitude)
+        return CoordinateManager(latitude: latitude, longitude: longitude)
     }
     
     /// 십진도 형식 파싱 (예: 37.648611°, 126.686667°)
-    private static func parseDecimalDegrees(_ input: String) -> Coordinate? {
+    private static func parseDecimalDegrees(_ input: String) -> CoordinateManager? {
         let pattern = #"(-?\d+\.?\d*)°?\s*,\s*(-?\d+\.?\d*)°?"#
         guard let regex = try? NSRegularExpression(pattern: pattern),
               let match = regex.firstMatch(in: input, range: NSRange(input.startIndex..., in: input)) else {
@@ -102,11 +102,11 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
             return nil
         }
         
-        return Coordinate(latitude: lat, longitude: lon)
+        return CoordinateManager(latitude: lat, longitude: lon)
     }
     
     /// 단순 십진수 형식 파싱 (예: 37.3855 126.4142)
-    private static func parseSimpleDecimal(_ input: String) -> Coordinate? {
+    private static func parseSimpleDecimal(_ input: String) -> CoordinateManager? {
         let components = input.split(separator: " ").map(String.init)
         guard components.count == 2,
               let lat = Double(components[0]),
@@ -114,11 +114,11 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
             return nil
         }
         
-        return Coordinate(latitude: lat, longitude: lon)
+        return CoordinateManager(latitude: lat, longitude: lon)
     }
     
     /// Geo URI 형식 파싱 (예: geo:37.648611,126.686667)
-    private static func parseGeo(_ input: String) -> Coordinate? {
+    private static func parseGeo(_ input: String) -> CoordinateManager? {
         guard input.hasPrefix("geo:") else { return nil }
         let components = input.dropFirst(4).split(separator: ",").map(String.init)
         guard components.count == 2,
@@ -127,18 +127,18 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
             return nil
         }
         
-        return Coordinate(latitude: lat, longitude: lon)
+        return CoordinateManager(latitude: lat, longitude: lon)
     }
     
     /// MGRS 형식 파싱 (예: 52S DF 24174 67282)
-    private static func parseMGRS(_ input: String) -> Coordinate? {
+    private static func parseMGRS(_ input: String) -> CoordinateManager? {
         // MGRS 파싱은 복잡하므로 여기서는 간단한 예시만 구현
         // 실제 구현은 MGRS 라이브러리 사용 권장
         return nil
     }
     
     /// Plus Code 형식 파싱 (예: 8Q98FXC7+M2)
-    private static func parsePlusCode(_ input: String) -> Coordinate? {
+    private static func parsePlusCode(_ input: String) -> CoordinateManager? {
         // Plus Code 파싱은 복잡하므로 여기서는 간단한 예시만 구현
         // 실제 구현은 OpenLocationCode 라이브러리 사용 권장
         return nil
@@ -166,6 +166,6 @@ public struct Coordinate: Codable, Equatable { // GPS 좌표를 나타내는 구
     }
 }
 
-extension Coordinate: Identifiable {
+extension CoordinateManager: Identifiable {
     public var id: String { "\(latitude),\(longitude)" }
 }

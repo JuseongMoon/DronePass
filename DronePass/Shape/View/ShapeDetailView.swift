@@ -15,10 +15,10 @@ import SafariServices
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @StateObject private var store = PlaceShapeStore.shared
+    @StateObject private var store = ShapeLocalManager.shared
     
-    @State private var shape: PlaceShape
-    private let originalShape: PlaceShape
+    @State private var shape: ShapeModel
+    private let originalShape: ShapeModel
     
     var onClose: (() -> Void)?
     var onEdit: (() -> Void)?
@@ -31,7 +31,7 @@ struct ShapeDetailView: View {
     @State private var safariURL: URL? = nil
     @State private var showEditSheet = false
     
-    init(shape: PlaceShape, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
+    init(shape: ShapeModel, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
         _shape = State(initialValue: shape)
         self.originalShape = shape
         self.onClose = onClose
@@ -292,10 +292,10 @@ struct HyperlinkTextView: UIViewRepresentable {
 
 // MARK: - Preview
 #Preview("기본") {
-    let dummy = PlaceShape(
+    let dummy = ShapeModel(
         id: UUID(),
         title: "드론 비행연습 및 테스트촬영",
-        baseCoordinate: Coordinate(latitude: 37.5331, longitude: 126.6342),
+        baseCoordinate: CoordinateManager(latitude: 37.5331, longitude: 126.6342),
         radius: 999,
         memo: """
 군 담당자  [ ☎ 031-290-9221 ]

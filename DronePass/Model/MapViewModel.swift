@@ -54,7 +54,7 @@ class MapViewModel: NSObject, ObservableObject {
     }
 
     private func setupShapeStoreObserver() {
-        PlaceShapeStore.shared.$shapes
+        ShapeLocalManager.shared.$shapes
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 // ⭐️ 상태변이 defer 필요 없음 (이미 MainQueue) – but 코어 함수만 사용
@@ -94,7 +94,7 @@ class MapViewModel: NSObject, ObservableObject {
     }
 
     @objc private func handleShapeOverlayTapped(_ notification: Notification) {
-        guard let shape = notification.object as? PlaceShape else { return }
+        guard let shape = notification.object as? ShapeModel else { return }
         
         // 하이라이트 상태 업데이트
         highlightedShapeID = shape.id
@@ -158,13 +158,13 @@ class MapViewModel: NSObject, ObservableObject {
     
     private func shouldSkipMove(for moveData: SavedTableListView.MoveToShapeData) -> Bool {
         guard let shapeID = highlightedShapeID,
-              let currentShape = PlaceShapeStore.shared.shapes.first(where: { $0.id == shapeID }) else {
+              let currentShape = ShapeLocalManager.shared.shapes.first(where: { $0.id == shapeID }) else {
             return false
         }
         return currentShape.baseCoordinate == moveData.coordinate
     }
     
-    private func moveCameraToShape(shapeID: UUID, coordinate: Coordinate, radius: Double, mapView: NMFMapView) {
+    private func moveCameraToShape(shapeID: UUID, coordinate: CoordinateManager, radius: Double, mapView: NMFMapView) {
         let center = NMGLatLng(lat: coordinate.latitude, lng: coordinate.longitude)
         let targetZoom = calculateZoomLevel(for: radius)
         
@@ -214,7 +214,7 @@ class MapViewModel: NSObject, ObservableObject {
         }
     }
 
-    func addOverlay(for shape: PlaceShape, mapView: NMFMapView) {
+    func addOverlay(for shape: ShapeModel, mapView: NMFMapView) {
         switch shape.shapeType {
         case .circle:
             addCircleOverlay(for: shape, mapView: mapView)
@@ -223,7 +223,7 @@ class MapViewModel: NSObject, ObservableObject {
         }
     }
     
-    private func addCircleOverlay(for shape: PlaceShape, mapView: NMFMapView) {
+    private func addCircleOverlay(for shape: ShapeModel, mapView: NMFMapView) {
             guard let radius = shape.radius else { return }
         
             let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
@@ -253,7 +253,7 @@ class MapViewModel: NSObject, ObservableObject {
         }
     }
     
-    private func createCircleOverlay(center: NMGLatLng, radius: Double, shape: PlaceShape) -> NMFCircleOverlay {
+    private func createCircleOverlay(center: NMGLatLng, radius: Double, shape: ShapeModel) -> NMFCircleOverlay {
             let circleOverlay = NMFCircleOverlay()
             circleOverlay.center = center
             circleOverlay.radius = radius
@@ -286,7 +286,7 @@ class MapViewModel: NSObject, ObservableObject {
         // 새로운 오버레이 추가
         guard let mapView = currentMapView else { return }
         
-        let savedShapes = PlaceShapeStore.shared.shapes
+        let savedShapes = ShapeLocalManager.shared.shapes
         for shape in savedShapes {
             addOverlay(for: shape, mapView: mapView)
         }

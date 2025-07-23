@@ -15,11 +15,11 @@ final class ShapeSelectionCoordinator { // 도형 선택을 관리하는 코디�
     static let shapeSelectedOnList = Notification.Name("shapeSelectedOnList") // 리스트에서 도형이 선택되었을 때 사용할 알림 이름을 정의합니다.
     static let shapeSelectedOnMap = Notification.Name("shapeSelectedOnMap") // 지도에서 도형이 선택되었을 때 사용할 알림 이름을 정의합니다.
 
-    func selectShapeOnList(_ shape: PlaceShape) { // 리스트에서 도형이 선택되었을 때 호출되는 메서드입니다.
+    func selectShapeOnList(_ shape: ShapeModel) { // 리스트에서 도형이 선택되었을 때 호출되는 메서드입니다.
         NotificationCenter.default.post(name: Self.shapeSelectedOnList, object: shape) // 선택된 도형 정보를 포함한 알림을 전송합니다.
     }
 
-    func selectShapeOnMap(_ shape: PlaceShape) { // 지도에서 도형이 선택되었을 때 호출되는 메서드입니다.
+    func selectShapeOnMap(_ shape: ShapeModel) { // 지도에서 도형이 선택되었을 때 호출되는 메서드입니다.
         NotificationCenter.default.post(name: Self.shapeSelectedOnMap, object: shape) // 선택된 도형 정보를 포함한 알림을 전송합니다.
     }
 } 

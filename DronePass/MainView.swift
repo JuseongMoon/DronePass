@@ -13,11 +13,11 @@ class MainViewCoordinator: NSObject, ObservableObject {
     @Published var currentAddress: String = ""
     @Published var isSearchingAddress: Bool = false
     @Published var selectedAddress: String = ""
-    @Published var selectedCoordinate: Coordinate?
+    @Published var selectedCoordinate: CoordinateManager?
     
-    var onLongPress: ((Coordinate) -> Void)?
+    var onLongPress: ((CoordinateManager) -> Void)?
     
-    init(onLongPress: ((Coordinate) -> Void)? = nil) {
+    init(onLongPress: ((CoordinateManager) -> Void)? = nil) {
         self.onLongPress = onLongPress
         super.init()
     }
@@ -29,7 +29,7 @@ class MainViewCoordinator: NSObject, ObservableObject {
         
         let point = gesture.location(in: gesture.view)
         let latlng = mapView.projection.latlng(from: point)
-        let coordinate = Coordinate(latitude: latlng.lat, longitude: latlng.lng)
+        let coordinate = CoordinateManager(latitude: latlng.lat, longitude: latlng.lng)
         
         // 주소 조회
         Task {
@@ -58,7 +58,7 @@ class MainViewCoordinator: NSObject, ObservableObject {
                 )
                 await MainActor.run {
                     self.currentAddress = address
-                    let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                    let coord = CoordinateManager(latitude: coordinate.latitude, longitude: coordinate.longitude)
                     self.onLongPress?(coord)
                 }
             } catch {
@@ -69,7 +69,7 @@ class MainViewCoordinator: NSObject, ObservableObject {
     
     func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
         let coordinate = annotation.coordinate
-        let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+        let coord = CoordinateManager(latitude: coordinate.latitude, longitude: coordinate.longitude)
         self.selectedCoordinate = coord
     }
 }
@@ -85,7 +85,7 @@ struct MainView: View {
     @State var mapView: NMFMapView?
     
     // 새 도형 만들기 관련 상태
-    @State private var newShapeCoordinate: Coordinate?
+    @State private var newShapeCoordinate: CoordinateManager?
     @State private var newShapeAddress: String?
     @State private var showShapeEditView = false
     
@@ -153,11 +153,11 @@ struct MainView: View {
                     showShapeEditView = false
                     clearNewShapeData()
                 },
-                originalShape: PlaceShape(
+                originalShape: ShapeModel(
                     id: UUID(),
                     title: "",
                     shapeType: .circle,
-                    baseCoordinate: newShapeCoordinate ?? Coordinate(latitude: 0, longitude: 0), // 임시 좌표
+                    baseCoordinate: newShapeCoordinate ?? CoordinateManager(latitude: 0, longitude: 0), // 임시 좌표
                     radius: nil,
                     memo: nil,
                     address: newShapeAddress,
@@ -195,12 +195,12 @@ struct MainView: View {
                     longitude: location.longitude
                 )
                 // 성공 시, 좌표와 주소를 저장하고 확인창을 띄웁니다.
-                self.newShapeCoordinate = Coordinate(latitude: location.latitude, longitude: location.longitude)
+                self.newShapeCoordinate = CoordinateManager(latitude: location.latitude, longitude: location.longitude)
                 self.newShapeAddress = address
                 self.showNewShapeConfirmAlert = true
             } catch {
                 // 실패 시, 안내 문구를 주소로 설정하고 실패 알림을 띄웁니다.
-                self.newShapeCoordinate = Coordinate(latitude: location.latitude, longitude: location.longitude)
+                self.newShapeCoordinate = CoordinateManager(latitude: location.latitude, longitude: location.longitude)
                 self.newShapeAddress = "해당 위치의 주소가 존재하지 않습니다"
                 self.showGeocodingFailedAlert = true
             }
@@ -231,7 +231,7 @@ struct MainView: View {
         }
 
         NotificationCenter.default.addObserver(forName: Notification.Name("ShapeOverlayTapped"), object: nil, queue: .main) { notification in
-            if let shape = notification.object as? PlaceShape {
+            if let shape = notification.object as? ShapeModel {
                 // ⭐️ 상태변이 반드시 defer
                 DispatchQueue.main.async {
                     viewModel.highlightedShapeID = shape.id

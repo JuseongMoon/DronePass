@@ -7,61 +7,13 @@
 
 import SwiftUI
 
-class CoordinateViewModel: ObservableObject {
-    @Published var coordinateText: String = ""
-    @Published var coordinateValidation: String = ""
-    @Published var isCoordinateValid = true
-    @Published var isSearching = false
-    @Published var errorMessage: String?
-    @Published var address: String?
-    @Published var parsedCoordinate: Coordinate?
-    @Published var showAddressNotFoundAlert = false
-    
-    func validateAndSearch() async {
-        if let coordinate = Coordinate.parse(coordinateText) {
-            coordinateValidation = "유효한 좌표 형식입니다"
-            isCoordinateValid = true
-            parsedCoordinate = coordinate
-            
-            // Reverse Geocoding 수행
-            await reverseGeocode(coordinate: coordinate)
-        } else {
-            coordinateValidation = "잘못된 좌표 형식입니다"
-            isCoordinateValid = false
-            address = nil
-            parsedCoordinate = nil
-        }
-    }
-    
-    @MainActor
-    private func reverseGeocode(coordinate: Coordinate) async {
-        isSearching = true
-        errorMessage = nil
-        address = nil
-        
-        do {
-            // Double 타입의 위도, 경도 값을 직접 전달
-            let address = try await NaverGeocodingService.shared.reverseGeocode(
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
-            self.address = address
-        } catch {
-            // 주소 검색 실패 시 알림창 표시
-            self.showAddressNotFoundAlert = true
-            print("[좌표검색] 에러 발생: \(error)")
-        }
-        
-        isSearching = false
-    }
-}
 
 struct CoordinateView: View {
     @Environment(\.dismiss) private var dismiss
-    @StateObject private var viewModel = CoordinateViewModel()
+    @StateObject private var viewModel = SearchCoordinateViewModel()
     @FocusState private var isFocused: Bool
     
-    var onSelectCoordinate: ((Coordinate, String) -> Void)?
+    var onSelectCoordinate: ((CoordinateManager, String) -> Void)?
     
     var body: some View {
         NavigationView {
@@ -182,7 +134,7 @@ struct CoordinateView: View {
 
 struct AddressResultView: View {
     let address: String
-    let coordinate: Coordinate
+    let coordinate: CoordinateManager
     let originalText: String
     let onSelect: () -> Void
     

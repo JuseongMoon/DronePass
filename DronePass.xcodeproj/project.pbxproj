@@ -12,12 +12,10 @@
 		631AB35B2DD389FC005AA749 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = 631AB35A2DD389FC005AA749 /* NMapsMap */; };
 		632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */; };
 		632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 632D56F32E05C23D0029ADE5 /* AppInfoView.swift */; };
-		6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CA2DF9885B00089659 /* SavedTableListView.swift */; };
 		6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */; };
 		6337C4D12DF98F4E00089659 /* ShapeEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6337C4D02DF98F4E00089659 /* ShapeEditView.swift */; };
 		633F13AA2DF8340400BBDD38 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13A92DF8340400BBDD38 /* MainView.swift */; };
 		633F13C82DF842F300BBDD38 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13C62DF842F300BBDD38 /* MapViewModel.swift */; };
-		633F13C92DF842F300BBDD38 /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13C72DF842F300BBDD38 /* NaverMapView.swift */; };
 		633F13CB2DF885DB00BBDD38 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CA2DF885DB00BBDD38 /* MainTabView.swift */; };
 		633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CC2DF888C700BBDD38 /* DronePassApp.swift */; };
 		633F13CF2DF8941600BBDD38 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 633F13CE2DF8941600BBDD38 /* SettingView.swift */; };
@@ -29,18 +27,22 @@
 		634E3FBF2E2E7E5600C60E43 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */; };
 		634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634E3FC12E2E96C000C60E43 /* LoginManager.swift */; };
 		6362E56A2E2F8FF400402B39 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E5692E2F8FF400402B39 /* ProfileView.swift */; };
-		6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchingAddressView.swift */; };
+		6362E56C2E2FD22A00402B39 /* ShapeFirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */; };
+		6362E56E2E2FD2B600402B39 /* CoordinateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E56D2E2FD2B100402B39 /* CoordinateViewModel.swift */; };
+		6362E5702E2FD7CD00402B39 /* SearchAddressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E56F2E2FD7C400402B39 /* SearchAddressViewModel.swift */; };
+		6362E5722E2FD8D000402B39 /* ShapeEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E5712E2FD8C800402B39 /* ShapeEditViewModel.swift */; };
+		6383D99D2E0298C60033550D /* SearchAddressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6383D99C2E0298C60033550D /* SearchAddressView.swift */; };
 		63970D3F2DE9C93400E11238 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 63970D302DE9C93400E11238 /* Assets.xcassets */; };
-		63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* PlaceShape.swift */; };
+		63970D462DE9C93400E11238 /* ShapeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D222DE9C93400E11238 /* ShapeModel.swift */; };
 		63970D482DE9C93400E11238 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1F2DE9C93400E11238 /* LocationManager.swift */; };
 		63970D492DE9C93400E11238 /* ColorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1D2DE9C93400E11238 /* ColorManager.swift */; };
 		63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */; };
 		63970D582DE9C93400E11238 /* AppInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D2F2DE9C93400E11238 /* AppInfo.swift */; };
-		63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1E2DE9C93400E11238 /* Coordinate.swift */; };
+		63970D5B2DE9C93400E11238 /* CoordinateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1E2DE9C93400E11238 /* CoordinateManager.swift */; };
 		63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D242DE9C93400E11238 /* SettingManager.swift */; };
 		63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D102DE9C93400E11238 /* NaverGeocodingService.swift */; };
 		63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D252DE9C93400E11238 /* ShapeManager.swift */; };
-		63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */; };
+		63970D682DE9C93400E11238 /* ShapeLocalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D1A2DE9C93400E11238 /* ShapeLocalManager.swift */; };
 		63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */; };
 		63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63970D212DE9C93400E11238 /* NotiName.swift */; };
 		63AB0F8A2E1D5ADF001F304E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F892E1D5ADF001F304E /* LoginView.swift */; };
@@ -48,6 +50,8 @@
 		63AB0F8E2E1D64AC001F304E /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */; };
 		63AB0F902E1D64EF001F304E /* LocationTermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */; };
 		63AB0F922E1D69E7001F304E /* TermsAndPoliciesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */; };
+		63BD52E02E30948B0048B7EB /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52DE2E30948B0048B7EB /* NaverMapView.swift */; };
+		63BD52E22E3095540048B7EB /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52E12E3095540048B7EB /* SavedTableListView.swift */; };
 		63C2D7E02E0EC20E006FFF21 /* DateTimeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */; };
 		63C805A12DE30E9000F3428B /* Solar in Frameworks */ = {isa = PBXBuildFile; productRef = 63C805A02DE30E9000F3428B /* Solar */; };
 		63D1F39C2E0AB5B700E1E51E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */; };
@@ -59,12 +63,10 @@
 		630384CA2E02C716007684D1 /* CoordinateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateView.swift; sourceTree = "<group>"; };
 		632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchNotesView.swift; sourceTree = "<group>"; };
 		632D56F32E05C23D0029ADE5 /* AppInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfoView.swift; sourceTree = "<group>"; };
-		6337C4CA2DF9885B00089659 /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
 		6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeDetailView.swift; sourceTree = "<group>"; };
 		6337C4D02DF98F4E00089659 /* ShapeEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeEditView.swift; sourceTree = "<group>"; };
 		633F13A92DF8340400BBDD38 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		633F13C62DF842F300BBDD38 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
-		633F13C72DF842F300BBDD38 /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
 		633F13CA2DF885DB00BBDD38 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		633F13CC2DF888C700BBDD38 /* DronePassApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DronePassApp.swift; sourceTree = "<group>"; };
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
@@ -72,16 +74,20 @@
 		634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		634E3FC12E2E96C000C60E43 /* LoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginManager.swift; sourceTree = "<group>"; };
 		6362E5692E2F8FF400402B39 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		6383D99C2E0298C60033550D /* SearchingAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchingAddressView.swift; sourceTree = "<group>"; };
+		6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeFirebaseManager.swift; sourceTree = "<group>"; };
+		6362E56D2E2FD2B100402B39 /* CoordinateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateViewModel.swift; sourceTree = "<group>"; };
+		6362E56F2E2FD7C400402B39 /* SearchAddressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchAddressViewModel.swift; sourceTree = "<group>"; };
+		6362E5712E2FD8C800402B39 /* ShapeEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeEditViewModel.swift; sourceTree = "<group>"; };
+		6383D99C2E0298C60033550D /* SearchAddressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchAddressView.swift; sourceTree = "<group>"; };
 		63970D0F2DE9C93400E11238 /* DateFormatter+Korean.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateFormatter+Korean.swift"; sourceTree = "<group>"; };
 		63970D102DE9C93400E11238 /* NaverGeocodingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverGeocodingService.swift; sourceTree = "<group>"; };
 		63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeSelectionCoordinator.swift; sourceTree = "<group>"; };
-		63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShapeStore.swift; sourceTree = "<group>"; };
+		63970D1A2DE9C93400E11238 /* ShapeLocalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeLocalManager.swift; sourceTree = "<group>"; };
 		63970D1D2DE9C93400E11238 /* ColorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorManager.swift; sourceTree = "<group>"; };
-		63970D1E2DE9C93400E11238 /* Coordinate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinate.swift; sourceTree = "<group>"; };
+		63970D1E2DE9C93400E11238 /* CoordinateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateManager.swift; sourceTree = "<group>"; };
 		63970D1F2DE9C93400E11238 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		63970D212DE9C93400E11238 /* NotiName.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotiName.swift; sourceTree = "<group>"; };
-		63970D222DE9C93400E11238 /* PlaceShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceShape.swift; sourceTree = "<group>"; };
+		63970D222DE9C93400E11238 /* ShapeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeModel.swift; sourceTree = "<group>"; };
 		63970D242DE9C93400E11238 /* SettingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingManager.swift; sourceTree = "<group>"; };
 		63970D252DE9C93400E11238 /* ShapeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeManager.swift; sourceTree = "<group>"; };
 		63970D2F2DE9C93400E11238 /* AppInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppInfo.swift; sourceTree = "<group>"; };
@@ -93,6 +99,8 @@
 		63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTermsView.swift; sourceTree = "<group>"; };
 		63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPoliciesView.swift; sourceTree = "<group>"; };
+		63BD52DE2E30948B0048B7EB /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
+		63BD52E12E3095540048B7EB /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTimeSelectionView.swift; sourceTree = "<group>"; };
 		63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -129,10 +137,11 @@
 		630379692E0A8D5E00F0A84D /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				63BD52DE2E30948B0048B7EB /* NaverMapView.swift */,
 				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
-				63970D1E2DE9C93400E11238 /* Coordinate.swift */,
+				63970D1E2DE9C93400E11238 /* CoordinateManager.swift */,
 				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
 				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
 				63970D252DE9C93400E11238 /* ShapeManager.swift */,
@@ -186,8 +195,9 @@
 		634E3FC62E2E978600C60E43 /* Shape */ = {
 			isa = PBXGroup;
 			children = (
-				63970D222DE9C93400E11238 /* PlaceShape.swift */,
-				63970D1A2DE9C93400E11238 /* PlaceShapeStore.swift */,
+				6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */,
+				63970D222DE9C93400E11238 /* ShapeModel.swift */,
+				63970D1A2DE9C93400E11238 /* ShapeLocalManager.swift */,
 				634E3FC82E2E982B00C60E43 /* View */,
 			);
 			path = Shape;
@@ -204,10 +214,14 @@
 		634E3FC82E2E982B00C60E43 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				63BD52E12E3095540048B7EB /* SavedTableListView.swift */,
 				6337C4CE2DF98ECA00089659 /* ShapeDetailView.swift */,
 				6337C4D02DF98F4E00089659 /* ShapeEditView.swift */,
-				6383D99C2E0298C60033550D /* SearchingAddressView.swift */,
+				6362E5712E2FD8C800402B39 /* ShapeEditViewModel.swift */,
+				6383D99C2E0298C60033550D /* SearchAddressView.swift */,
+				6362E56F2E2FD7C400402B39 /* SearchAddressViewModel.swift */,
 				630384CA2E02C716007684D1 /* CoordinateView.swift */,
+				6362E56D2E2FD2B100402B39 /* CoordinateViewModel.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -226,8 +240,6 @@
 				634E3FC02E2E96AF00C60E43 /* Login */,
 				630379692E0A8D5E00F0A84D /* Core */,
 				634E3FC52E2E976200C60E43 /* Setting */,
-				633F13C72DF842F300BBDD38 /* NaverMapView.swift */,
-				6337C4CA2DF9885B00089659 /* SavedTableListView.swift */,
 				634E3FC62E2E978600C60E43 /* Shape */,
 				630379682E0A8D4C00F0A84D /* Model */,
 				634E3FC32E2E974600C60E43 /* Extension */,
@@ -349,21 +361,22 @@
 				63AB0F8E2E1D64AC001F304E /* TermsOfServiceView.swift in Sources */,
 				630384C92E02B391007684D1 /* NaverGeocodingModels.swift in Sources */,
 				633F13C82DF842F300BBDD38 /* MapViewModel.swift in Sources */,
-				633F13C92DF842F300BBDD38 /* NaverMapView.swift in Sources */,
+				6362E56C2E2FD22A00402B39 /* ShapeFirebaseManager.swift in Sources */,
+				6362E5702E2FD7CD00402B39 /* SearchAddressViewModel.swift in Sources */,
 				63AB0F8C2E1D649A001F304E /* PrivacyPolicyView.swift in Sources */,
-				63970D462DE9C93400E11238 /* PlaceShape.swift in Sources */,
+				63970D462DE9C93400E11238 /* ShapeModel.swift in Sources */,
 				6337C4D12DF98F4E00089659 /* ShapeEditView.swift in Sources */,
 				63970D482DE9C93400E11238 /* LocationManager.swift in Sources */,
+				6362E5722E2FD8D000402B39 /* ShapeEditViewModel.swift in Sources */,
 				633F13CF2DF8941600BBDD38 /* SettingView.swift in Sources */,
 				63970D492DE9C93400E11238 /* ColorManager.swift in Sources */,
 				632D56F02E05B0B90029ADE5 /* PatchNotesView.swift in Sources */,
 				63970D542DE9C93400E11238 /* DateFormatter+Korean.swift in Sources */,
 				6362E56A2E2F8FF400402B39 /* ProfileView.swift in Sources */,
-				6383D99D2E0298C60033550D /* SearchingAddressView.swift in Sources */,
+				6383D99D2E0298C60033550D /* SearchAddressView.swift in Sources */,
 				63970D582DE9C93400E11238 /* AppInfo.swift in Sources */,
 				63C2D7E02E0EC20E006FFF21 /* DateTimeSelectionView.swift in Sources */,
-				6337C4CB2DF9885B00089659 /* SavedTableListView.swift in Sources */,
-				63970D5B2DE9C93400E11238 /* Coordinate.swift in Sources */,
+				63970D5B2DE9C93400E11238 /* CoordinateManager.swift in Sources */,
 				63AB0F902E1D64EF001F304E /* LocationTermsView.swift in Sources */,
 				632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
@@ -372,9 +385,12 @@
 				634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
+				63BD52E22E3095540048B7EB /* SavedTableListView.swift in Sources */,
 				6337C4CF2DF98ECA00089659 /* ShapeDetailView.swift in Sources */,
-				63970D682DE9C93400E11238 /* PlaceShapeStore.swift in Sources */,
+				6362E56E2E2FD2B600402B39 /* CoordinateViewModel.swift in Sources */,
+				63970D682DE9C93400E11238 /* ShapeLocalManager.swift in Sources */,
 				633F13AA2DF8340400BBDD38 /* MainView.swift in Sources */,
+				63BD52E02E30948B0048B7EB /* NaverMapView.swift in Sources */,
 				63970D692DE9C93400E11238 /* ShapeSelectionCoordinator.swift in Sources */,
 				633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */,
 				633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */,
@@ -395,7 +411,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -432,7 +448,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 34;
+				CURRENT_PROJECT_VERSION = 36;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;

@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct SavedTableListView: View {
-    @StateObject private var placeShapeStore = PlaceShapeStore.shared
+    @StateObject private var placeShapeStore = ShapeLocalManager.shared
     @Binding var selectedShapeID: UUID?
     @Binding var shapeIDToScrollTo: UUID?
     
@@ -19,11 +19,11 @@ struct SavedTableListView: View {
     
     // MARK: - Notification Data Structure
     struct MoveToShapeData {
-        let coordinate: Coordinate
+        let coordinate: CoordinateManager
         let radius: Double
         let shapeID: UUID
         
-        init(coordinate: Coordinate, radius: Double, shapeID: UUID) {
+        init(coordinate: CoordinateManager, radius: Double, shapeID: UUID) {
             self.coordinate = coordinate
             self.radius = radius
             self.shapeID = shapeID
@@ -121,7 +121,7 @@ private struct EmptyStateView: View {
 
 // MARK: - ShapeListContent
 private struct ShapeListContent: View {
-    let shapes: [PlaceShape]
+    let shapes: [ShapeModel]
     @Binding var selectedShapeID: UUID?
     let onDelete: (IndexSet) -> Void
     
@@ -136,7 +136,7 @@ private struct ShapeListContent: View {
 
 // MARK: - ShapeListRow
 private struct ShapeListRow: View {
-    let shape: PlaceShape
+    let shape: ShapeModel
     @Binding var selectedShapeID: UUID?
     @State private var showingDetailView = false
     
@@ -212,7 +212,7 @@ private struct ShapeColorIndicator: View {
 }
 
 private struct ShapeInfoContent: View {
-    let shape: PlaceShape
+    let shape: ShapeModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -270,7 +270,7 @@ private struct ColorRectangle: View {
 }
 
 private struct ShapeInfo: View {
-    let shape: PlaceShape
+    let shape: ShapeModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -303,46 +303,46 @@ private struct ShapeInfo: View {
         .onAppear {
             // Canvas에서 더미 데이터 추가
             let dummyShapes = [
-                PlaceShape(
+                ShapeModel(
                     title: "드론 비행 구역 A",
                     shapeType: .circle,
-                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 500.0,
                     address: "서울특별시 중구 세종대로 110",
                     expireDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
                     color: "#FF6B6B"
                 ),
-                PlaceShape(
+                ShapeModel(
                     title: "헬기 착륙장",
                     shapeType: .circle,
-                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 300.0,
                     address: "서울특별시 강남구 테헤란로 152",
                     expireDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
                     color: "#4ECDC4"
                 ),
-                PlaceShape(
+                ShapeModel(
                     title: "공사 현장",
                     shapeType: .circle,
-                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 800.0,
                     address: "서울특별시 마포구 와우산로 94",
                     expireDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
                     color: "#45B7D1"
                 ),
-                PlaceShape(
+                ShapeModel(
                     title: "이벤트 공간",
                     shapeType: .circle,
-                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 200.0,
                     address: "서울특별시 종로구 종로 1---------------------",
                     expireDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
                     color: "#96CEB4"
                 ),
-                PlaceShape(
+                ShapeModel(
                     title: "보안 구역",
                     shapeType: .circle,
-                    baseCoordinate: Coordinate(latitude: 37.5665, longitude: 126.9780),
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 100000.0,
                     address: "서울특별시 용산구 이태원로 27",
                     expireDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
@@ -350,7 +350,7 @@ private struct ShapeInfo: View {
                 )
             ]
             
-            PlaceShapeStore.shared.shapes = dummyShapes
+            ShapeLocalManager.shared.shapes = dummyShapes
         }
 }
 
@@ -360,7 +360,7 @@ private struct ShapeInfo: View {
         shapeIDToScrollTo: .constant(nil)
     )
         .onAppear {
-            PlaceShapeStore.shared.shapes = []
+            ShapeLocalManager.shared.shapes = []
         }
 }
 

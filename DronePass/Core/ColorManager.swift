@@ -75,7 +75,7 @@ final class ColorManager {
     
     /// 첫 번째 도형의 색상값을 동기화하는 함수 (옵저버에서도 호출)
     @objc func syncFirstShapeColor() {
-        if let firstShape = PlaceShapeStore.shared.shapes.first,
+        if let firstShape = ShapeLocalManager.shared.shapes.first,
            let color = PaletteColor.allCases.first(where: { $0.hex.lowercased() == firstShape.color.lowercased() }) {
             firstShapeColor = color
         } else {
