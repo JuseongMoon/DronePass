@@ -68,15 +68,17 @@ struct LoginView: View {
                         }
                         .font(.footnote)
                         .foregroundColor(.blue)
-                        Text(", ")
-                            .font(.footnote)
-                            .foregroundColor(.secondary)
-                        Button(action: { showLocationTerms = true }) {
-                            Text("위치기반 서비스 이용약관")
-                                .underline()
-                        }
-                        .font(.footnote)
-                        .foregroundColor(.blue)
+                        
+                        /// 위치기반서비스 미활용으로 인한 비활성화
+//                        Text(", ")
+//                            .font(.footnote)
+//                            .foregroundColor(.secondary)
+//                        Button(action: { showLocationTerms = true }) {
+//                            Text("위치기반 서비스 이용약관")
+//                                .underline()
+//                        }
+//                        .font(.footnote)
+//                        .foregroundColor(.blue)
                         Text("에")
                             .font(.footnote)
                             .foregroundColor(.secondary)
@@ -102,7 +104,9 @@ struct LoginView: View {
                 Group {
                     NavigationLink(destination: TermsOfServiceView(), isActive: $showTerms) { EmptyView() }.hidden()
                     NavigationLink(destination: PrivacyPolicyView(), isActive: $showPrivacy) { EmptyView() }.hidden()
-                    NavigationLink(destination: LocationTermsView(), isActive: $showLocationTerms) { EmptyView() }.hidden()
+                    
+                    /// 위치기반서비스 미활용으로 인한 비활성화
+//                    NavigationLink(destination: LocationTermsView(), isActive: $showLocationTerms) { EmptyView() }.hidden()
                 }
             )
             .alert(isPresented: Binding<Bool>(get: { loginManager.loginError != nil }, set: { _ in loginManager.loginError = nil })) {

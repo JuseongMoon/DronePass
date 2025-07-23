@@ -124,12 +124,6 @@ struct SettingView: View {
                 } label: {
                     Text("패치노트")
                 }
-                // 약관 및 정책 버튼 추가
-                Button {
-                    showTermsAndPolicies = true
-                } label: {
-                    Text("약관 및 정책")
-                }
             } header: {
                 Text("기타")
             }
@@ -137,16 +131,6 @@ struct SettingView: View {
         // 모든 기기에서 sheet로 LoginView 표시
         .sheet(isPresented: $showLoginSheet) {
             LoginView()
-        }
-        .sheet(isPresented: $showTermsAndPolicies) {
-            NavigationView {
-                TermsAndPoliciesView()
-                    .navigationTitle("약관 및 정책")
-                    .navigationBarTitleDisplayMode(.inline)
-            }
-            .if(UIDevice.current.userInterfaceIdiom == .phone) { view in
-                view.presentationDetents([.fraction(0.5)])
-            }
         }
     }
 }

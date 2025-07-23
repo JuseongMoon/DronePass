@@ -49,7 +49,6 @@
 		63AB0F8C2E1D649A001F304E /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */; };
 		63AB0F8E2E1D64AC001F304E /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */; };
 		63AB0F902E1D64EF001F304E /* LocationTermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */; };
-		63AB0F922E1D69E7001F304E /* TermsAndPoliciesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */; };
 		63BD52E02E30948B0048B7EB /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52DE2E30948B0048B7EB /* NaverMapView.swift */; };
 		63BD52E22E3095540048B7EB /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52E12E3095540048B7EB /* SavedTableListView.swift */; };
 		63C2D7E02E0EC20E006FFF21 /* DateTimeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */; };
@@ -98,7 +97,6 @@
 		63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTermsView.swift; sourceTree = "<group>"; };
-		63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsAndPoliciesView.swift; sourceTree = "<group>"; };
 		63BD52DE2E30948B0048B7EB /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
 		63BD52E12E3095540048B7EB /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,14 +167,11 @@
 		634E3FC42E2E975E00C60E43 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */,
-				63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */,
-				63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */,
+				63BD52E32E30B70A0048B7EB /* Terms */,
 				63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */,
 				633F13CE2DF8941600BBDD38 /* SettingView.swift */,
 				632D56F32E05C23D0029ADE5 /* AppInfoView.swift */,
 				632D56EF2E05B0B90029ADE5 /* PatchNotesView.swift */,
-				63AB0F912E1D69E7001F304E /* TermsAndPoliciesView.swift */,
 				633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */,
 				6362E5692E2F8FF400402B39 /* ProfileView.swift */,
 			);
@@ -246,6 +241,16 @@
 				634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */,
 			);
 			path = DronePass;
+			sourceTree = "<group>";
+		};
+		63BD52E32E30B70A0048B7EB /* Terms */ = {
+			isa = PBXGroup;
+			children = (
+				63AB0F8D2E1D64AC001F304E /* TermsOfServiceView.swift */,
+				63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */,
+				63AB0F8B2E1D649A001F304E /* PrivacyPolicyView.swift */,
+			);
+			path = Terms;
 			sourceTree = "<group>";
 		};
 		63C057392DD2F6530044CF9B = {
@@ -381,7 +386,6 @@
 				632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63AB0F8A2E1D5ADF001F304E /* LoginView.swift in Sources */,
-				63AB0F922E1D69E7001F304E /* TermsAndPoliciesView.swift in Sources */,
 				634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeManager.swift in Sources */,
@@ -411,7 +415,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -448,7 +452,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 36;
+				CURRENT_PROJECT_VERSION = 37;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
