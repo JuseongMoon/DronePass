@@ -174,31 +174,93 @@ class AuthManager {
         // 실시간 백업이 활성화되어 있는지 확인
         if SettingManager.shared.isCloudBackupEnabled {
             do {
-                // 1. 먼저 로컬의 모든 데이터(삭제된 도형 포함)를 Firebase에 업로드
-                print("📤 로그인 시 로컬 데이터를 Firebase에 먼저 업로드...")
-                let allLocalShapes = await MainActor.run {
-                    // ShapeFileStore에서 모든 도형 데이터를 직접 파일에서 로드 (삭제된 도형 포함)
-                    return ShapeFileStore.shared.getAllShapesIncludingDeleted()
+                // 1. 로컬 데이터 상태 확인
+                let localShapes = await MainActor.run {
+                    return ShapeFileStore.shared.shapes
+                }
+                let hasLocalData = !localShapes.isEmpty
+                
+                // 2. 마지막 동기화 시간 확인
+                let lastSyncTime = UserDefaults.standard.object(forKey: "lastSyncTime") as? Date ?? Date.distantPast
+                let isFirstSync = lastSyncTime == Date.distantPast
+                
+                // 3. 로컬 변경사항 확인
+                let hasLocalChanges = await MainActor.run {
+                    return UserDefaults.standard.object(forKey: "lastLocalModificationTime") != nil
                 }
                 
-                if !allLocalShapes.isEmpty {
-                    try await ShapeFirebaseStore.shared.saveShapes(allLocalShapes)
-                    print("✅ 로컬 데이터 Firebase 업로드 완료: \(allLocalShapes.count)개 (삭제된 도형 포함)")
+                print("🔍 동기화 상태 분석:")
+                print("   - 로컬 데이터: \(localShapes.count)개")
+                print("   - 첫 동기화: \(isFirstSync ? "예" : "아니오")")
+                print("   - 로컬 변경사항: \(hasLocalChanges ? "있음" : "없음")")
+                
+                // 4. 동기화 전략 결정
+                if hasLocalData && (isFirstSync || hasLocalChanges) {
+                    // 로컬 데이터가 있고 첫 동기화이거나 변경사항이 있는 경우
+                    print("📤 로컬 데이터를 Firebase에 우선 업로드합니다...")
+                    
+                    let allLocalShapes = await MainActor.run {
+                        return ShapeFileStore.shared.getAllShapesIncludingDeleted()
+                    }
+                    
+                    if !allLocalShapes.isEmpty {
+                        try await ShapeFirebaseStore.shared.saveShapes(allLocalShapes)
+                        print("✅ 로컬 데이터 Firebase 업로드 완료: \(allLocalShapes.count)개 (삭제된 도형 포함)")
+                        
+                        // 변경 추적 초기화
+                        await MainActor.run {
+                            UserDefaults.standard.removeObject(forKey: "lastLocalModificationTime")
+                        }
+                    }
+                    
+                    // 업로드 후 Firebase에서 최신 데이터 다운로드 (다른 기기 데이터 포함)
+                    print("📥 Firebase에서 최신 데이터 다운로드 시작...")
+                    let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
+                    
+                    print("📥 Firebase 데이터로 로컬 업데이트합니다...")
+                    await MainActor.run {
+                        ShapeFileStore.shared.shapes = firebaseShapes
+                        ShapeFileStore.shared.saveShapes()
+                    }
+                    print("✅ Firebase 데이터로 로컬 업데이트 완료: \(firebaseShapes.count)개")
+                    
+                } else if !hasLocalData {
+                    // 로컬 데이터가 없는 경우 Firebase에서 다운로드
+                    print("📝 로컬 데이터가 없어 Firebase에서 데이터를 다운로드합니다...")
+                    
+                    print("📥 Firebase에서 도형 데이터 다운로드 시작...")
+                    let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
+                    
+                    print("📥 Firebase 데이터로 로컬 업데이트합니다...")
+                    await MainActor.run {
+                        ShapeFileStore.shared.shapes = firebaseShapes
+                        ShapeFileStore.shared.saveShapes()
+                    }
+                    print("✅ Firebase 데이터로 로컬 업데이트 완료: \(firebaseShapes.count)개")
+                    
+                } else {
+                    // 로컬 데이터가 있고 변경사항이 없는 경우 변경사항만 확인
+                    print("📝 로컬 데이터가 있고 변경사항이 없어 변경사항만 확인합니다...")
+                    
+                    // Firebase에서 변경사항 확인
+                    let hasChanges = try await ShapeFirebaseStore.shared.hasChanges()
+                    
+                    if hasChanges {
+                        print("🔄 Firebase에 변경사항이 감지되어 다운로드합니다...")
+                        let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
+                        
+                        await MainActor.run {
+                            ShapeFileStore.shared.shapes = firebaseShapes
+                            ShapeFileStore.shared.saveShapes()
+                        }
+                        print("✅ 변경사항 다운로드 완료: \(firebaseShapes.count)개")
+                    } else {
+                        print("✅ 변경사항이 없어 동기화를 건너뜁니다.")
+                    }
                 }
                 
-                // 2. Firebase에서 최신 데이터를 로컬로 다운로드 (deletedAt 필터링 포함)
-                print("📥 Firebase에서 도형 데이터 다운로드 시작...")
-                let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
-                
-                // 3. 로컬 데이터를 Firebase 데이터로 업데이트
-                print("📥 Firebase 데이터로 로컬 업데이트합니다...")
-                await MainActor.run {
-                    ShapeFileStore.shared.shapes = firebaseShapes
-                    ShapeFileStore.shared.saveShapes()
-                }
-                print("✅ Firebase 데이터로 로컬 업데이트 완료: \(firebaseShapes.count)개")
-                
-                // 백업 시간 저장
+                // 동기화 시간 업데이트
+                UserDefaults.standard.set(Date(), forKey: "lastSyncTime")
                 UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
                 
             } catch {

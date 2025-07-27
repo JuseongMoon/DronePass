@@ -83,7 +83,10 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 try await batch.commit()
             }
             
-            print("✅ Firebase에 도형 데이터 저장 성공: \(shapes.count)개")
+            // 서버 메타데이터 업데이트 (마지막 수정 시간)
+            try await self.updateServerMetadata()
+            
+            print("✅ Firebase에 도형 데이터 저장 및 메타데이터 업데이트 성공: \(shapes.count)개")
         }
     }
     
@@ -100,7 +103,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             
             let data = try self.shapeToFirestoreData(shape)
             try await collection.document(shape.id.uuidString).setData(data)
-            print("✅ Firebase에 도형 추가 성공: \(shape.title)")
+            
+            // 서버 메타데이터 업데이트
+            try await self.updateServerMetadata()
+            
+            print("✅ Firebase에 도형 추가 및 메타데이터 업데이트 성공: \(shape.title)")
         }
     }
     
@@ -116,7 +123,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             ]
             
             try await collection.document(id.uuidString).setData(data, merge: true)
-            print("✅ Firebase에서 도형 soft delete 성공: \(id)")
+            
+            // 서버 메타데이터 업데이트
+            try await self.updateServerMetadata()
+            
+            print("✅ Firebase에서 도형 soft delete 및 메타데이터 업데이트 성공: \(id)")
         }
     }
     
@@ -133,7 +144,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             
             let data = try self.shapeToFirestoreData(shape)
             try await collection.document(shape.id.uuidString).setData(data, merge: true)
-            print("✅ Firebase에서 도형 수정 성공: \(shape.title)")
+            
+            // 서버 메타데이터 업데이트
+            try await self.updateServerMetadata()
+            
+            print("✅ Firebase에서 도형 수정 및 메타데이터 업데이트 성공: \(shape.title)")
         }
     }
     
@@ -162,6 +177,41 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 print("✅ Firebase에서 만료된 도형 삭제 성공: \(deletedCount)개")
             }
         }
+    }
+    
+    // MARK: - Server Metadata Methods
+    
+    /// 서버 메타데이터 업데이트 (마지막 수정 시간)
+    private func updateServerMetadata() async throws {
+        try await performWithRetry {
+            let metadataRef = self.db.collection("metadata").document("server")
+            try await metadataRef.setData([
+                "lastModified": Timestamp(date: Date())
+            ])
+        }
+    }
+    
+    /// 서버의 마지막 수정 시간 가져오기
+    func getServerLastModifiedTime() async throws -> Date {
+        try await performWithRetry {
+            let metadataRef = self.db.collection("metadata").document("server")
+            let document = try await metadataRef.getDocument()
+            
+            if let timestamp = document.data()?["lastModified"] as? Timestamp {
+                return timestamp.dateValue()
+            } else {
+                // 메타데이터가 없으면 과거 시간 반환 (변경사항 없음으로 처리)
+                return Date.distantPast
+            }
+        }
+    }
+    
+    /// 변경사항이 있는지 확인
+    func hasChanges() async throws -> Bool {
+        let serverLastModified = try await getServerLastModifiedTime()
+        let localLastSync = UserDefaults.standard.object(forKey: "lastSyncTime") as? Date ?? Date.distantPast
+        
+        return serverLastModified > localLastSync
     }
     
     // MARK: - Helper Methods

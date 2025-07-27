@@ -58,6 +58,11 @@ struct ColorPickerView: View {
                     selectedColor = color
                     // 전체 도형 색상 변경
                     ShapeFileStore.shared.updateAllShapesColor(to: color.hex)
+                    
+                    // 로컬 변경 사항 추적
+                    UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+                    print("✅ 도형 색상 변경 및 로컬 변경 추적 기록")
+                    
                     ColorManager.shared.defaultColor = color
                     onColorSelected(color)
                     presentationMode.wrappedValue.dismiss()

@@ -28,6 +28,16 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     
     return true
   }
+  
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    // 앱이 포그라운드로 올 때 변경사항 체크
+    ChangeDetectionManager.shared.checkForChangesIfNeeded()
+  }
+  
+  func applicationWillResignActive(_ application: UIApplication) {
+    // 앱이 백그라운드로 갈 때 변경사항 체크 상태 리셋
+    ChangeDetectionManager.shared.resetCheckStatus()
+  }
 }
 
 

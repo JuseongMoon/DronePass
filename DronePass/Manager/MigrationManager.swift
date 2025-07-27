@@ -94,13 +94,43 @@ final class MigrationManager {
             // 3: performV3Migration
         ]
         
-        /// 버전 1 마이그레이션: 날짜 필드 구조 변경
+        /// 버전 1 마이그레이션: 날짜 필드 구조 변경 + 변경사항 감지 시스템 초기화
         /// startedAt/expireDate → createdAt/flightStartDate/flightEndDate/deletedAt
+        /// 변경사항 감지 시스템 초기화
         static func performV1Migration() {
-            print("📝 [Shape v1] 마이그레이션: 날짜 필드 구조 변경")
+            print("📝 [Shape v1] 마이그레이션: 날짜 필드 구조 변경 + 변경사항 감지 시스템 초기화")
             print("   startedAt/expireDate → createdAt/flightStartDate/flightEndDate/deletedAt")
+            print("   변경사항 감지 시스템 초기화")
+            
+            // 변경사항 감지 시스템 초기화
+            initializeChangeDetectionSystem()
+            
             // 실제 마이그레이션 로직은 ShapeModel의 커스텀 디코딩에서 처리
             // 여기서는 전역적인 마이그레이션 작업만 수행 (예: 설정 초기화 등)
+        }
+        
+        /// 변경사항 감지 시스템 초기화
+        private static func initializeChangeDetectionSystem() {
+            // 기존 로컬 데이터가 있는지 확인
+            let existingShapes = ShapeFileStore.shared.shapes
+            let hasExistingData = !existingShapes.isEmpty
+            
+            if hasExistingData {
+                // 기존 데이터가 있으면 과거 시간으로 설정하여 로컬 데이터가 우선적으로 업로드되도록 함
+                UserDefaults.standard.set(Date.distantPast, forKey: "lastSyncTime")
+                print("📝 기존 로컬 데이터 감지: \(existingShapes.count)개 도형")
+                print("   → 로컬 데이터 우선 업로드 모드로 설정")
+            } else {
+                // 기존 데이터가 없으면 현재 시간으로 설정
+                UserDefaults.standard.set(Date(), forKey: "lastSyncTime")
+                print("📝 기존 로컬 데이터 없음")
+                print("   → 일반 동기화 모드로 설정")
+            }
+            
+            // 변경사항 감지 관련 설정 초기화
+            UserDefaults.standard.set(true, forKey: "changeDetectionEnabled")
+            
+            print("✅ 변경사항 감지 시스템 초기화 완료")
         }
         
         /// 향후 버전 2 마이그레이션 (예시)

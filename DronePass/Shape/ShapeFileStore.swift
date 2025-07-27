@@ -235,6 +235,10 @@ final class ShapeFileStore: ObservableObject {
         shapes.append(shape)
         saveShapes()
         NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        
+        // 로컬 변경 사항 추적
+        UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+        print("✅ 도형 추가 완료 및 로컬 변경 추적 기록")
     }
     
     public func removeShape(id: UUID) {
@@ -283,6 +287,10 @@ final class ShapeFileStore: ObservableObject {
             try newData.write(to: shapesFileURL)
             // 4. 메모리의 shapes도 동기화 (여기서 @Published가 UI에 반영)
             self.shapes = loadedShapes.filter { $0.deletedAt == nil }
+            
+            // 5. 로컬 변경 사항 추적
+            UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+            print("✅ 모든 도형 색상 변경 완료 및 로컬 변경 추적 기록")
         } catch {
             print("모든 도형 색상 일괄 변경 실패: \(error)")
         }

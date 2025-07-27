@@ -224,6 +224,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             // 항상 로컬에 먼저 추가 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.addShape(shape)
+                
+                // 로컬 변경 사항 추적
+                UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+                print("✅ 도형 추가 및 로컬 변경 추적 기록")
             }
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
@@ -238,6 +242,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             // 항상 로컬에서 먼저 삭제 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.removeShape(id: id)
+                
+                // 로컬 변경 사항 추적
+                UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+                print("✅ 도형 삭제 및 로컬 변경 추적 기록")
             }
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
@@ -252,6 +260,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             // 항상 로컬에 먼저 업데이트 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.updateShape(shape)
+                
+                // 로컬 변경 사항 추적
+                UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+                print("✅ 도형 수정 및 로컬 변경 추적 기록")
             }
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
