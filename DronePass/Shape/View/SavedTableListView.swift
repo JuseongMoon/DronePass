@@ -233,8 +233,8 @@ private struct ShapeInfoContent: View {
     }
     
     private var dateRangeText: String {
-        let start = SavedTableListView.Constants.dateFormatter.string(from: shape.startedAt)
-        if let end = shape.expireDate {
+        let start = SavedTableListView.Constants.dateFormatter.string(from: shape.flightStartDate)
+        if let end = shape.flightEndDate {
             return "\(start) ~ \(SavedTableListView.Constants.dateFormatter.string(from: end))"
         }
         return start
@@ -283,7 +283,7 @@ private struct ShapeInfo: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            Text("\(formattedDate(shape.startedAt)) ~ \(formattedDate(shape.expireDate ?? Date()))")
+            Text("\(formattedDate(shape.flightStartDate)) ~ \(formattedDate(shape.flightEndDate ?? Date()))")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
@@ -309,7 +309,10 @@ private struct ShapeInfo: View {
                     baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 500.0,
                     address: "서울특별시 중구 세종대로 110",
-                    expireDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
                     color: "#FF6B6B"
                 ),
                 ShapeModel(
@@ -318,7 +321,10 @@ private struct ShapeInfo: View {
                     baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 300.0,
                     address: "서울특별시 강남구 테헤란로 152",
-                    expireDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
                     color: "#4ECDC4"
                 ),
                 ShapeModel(
@@ -327,7 +333,10 @@ private struct ShapeInfo: View {
                     baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 800.0,
                     address: "서울특별시 마포구 와우산로 94",
-                    expireDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
                     color: "#45B7D1"
                 ),
                 ShapeModel(
@@ -336,7 +345,10 @@ private struct ShapeInfo: View {
                     baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 200.0,
                     address: "서울특별시 종로구 종로 1---------------------",
-                    expireDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
                     color: "#96CEB4"
                 ),
                 ShapeModel(
@@ -345,7 +357,10 @@ private struct ShapeInfo: View {
                     baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
                     radius: 100000.0,
                     address: "서울특별시 용산구 이태원로 27",
-                    expireDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
                     color: "#FFEAA7"
                 )
             ]

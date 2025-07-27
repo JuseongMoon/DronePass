@@ -1,42 +1,507 @@
-//import Foundation
-//import Firebase
-//
-//final class ShapeRepository: ShapeStoreProtocol {
-//    typealias ShapeType = ShapeModel
-//    static let shared = ShapeRepository()
-//    
-//    private var store: any ShapeStoreProtocol<ShapeModel>
-//    
-//    private init() {
-//        // 로그인/백업 여부에 따라 저장소 선택
-//        if LoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
-//            store = ShapeFirebaseStore()
-//        } else {
-//            store = ShapeFileStore.shared
-//        }
-//    }
-//    
-//    func loadShapes() async throws -> [ShapeModel] {
-//        try await store.loadShapes()
-//    }
-//    
-//    func saveShapes(_ shapes: [ShapeModel]) async throws {
-//        try await store.saveShapes(shapes)
-//    }
-//    
-//    func addShape(_ shape: ShapeModel) async throws {
-//        try await store.addShape(shape)
-//    }
-//    
-//    func removeShape(id: UUID) async throws {
-//        try await store.removeShape(id: id)
-//    }
-//    
-//    func updateShape(_ shape: ShapeModel) async throws {
-//        try await store.updateShape(shape)
-//    }
-//    
-//    func deleteExpiredShapes() async throws {
-//        try await store.deleteExpiredShapes()
-//    }
-//} 
+import Foundation
+import Firebase
+import Combine
+
+final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
+    typealias ShapeType = ShapeModel
+    static let shared = ShapeRepository()
+    
+    private var store: any ShapeStoreProtocol<ShapeModel>
+    private var cancellables = Set<AnyCancellable>()
+    private let syncSemaphore = DispatchSemaphore(value: 1)
+    private var isSyncing = false
+    private let syncQueue = DispatchQueue(label: "com.dronepass.sync", qos: .userInitiated)
+    private var storeUpdateWorkItem: DispatchWorkItem?
+    
+    // 동기화 상태 추적
+    @Published var syncStatus: SyncStatus = .idle
+    
+    private init() {
+        // 먼저 모든 stored property 초기화
+        self.store = ShapeFileStore.shared // 임시로 기본값 설정
+        
+        // 그 다음 실제 저장소 결정
+        self.store = determineStore()
+        
+        // 로그인 상태와 클라우드 백업 설정 변경을 감지하여 저장소 변경 (디바운스 적용)
+        Publishers.CombineLatest(
+            AppleLoginManager.shared.$isLogin,
+            SettingManager.shared.$isCloudBackupEnabled
+        )
+        .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+        .sink { [weak self] _, _ in
+            self?.updateStoreWithDebounce()
+        }
+        .store(in: &cancellables)
+    }
+    
+    /// 현재 상태에 따라 적절한 저장소를 결정
+    private func determineStore() -> any ShapeStoreProtocol<ShapeModel> {
+        if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+            return ShapeFirebaseStore.shared
+        } else {
+            return ShapeFileStore.shared
+        }
+    }
+    
+    /// 디바운스를 적용한 저장소 업데이트
+    private func updateStoreWithDebounce() {
+        // 이전 작업이 있다면 취소
+        storeUpdateWorkItem?.cancel()
+        
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.updateStore()
+        }
+        
+        storeUpdateWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: workItem)
+    }
+    
+    /// 저장소를 업데이트하고 필요시 동기화 수행
+    private func updateStore() {
+        let newStore = determineStore()
+        
+        // 저장소 타입이 변경된 경우에만 처리
+        let currentIsFirebase = store is ShapeFirebaseStore
+        let newIsFirebase = newStore is ShapeFirebaseStore
+        
+        if currentIsFirebase != newIsFirebase {
+            store = newStore
+            
+            // 동기화 중이 아닐 때만 새로운 동기화 시작
+            guard !isSyncing else {
+                print("⚠️ 동기화가 이미 진행 중입니다. 대기...")
+                return
+            }
+            
+            // 비동기적으로 동기화 수행하여 SwiftUI 상태 업데이트 문제 방지
+            Task { @MainActor in
+                // 로그인 시 로컬 -> Firebase 동기화
+                if newIsFirebase {
+                    await syncLocalToFirebaseSafely()
+                }
+                // 로그아웃 시 Firebase -> 로컬 동기화
+                else if currentIsFirebase {
+                    await syncFirebaseToLocalSafely()
+                }
+            }
+        }
+    }
+    
+    /// 안전한 로컬 -> Firebase 동기화
+    private func syncLocalToFirebaseSafely() async {
+        await performSafeSync(operation: .localToFirebase) {
+            do {
+                // 로컬의 모든 데이터(삭제된 도형 포함)를 Firebase에 업로드
+                let allLocalShapes = await MainActor.run {
+                    return ShapeFileStore.shared.getAllShapesIncludingDeleted()
+                }
+                
+                if !allLocalShapes.isEmpty {
+                    try await ShapeFirebaseStore.shared.saveShapes(allLocalShapes)
+                    print("✅ 로컬 도형 \(allLocalShapes.count)개를 Firebase에 안전 동기화 완료 (삭제된 도형 포함)")
+                }
+                
+                // 동기화 성공 시점에 마지막 백업 시간 저장
+                Task { @MainActor in
+                    UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                }
+                
+            } catch {
+                print("❌ 로컬 -> Firebase 동기화 실패: \(error)")
+                throw error
+            }
+        }
+    }
+    
+    /// 안전한 Firebase -> 로컬 동기화
+    private func syncFirebaseToLocalSafely() async {
+        await performSafeSync(operation: .firebaseToLocal) {
+            // 로컬 데이터 백업
+            let localBackup = try await ShapeFileStore.shared.loadShapes()
+            
+            do {
+                let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
+                let localShapes = try await ShapeFileStore.shared.loadShapes()
+                
+                // Firebase에만 있는 도형들을 로컬에 추가
+                let localShapeIds = Set(localShapes.map { $0.id })
+                let shapesToDownload = firebaseShapes.filter { !localShapeIds.contains($0.id) }
+                
+                for shape in shapesToDownload {
+                    try await ShapeFileStore.shared.addShape(shape)
+                }
+                
+                // 검증: 다운로드된 데이터 확인
+                let verifyShapes = try await ShapeFileStore.shared.loadShapes()
+                let downloadedIds = Set(shapesToDownload.map { $0.id })
+                let verifyIds = Set(verifyShapes.map { $0.id })
+                
+                if !downloadedIds.isSubset(of: verifyIds) {
+                    throw SyncError.verificationFailed
+                }
+                
+                print("✅ Firebase 도형 \(shapesToDownload.count)개를 로컬에 안전 동기화 완료")
+                
+            } catch {
+                print("❌ Firebase -> 로컬 동기화 실패: \(error)")
+                
+                // 실패 시 로컬 데이터 복구
+                print("🔄 로컬 데이터 백업에서 복구 중...")
+                for shape in localBackup {
+                    try? await ShapeFileStore.shared.addShape(shape)
+                }
+                
+                throw error
+            }
+        }
+    }
+    
+    /// 안전한 동기화 작업 실행
+    private func performSafeSync(operation: SyncOperation, _ syncWork: @escaping () async throws -> Void) async {
+        // 세마포어로 동시 접근 방지
+        syncSemaphore.wait()
+        defer { syncSemaphore.signal() }
+        
+        // 이미 동기화 중이면 대기
+        guard !isSyncing else {
+            print("⚠️ 다른 동기화 작업이 진행 중입니다.")
+            return
+        }
+        
+        isSyncing = true
+        
+        Task { @MainActor in
+            syncStatus = .syncing(operation)
+        }
+        
+        do {
+            try await syncWork()
+            
+            Task { @MainActor in
+                syncStatus = .completed(operation)
+            }
+            
+            // 완료 상태를 잠시 보여준 후 idle로 변경
+            try? await Task.sleep(nanoseconds: 2_000_000_000) // 2초
+            
+            Task { @MainActor in
+                syncStatus = .idle
+            }
+            
+        } catch {
+            Task { @MainActor in
+                syncStatus = .failed(operation, error)
+            }
+            
+            // 에러 상태를 잠시 보여준 후 idle로 변경
+            try? await Task.sleep(nanoseconds: 5_000_000_000) // 5초
+            
+            Task { @MainActor in
+                syncStatus = .idle
+            }
+        }
+        
+        isSyncing = false
+    }
+    
+    // MARK: - ShapeStoreProtocol 구현
+    
+    func loadShapes() async throws -> [ShapeModel] {
+        return try await performSafeOperation {
+            try await self.store.loadShapes()
+        }
+    }
+    
+    func saveShapes(_ shapes: [ShapeModel]) async throws {
+        try await performSafeOperation {
+            try await self.store.saveShapes(shapes)
+        }
+    }
+    
+    func addShape(_ shape: ShapeModel) async throws {
+        try await performSafeOperation {
+            // 항상 로컬에 먼저 추가 (즉시 UI 반영)
+            await MainActor.run {
+                ShapeFileStore.shared.addShape(shape)
+            }
+            
+            // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                try await ShapeFirebaseStore.shared.addShape(shape)
+            }
+        }
+    }
+    
+    func removeShape(id: UUID) async throws {
+        try await performSafeOperation {
+            // 항상 로컬에서 먼저 삭제 (즉시 UI 반영)
+            await MainActor.run {
+                ShapeFileStore.shared.removeShape(id: id)
+            }
+            
+            // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                try await ShapeFirebaseStore.shared.removeShape(id: id)
+            }
+        }
+    }
+    
+    func updateShape(_ shape: ShapeModel) async throws {
+        try await performSafeOperation {
+            // 항상 로컬에 먼저 업데이트 (즉시 UI 반영)
+            await MainActor.run {
+                ShapeFileStore.shared.updateShape(shape)
+            }
+            
+            // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                try await ShapeFirebaseStore.shared.updateShape(shape)
+            }
+        }
+    }
+    
+    func deleteExpiredShapes() async throws {
+        try await performSafeOperation {
+            try await self.store.deleteExpiredShapes()
+        }
+    }
+    
+    // MARK: - Safe Operation Handler
+    
+    /// 동기화 중이 아닐 때만 작업 수행
+    private func performSafeOperation<T>(_ operation: @escaping () async throws -> T) async throws -> T {
+        // 동기화 중이면 잠시 대기
+        while isSyncing {
+            print("⚠️ 동기화 진행 중... 작업 대기")
+            try await Task.sleep(nanoseconds: 100_000_000) // 0.1초 대기
+        }
+        
+        // 세마포어로 동시 접근 제어
+        syncSemaphore.wait()
+        defer { syncSemaphore.signal() }
+        
+        return try await operation()
+    }
+    
+    // MARK: - Data Integrity Methods
+    
+    /// 강제 데이터 무결성 검증 (외부에서 호출 가능)
+    func verifyDataIntegrity() async -> DataIntegrityResult {
+        do {
+            let shapes = try await loadShapes()
+            
+            // 1. 기본 검증
+            guard !shapes.isEmpty else {
+                return .valid(message: "데이터 없음 (정상)")
+            }
+            
+            // 2. 중복 ID 검증
+            let uniqueIds = Set(shapes.map { $0.id })
+            if uniqueIds.count != shapes.count {
+                return .invalid(reason: "중복된 ID가 발견되었습니다.")
+            }
+            
+            // 3. 필수 필드 검증
+            for (index, shape) in shapes.enumerated() {
+                if shape.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    return .invalid(reason: "\(index + 1)번째 도형의 제목이 비어있습니다.")
+                }
+                
+                if !isValidCoordinate(shape.baseCoordinate) {
+                    return .invalid(reason: "\(index + 1)번째 도형의 좌표가 유효하지 않습니다.")
+                }
+            }
+            
+            return .valid(message: "\(shapes.count)개 도형 데이터 검증 완료")
+            
+        } catch {
+            return .invalid(reason: "데이터 검증 중 오류 발생: \(error.localizedDescription)")
+        }
+    }
+    
+    /// 긴급 복구 모드 (모든 백업에서 데이터 복구 시도)
+    func emergencyRestore() async -> Bool {
+        print("🚨 긴급 복구 모드 시작...")
+        
+        do {
+            // 1. 로컬 백업에서 복구 시도
+            if let restoredShapes = await restoreFromLocalBackup() {
+                print("✅ 로컬 백업에서 복구 성공: \(restoredShapes.count)개")
+                return true
+            }
+            
+            // 2. Firebase에서 복구 시도 (로그인 상태인 경우)
+            if AppleLoginManager.shared.isLogin {
+                if let firebaseShapes = await restoreFromFirebase() {
+                    print("✅ Firebase에서 복구 성공: \(firebaseShapes.count)개")
+                    return true
+                }
+            }
+            
+            print("❌ 모든 복구 시도 실패")
+            return false
+            
+        } catch {
+            print("❌ 긴급 복구 중 오류: \(error)")
+            return false
+        }
+    }
+    
+    /// 로컬 백업에서 복구
+    private func restoreFromLocalBackup() async -> [ShapeModel]? {
+        do {
+            // ShapeFileStore의 백업 파일에서 복구
+            let backupURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("shapes_backup.json")
+            
+            if FileManager.default.fileExists(atPath: backupURL.path) {
+                let data = try Data(contentsOf: backupURL)
+                let shapes = try JSONDecoder().decode([ShapeModel].self, from: data)
+                
+                // 검증 후 메인 파일로 복구
+                if validateShapes(shapes) {
+                    try await ShapeFileStore.shared.saveShapes(shapes)
+                    return shapes
+                }
+            }
+            return nil
+        } catch {
+            print("❌ 로컬 백업 복구 실패: \(error)")
+            return nil
+        }
+    }
+    
+    /// Firebase에서 복구
+    private func restoreFromFirebase() async -> [ShapeModel]? {
+        do {
+            let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
+            
+            if !firebaseShapes.isEmpty {
+                // 로컬에 복구
+                for shape in firebaseShapes {
+                    try await ShapeFileStore.shared.addShape(shape)
+                }
+                return firebaseShapes
+            }
+            return nil
+        } catch {
+            print("❌ Firebase 복구 실패: \(error)")
+            return nil
+        }
+    }
+    
+    /// 도형 데이터 유효성 검증
+    private func validateShapes(_ shapes: [ShapeModel]) -> Bool {
+        guard !shapes.isEmpty else { return true }
+        
+        // 중복 ID 검증
+        let uniqueIds = Set(shapes.map { $0.id })
+        if uniqueIds.count != shapes.count { return false }
+        
+        // 각 도형 검증
+        return shapes.allSatisfy { shape in
+            !shape.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            isValidCoordinate(shape.baseCoordinate)
+        }
+    }
+    
+    /// 좌표 유효성 검증
+    private func isValidCoordinate(_ coordinate: CoordinateManager) -> Bool {
+        let lat = coordinate.latitude
+        let lng = coordinate.longitude
+        return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 &&
+               !lat.isNaN && !lng.isNaN && lat.isFinite && lng.isFinite
+    }
+}
+
+// MARK: - Sync Status & Operations
+enum SyncStatus: Equatable {
+    case idle
+    case syncing(SyncOperation)
+    case completed(SyncOperation)
+    case failed(SyncOperation, Error)
+    
+    static func == (lhs: SyncStatus, rhs: SyncStatus) -> Bool {
+        switch (lhs, rhs) {
+        case (.idle, .idle):
+            return true
+        case (.syncing(let lhsOp), .syncing(let rhsOp)):
+            return lhsOp == rhsOp
+        case (.completed(let lhsOp), .completed(let rhsOp)):
+            return lhsOp == rhsOp
+        case (.failed(let lhsOp, _), .failed(let rhsOp, _)):
+            return lhsOp == rhsOp
+        default:
+            return false
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .idle:
+            return "대기 중"
+        case .syncing(let operation):
+            return "\(operation.description) 동기화 중..."
+        case .completed(let operation):
+            return "\(operation.description) 동기화 완료"
+        case .failed(let operation, let error):
+            return "\(operation.description) 동기화 실패: \(error.localizedDescription)"
+        }
+    }
+}
+
+enum SyncOperation: Equatable {
+    case localToFirebase
+    case firebaseToLocal
+    
+    var description: String {
+        switch self {
+        case .localToFirebase:
+            return "클라우드 업로드"
+        case .firebaseToLocal:
+            return "클라우드 다운로드"
+        }
+    }
+}
+
+enum SyncError: LocalizedError {
+    case verificationFailed
+    case backupFailed
+    case concurrentAccess
+    
+    var errorDescription: String? {
+        switch self {
+        case .verificationFailed:
+            return "동기화 후 데이터 검증에 실패했습니다."
+        case .backupFailed:
+            return "백업 생성에 실패했습니다."
+        case .concurrentAccess:
+            return "동시 접근으로 인한 충돌이 발생했습니다."
+        }
+    }
+}
+
+// MARK: - Data Integrity Result
+enum DataIntegrityResult {
+    case valid(message: String)
+    case invalid(reason: String)
+    
+    var isValid: Bool {
+        switch self {
+        case .valid:
+            return true
+        case .invalid:
+            return false
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .valid(let message):
+            return "✅ \(message)"
+        case .invalid(let reason):
+            return "❌ \(reason)"
+        }
+    }
+} 

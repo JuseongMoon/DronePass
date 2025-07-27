@@ -49,8 +49,8 @@ final class ShapeEditViewModel: ObservableObject {
             self.address = shape.address ?? ""
             self.radius = shape.radius != nil ? String(format: "%.0f", shape.radius!) : ""
             self.memo = shape.memo ?? ""
-            self.startDate = shape.startedAt
-            self.endDate = shape.expireDate ?? Date()
+            self.startDate = shape.flightStartDate
+            self.endDate = shape.flightEndDate ?? Date()
             self.coordinateText = coordinate?.formattedCoordinate ?? ""
             self.initialTitle = shape.title
             self.initialAddress = shape.address ?? ""
@@ -133,8 +133,10 @@ final class ShapeEditViewModel: ObservableObject {
             radius: Double(radius) ?? 0,
             memo: memo.isEmpty ? nil : memo,
             address: addressToSave,
-            expireDate: endDate,
-            startedAt: startDate,
+            createdAt: originalShape?.createdAt ?? Date(),
+            deletedAt: originalShape?.deletedAt,
+            flightStartDate: startDate,
+            flightEndDate: endDate,
             color: ColorManager.shared.defaultColor.rawValue
         )
         UserDefaults.standard.set(startDate, forKey: lastStartDateKey)

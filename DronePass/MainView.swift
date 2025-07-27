@@ -161,8 +161,10 @@ struct MainView: View {
                     radius: nil,
                     memo: nil,
                     address: newShapeAddress,
-                    expireDate: nil,
-                    startedAt: Date(),
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: nil,
                     color: ColorManager.shared.defaultColor.rawValue
                 )
             )

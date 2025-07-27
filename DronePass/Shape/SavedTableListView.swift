@@ -8,8 +8,14 @@
 import SwiftUI
 import CoreLocation
 
+// MARK: - Notification Names Extension
+extension Notification.Name {
+    static let shapesDidChange = Notification.Name("shapesDidChange")
+}
+
 struct SavedTableListView: View {
-    @StateObject private var placeShapeStore = ShapeLocalManager.shared
+    @StateObject private var placeShapeStore = ShapeFileStore.shared
+    @StateObject private var repository = ShapeRepository.shared
     @Binding var selectedShapeID: UUID?
     @Binding var shapeIDToScrollTo: UUID?
     
@@ -93,7 +99,13 @@ struct SavedTableListView: View {
         let sortedShapes = placeShapeStore.shapes.sorted(by: { $0.title < $1.title })
         for index in indexSet {
             let shape = sortedShapes[index]
-            placeShapeStore.removeShape(id: shape.id)
+            Task {
+                do {
+                    try await repository.removeShape(id: shape.id)
+                } catch {
+                    print("❌ 도형 삭제 실패: \(error)")
+                }
+            }
         }
     }
 }
@@ -233,8 +245,8 @@ private struct ShapeInfoContent: View {
     }
     
     private var dateRangeText: String {
-        let start = SavedTableListView.Constants.dateFormatter.string(from: shape.startedAt)
-        if let end = shape.expireDate {
+        let start = SavedTableListView.Constants.dateFormatter.string(from: shape.flightStartDate)
+        if let end = shape.flightEndDate {
             return "\(start) ~ \(SavedTableListView.Constants.dateFormatter.string(from: end))"
         }
         return start
@@ -283,7 +295,7 @@ private struct ShapeInfo: View {
                     .foregroundColor(.secondary)
                     .lineLimit(1)
             }
-            Text("\(formattedDate(shape.startedAt)) ~ \(formattedDate(shape.expireDate ?? Date()))")
+            Text("\(formattedDate(shape.flightStartDate)) ~ \(formattedDate(shape.flightEndDate ?? Date()))")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
@@ -350,7 +362,7 @@ private struct ShapeInfo: View {
                 )
             ]
             
-            ShapeLocalManager.shared.shapes = dummyShapes
+            ShapeFileStore.shared.shapes = dummyShapes
         }
 }
 
@@ -360,7 +372,7 @@ private struct ShapeInfo: View {
         shapeIDToScrollTo: .constant(nil)
     )
         .onAppear {
-            ShapeLocalManager.shared.shapes = []
+            ShapeFileStore.shared.shapes = []
         }
 }
 

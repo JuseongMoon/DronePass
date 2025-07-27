@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct SavedShapeViewCell: View {
-    let shape: PlaceShape
+    let shape: ShapeModel
     private static let dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateFormat = "yyyy-MM-dd"
@@ -16,7 +16,7 @@ struct SavedShapeViewCell: View {
                 Text(shape.shapeType.koreanName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                Text(Self.dateFormatter.string(from: shape.startedAt))
+                Text(Self.dateFormatter.string(from: shape.flightStartDate))
                     .font(.caption)
                     .foregroundColor(.gray)
             }
@@ -27,14 +27,14 @@ struct SavedShapeViewCell: View {
 }
 
 #Preview {
-    SavedShapeViewCell(shape: PlaceShape(
+    SavedShapeViewCell(shape: ShapeModel(
         title: "테스트 구역",
-        baseCoordinate: Coordinate(latitude: 37.56, longitude: 126.97),
+        baseCoordinate: CoordinateManager(latitude: 37.56, longitude: 126.97),
         radius: 300,
         memo: "메모 예시",
         address: "서울특별시 어딘가",
-        expireDate: Date(),
-        startedAt: Date(),
+        flightEndDate: Date(),
+        flightStartDate: Date(),
         color: "#007AFF"
     ))
 }

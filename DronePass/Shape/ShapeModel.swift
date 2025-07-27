@@ -42,16 +42,168 @@ public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형�
     public var polylineCoordinates: [CoordinateManager]? // 선형 도형의 좌표 배열입니다. (선택적)
 
     public var memo: String? // 도형에 대한 메모입니다. (선택적)
-    public var expireDate: Date? // 도형의 만료 날짜입니다.
-    public let startedAt: Date // 도형이 생성된 날짜입니다.
+    
+    // 새로운 날짜 관련 필드들
+    public var createdAt: Date // 도형이 만들어진 시간
+    public var deletedAt: Date? // 도형이 삭제된 시간 (삭제되지 않았다면 nil)
+    public var flightStartDate: Date // 드론비행승인 시작날짜
+    public var flightEndDate: Date? // 드론비행승인 종료날짜
 
     /// **팔레트 컬러 (색상 팔레트에서 고름)**
     public var color: String // 도형의 색상입니다. (16진수 색상 코드)
-
+    
+    // MARK: - 커스텀 디코딩 (기존 데이터 호환성)
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // 기본 필드들
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        shapeType = try container.decode(ShapeType.self, forKey: .shapeType)
+        baseCoordinate = try container.decode(CoordinateManager.self, forKey: .baseCoordinate)
+        address = try container.decodeIfPresent(String.self, forKey: .address)
+        
+        // 도형 타입별 옵션들
+        radius = try container.decodeIfPresent(Double.self, forKey: .radius)
+        secondCoordinate = try container.decodeIfPresent(CoordinateManager.self, forKey: .secondCoordinate)
+        polygonCoordinates = try container.decodeIfPresent([CoordinateManager].self, forKey: .polygonCoordinates)
+        polylineCoordinates = try container.decodeIfPresent([CoordinateManager].self, forKey: .polylineCoordinates)
+        
+        memo = try container.decodeIfPresent(String.self, forKey: .memo)
+        color = try container.decode(String.self, forKey: .color)
+        
+        // 새로운 날짜 필드들 - 안전한 마이그레이션 로직 (에러 로깅 포함)
+        
+        // createdAt 처리
+        if let existingCreatedAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) {
+            createdAt = existingCreatedAt
+        } else {
+            // 기존 startedAt에서 마이그레이션 (안전한 처리)
+            if let migratedDate = Self.safeMigrateDate(from: container, forKey: .startedAt, fieldName: "createdAt", shapeName: title) {
+                createdAt = migratedDate
+            } else {
+                createdAt = Date()
+            }
+        }
+        
+        // deletedAt 처리
+        deletedAt = try container.decodeIfPresent(Date.self, forKey: .deletedAt)
+        
+        // flightStartDate 처리
+        if let existingFlightStartDate = try container.decodeIfPresent(Date.self, forKey: .flightStartDate) {
+            flightStartDate = existingFlightStartDate
+        } else {
+            // 기존 startedAt에서 마이그레이션 (안전한 처리)
+            if let migratedDate = Self.safeMigrateDate(from: container, forKey: .startedAt, fieldName: "flightStartDate", shapeName: title) {
+                flightStartDate = migratedDate
+            } else {
+                flightStartDate = Date()
+            }
+        }
+        
+        // flightEndDate 처리
+        if let existingFlightEndDate = try container.decodeIfPresent(Date.self, forKey: .flightEndDate) {
+            flightEndDate = existingFlightEndDate
+        } else {
+            // 기존 expireDate에서 마이그레이션 (안전한 처리)  
+            if let migratedDate = Self.safeMigrateDate(from: container, forKey: .expireDate, fieldName: "flightEndDate", shapeName: title) {
+                flightEndDate = migratedDate
+            } else {
+                flightEndDate = nil
+            }
+        }
+        
+    }
+    
+    // MARK: - 안전한 날짜 마이그레이션 헬퍼
+    
+    /// 기존 필드에서 안전하게 날짜를 마이그레이션합니다.
+    /// - Parameters:
+    ///   - container: 디코딩 컨테이너
+    ///   - key: 마이그레이션할 키
+    ///   - fieldName: 대상 필드명 (로깅용)
+    ///   - shapeName: 도형명 (로깅용)
+    /// - Returns: 성공 시 Date, 실패 시 nil
+    private static func safeMigrateDate(from container: KeyedDecodingContainer<CodingKeys>, forKey key: CodingKeys, fieldName: String, shapeName: String) -> Date? {
+        
+        // 1. Date 타입으로 직접 디코딩 시도
+        if let date = try? container.decodeIfPresent(Date.self, forKey: key) {
+            return date
+        }
+        
+        // 2. Double (timestamp) 타입으로 디코딩 시도
+        if let timestamp = try? container.decodeIfPresent(Double.self, forKey: key) {
+            // Swift Date는 timeIntervalSinceReferenceDate (2001-01-01 기준)를 사용
+            let date = Date(timeIntervalSinceReferenceDate: timestamp)
+            return date
+        }
+        
+        // 3. Int (timestamp) 타입으로 디코딩 시도  
+        if let timestamp = try? container.decodeIfPresent(Int.self, forKey: key) {
+            // Swift Date는 timeIntervalSinceReferenceDate (2001-01-01 기준)를 사용
+            let date = Date(timeIntervalSinceReferenceDate: TimeInterval(timestamp))
+            return date
+        }
+        
+        // 4. String 타입으로 디코딩 시도
+        if let dateString = try? container.decodeIfPresent(String.self, forKey: key) {
+            let iso8601Formatter = ISO8601DateFormatter()
+            if let date = iso8601Formatter.date(from: dateString) {
+                return date
+            }
+        }
+        
+        return nil
+    }
+    
+    // MARK: - 커스텀 인코딩
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        // 기본 필드들
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(shapeType, forKey: .shapeType)
+        try container.encode(baseCoordinate, forKey: .baseCoordinate)
+        try container.encodeIfPresent(address, forKey: .address)
+        
+        // 도형 타입별 옵션들
+        try container.encodeIfPresent(radius, forKey: .radius)
+        try container.encodeIfPresent(secondCoordinate, forKey: .secondCoordinate)
+        try container.encodeIfPresent(polygonCoordinates, forKey: .polygonCoordinates)
+        try container.encodeIfPresent(polylineCoordinates, forKey: .polylineCoordinates)
+        
+        try container.encodeIfPresent(memo, forKey: .memo)
+        try container.encode(color, forKey: .color)
+        
+        // 새로운 날짜 필드들만 저장 (기존 필드는 저장하지 않음)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
+        try container.encode(flightStartDate, forKey: .flightStartDate)
+        try container.encodeIfPresent(flightEndDate, forKey: .flightEndDate)
+    }
+    
+    // MARK: - CodingKeys
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, title, shapeType, baseCoordinate, address
+        case radius, secondCoordinate, polygonCoordinates, polylineCoordinates
+        case memo, color
+        case createdAt, deletedAt, flightStartDate, flightEndDate
+        case startedAt, expireDate // 기존 필드 (호환성)
+    }
+    
     /// 만료 여부 (오늘 날짜 기준)
     public var isExpired: Bool {
-        guard let expireDate = expireDate else { return false }
-        return expireDate < Date()
+        guard let flightEndDate = flightEndDate else { return false }
+        return flightEndDate < Date()
+    }
+    
+    /// 삭제된 도형인지 확인
+    public var isDeleted: Bool {
+        return deletedAt != nil
     }
 
     public init( // 초기화 메서드입니다.
@@ -65,8 +217,10 @@ public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형�
         polylineCoordinates: [CoordinateManager]? = nil, // 선형 도형의 좌표 배열을 설정합니다. (선택적)
         memo: String? = nil, // 도형에 대한 메모를 설정합니다. (선택적)
         address: String? = nil, // 도형의 주소를 설정합니다. (선택적)
-        expireDate: Date?, // 도형의 만료 날짜를 설정합니다. (선택적)
-        startedAt: Date = Date(), // 도형의 생성 날짜를 설정합니다. 기본값은 현재 시간입니다.
+        createdAt: Date = Date(), // 도형이 만들어진 시간을 설정합니다. 기본값은 현재 시간입니다.
+        deletedAt: Date? = nil, // 도형이 삭제된 시간을 설정합니다. (선택적)
+        flightStartDate: Date = Date(), // 드론비행승인 시작날짜를 설정합니다. 기본값은 현재 시간입니다.
+        flightEndDate: Date? = nil, // 드론비행승인 종료날짜를 설정합니다. (선택적)
         color: String = "#007AFF" // 도형의 색상을 설정합니다. 기본값은 파란색입니다.
     ) {
         self.id = id
@@ -79,8 +233,10 @@ public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형�
         self.polylineCoordinates = polylineCoordinates
         self.memo = memo
         self.address = address
-        self.expireDate = expireDate
-        self.startedAt = startedAt
+        self.createdAt = createdAt
+        self.deletedAt = deletedAt
+        self.flightStartDate = flightStartDate
+        self.flightEndDate = flightEndDate
         self.color = color
     }
 }

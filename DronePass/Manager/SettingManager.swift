@@ -10,10 +10,11 @@ import Foundation
 import UserNotifications   // iOS의 푸시 알림(로컬 알림 포함) 기능을 사용하기 위한 프레임워크
 import CoreLocation       // 위치정보(위도/경도 등)를 다루기 위한 프레임워크
 import Solar              // 일출/일몰 계산용 외부 라이브러리(https://github.com/ceeK/Solar)
+import Combine           // ObservableObject 사용을 위한 프레임워크
 
 /// 앱 전체에서 알림 및 설정 관련 기능을 담당하는 싱글톤 객체입니다.
 /// (이 객체를 통해 알림, 일출/일몰 스케줄링, 종료일 알림 관리 등 수행)
-final class SettingManager {
+final class SettingManager: ObservableObject {
     // 전역에서 공유해서 사용하기 위한 싱글톤 인스턴스 생성
     static let shared = SettingManager()
     
@@ -21,6 +22,7 @@ final class SettingManager {
     private init() {
         // 객체가 처음 생성될 때 알림 권한을 요청합니다.
         requestNotificationPermission()
+        loadCloudBackupSetting() // 초기화 시 클라우드 백업 설정 로드
     }
 
     // MARK: - 종료일 알림 관련 프로퍼티
@@ -76,7 +78,31 @@ final class SettingManager {
 
     /// 일출/일몰 알림 상세 설명 텍스트
     var sunriseSunsetAlarmDetailText: String {
-        isSunriseSunsetAlarmEnabled ? "일출/일몰 시간에 맞춰 알림을 받습니다." : "알림이 꺼져 있습니다."
+        isSunriseSunsetAlarmEnabled ? "일출/일몰 시간에 알림을 받습니다." : "알림이 꺼져 있습니다."
+    }
+    
+    // MARK: - 클라우드 백업 관련 프로퍼티
+    
+    /// 클라우드 백업 활성화 여부를 저장하는 UserDefaults 키
+    private let cloudBackupKey = "cloudBackupEnabled"
+    
+    /// 클라우드 백업 활성화 여부 프로퍼티 (UserDefaults에 저장/불러오기)
+    @Published var isCloudBackupEnabled: Bool = false {
+        didSet {
+            UserDefaults.standard.set(isCloudBackupEnabled, forKey: cloudBackupKey)
+        }
+    }
+    
+    /// 초기화 시 UserDefaults에서 값 불러오기
+    private func loadCloudBackupSetting() {
+        // 처음 설치 시에는 기본값을 false로 설정
+        if !UserDefaults.standard.bool(forKey: "\(cloudBackupKey)_initialized") {
+            UserDefaults.standard.set(false, forKey: cloudBackupKey)
+            UserDefaults.standard.set(true, forKey: "\(cloudBackupKey)_initialized")
+        }
+        
+        isCloudBackupEnabled = UserDefaults.standard.bool(forKey: cloudBackupKey)
+        print("✅ 클라우드 백업 설정 로드: \(isCloudBackupEnabled ? "활성화" : "비활성화")")
     }
 
     // MARK: - 알림 권한 요청

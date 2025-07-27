@@ -15,7 +15,7 @@ import SafariServices
 struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
-    @StateObject private var store = ShapeFileStore.shared
+    @StateObject private var repository = ShapeRepository.shared
     
     @State private var shape: ShapeModel
     private let originalShape: ShapeModel
@@ -30,6 +30,7 @@ struct ShapeDetailView: View {
     @State private var showSafari = false
     @State private var safariURL: URL? = nil
     @State private var showEditSheet = false
+    @State private var isDeleting = false // 삭제 중 상태 추가
     
     init(shape: ShapeModel, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
         _shape = State(initialValue: shape)
@@ -135,11 +136,11 @@ struct ShapeDetailView: View {
                             .bold()
 
                         Spacer()
-                        Text(DateFormatter.koreanDateTime.string(from: shape.startedAt))
+                        Text(DateFormatter.koreanDateTime.string(from: shape.flightStartDate))
                             .foregroundColor(.secondary)
                     }
                     
-                    if let expire = shape.expireDate {
+                    if let expire = shape.flightEndDate {
                         HStack {
                             Text("종료일")
                                 .bold()
@@ -187,10 +188,24 @@ struct ShapeDetailView: View {
             .alert("도형 삭제", isPresented: $showDeleteAlert) {
                 Button("취소", role: .cancel) {}
                 Button("삭제하기", role: .destructive) {
-                    store.removeShape(id: shape.id)
-                    onDelete?()
-                    dismiss()
-                    NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                    isDeleting = true
+                    Task {
+                        do {
+                            try await repository.removeShape(id: shape.id)
+                            print("✅ 도형 삭제 완료: \(shape.title)")
+                            await MainActor.run {
+                                onDelete?()
+                                dismiss()
+                                NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                                isDeleting = false
+                            }
+                        } catch {
+                            print("❌ 도형 삭제 실패: \(error.localizedDescription)")
+                            await MainActor.run {
+                                isDeleting = false
+                            }
+                        }
+                    }
                 }
             } message: {
                 Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
@@ -217,11 +232,6 @@ struct ShapeDetailView: View {
                     },
                     originalShape: shape
                 )
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .shapesDidChange)) { _ in
-                if let updatedShape = store.getShape(id: shape.id) {
-                    shape = updatedShape
-                }
             }
         }
         .presentationDetents([.fraction(0.8)])
@@ -314,12 +324,14 @@ hisnote@me.com
 https://www.naver.com
 """,
         address: "인천광역시 서구 청라동 1-791",
-        expireDate: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
-        startedAt: Date(),
+        createdAt: Date(),
+        deletedAt: nil,
+        flightStartDate: Date(),
+        flightEndDate: Calendar.current.date(byAdding: .year, value: 1, to: Date()),
         color: PaletteColor.blue.hex
     )
     
-    return ShapeDetailView(
+    ShapeDetailView(
         shape: dummy,
         onDelete: {
             print("프리뷰: '\(dummy.title)' 도형이 삭제되었습니다.")

@@ -27,7 +27,7 @@
 		634E3FBB2E2E7E5600C60E43 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBA2E2E7E5600C60E43 /* FirebaseAuth */; };
 		634E3FBD2E2E7E5600C60E43 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBC2E2E7E5600C60E43 /* FirebaseFirestore */; };
 		634E3FBF2E2E7E5600C60E43 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 634E3FBE2E2E7E5600C60E43 /* FirebaseStorage */; };
-		634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634E3FC12E2E96C000C60E43 /* LoginManager.swift */; };
+		634E3FC22E2E96D000C60E43 /* AppleLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 634E3FC12E2E96C000C60E43 /* AppleLoginManager.swift */; };
 		6362E56A2E2F8FF400402B39 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E5692E2F8FF400402B39 /* ProfileView.swift */; };
 		6362E56C2E2FD22A00402B39 /* ShapeFirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */; };
 		6362E56E2E2FD2B600402B39 /* CoordinateViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6362E56D2E2FD2B100402B39 /* CoordinateViewModel.swift */; };
@@ -56,6 +56,9 @@
 		63AB0F902E1D64EF001F304E /* LocationTermsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */; };
 		63BD52E02E30948B0048B7EB /* NaverMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52DE2E30948B0048B7EB /* NaverMapView.swift */; };
 		63BD52E22E3095540048B7EB /* SavedTableListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD52E12E3095540048B7EB /* SavedTableListView.swift */; };
+		63BFDE042E34E3730044F1BA /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BFDE032E34E3700044F1BA /* AuthManager.swift */; };
+		63BFDE062E34E7FD0044F1BA /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BFDE052E34E7FD0044F1BA /* User.swift */; };
+		63BFDE0A2E3618FD0044F1BA /* MigrationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BFDE092E3618F60044F1BA /* MigrationManager.swift */; };
 		63C2D7E02E0EC20E006FFF21 /* DateTimeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */; };
 		63C805A12DE30E9000F3428B /* Solar in Frameworks */ = {isa = PBXBuildFile; productRef = 63C805A02DE30E9000F3428B /* Solar */; };
 		63D1F39C2E0AB5B700E1E51E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */; };
@@ -78,7 +81,7 @@
 		633F13CE2DF8941600BBDD38 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 		633F13D02DF89AF500BBDD38 /* ColorPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		634E3FB52E2E760300C60E43 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		634E3FC12E2E96C000C60E43 /* LoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginManager.swift; sourceTree = "<group>"; };
+		634E3FC12E2E96C000C60E43 /* AppleLoginManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleLoginManager.swift; sourceTree = "<group>"; };
 		6362E5692E2F8FF400402B39 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeFirebaseManager.swift; sourceTree = "<group>"; };
 		6362E56D2E2FD2B100402B39 /* CoordinateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinateViewModel.swift; sourceTree = "<group>"; };
@@ -109,6 +112,9 @@
 		63AB0F8F2E1D64EF001F304E /* LocationTermsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationTermsView.swift; sourceTree = "<group>"; };
 		63BD52DE2E30948B0048B7EB /* NaverMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NaverMapView.swift; sourceTree = "<group>"; };
 		63BD52E12E3095540048B7EB /* SavedTableListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedTableListView.swift; sourceTree = "<group>"; };
+		63BFDE032E34E3700044F1BA /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		63BFDE052E34E7FD0044F1BA /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		63BFDE092E3618F60044F1BA /* MigrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationManager.swift; sourceTree = "<group>"; };
 		63C057422DD2F6530044CF9B /* DronePass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DronePass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		63C2D7DF2E0EC20E006FFF21 /* DateTimeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateTimeSelectionView.swift; sourceTree = "<group>"; };
 		63D1F39B2E0AB5B700E1E51E /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -136,6 +142,7 @@
 		630379682E0A8D4C00F0A84D /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				63BFDE052E34E7FD0044F1BA /* User.swift */,
 				633F13C62DF842F300BBDD38 /* MapViewModel.swift */,
 				63970D212DE9C93400E11238 /* NotiName.swift */,
 			);
@@ -149,9 +156,6 @@
 				630384C82E02B391007684D1 /* NaverGeocodingModels.swift */,
 				63970D102DE9C93400E11238 /* NaverGeocodingService.swift */,
 				63970D112DE9C93400E11238 /* ShapeSelectionCoordinator.swift */,
-				63970D1E2DE9C93400E11238 /* CoordinateManager.swift */,
-				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
-				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
 				63970D252DE9C93400E11238 /* ShapeUserDefaultsStore.swift */,
 			);
 			path = Core;
@@ -170,7 +174,6 @@
 			isa = PBXGroup;
 			children = (
 				63AB0F892E1D5ADF001F304E /* LoginView.swift */,
-				634E3FC12E2E96C000C60E43 /* LoginManager.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -201,7 +204,6 @@
 			isa = PBXGroup;
 			children = (
 				634E3FC42E2E975E00C60E43 /* View */,
-				634E3FC72E2E979500C60E43 /* Manager */,
 			);
 			path = Setting;
 			sourceTree = "<group>";
@@ -209,7 +211,6 @@
 		634E3FC62E2E978600C60E43 /* Shape */ = {
 			isa = PBXGroup;
 			children = (
-				6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */,
 				63970D222DE9C93400E11238 /* ShapeModel.swift */,
 				63970D1A2DE9C93400E11238 /* ShapeFileStore.swift */,
 				634E3FC82E2E982B00C60E43 /* View */,
@@ -220,7 +221,14 @@
 		634E3FC72E2E979500C60E43 /* Manager */ = {
 			isa = PBXGroup;
 			children = (
+				63BFDE092E3618F60044F1BA /* MigrationManager.swift */,
+				63BFDE032E34E3700044F1BA /* AuthManager.swift */,
 				63970D242DE9C93400E11238 /* SettingManager.swift */,
+				634E3FC12E2E96C000C60E43 /* AppleLoginManager.swift */,
+				63970D1E2DE9C93400E11238 /* CoordinateManager.swift */,
+				63970D1D2DE9C93400E11238 /* ColorManager.swift */,
+				63970D1F2DE9C93400E11238 /* LocationManager.swift */,
+				6362E56B2E2FD22100402B39 /* ShapeFirebaseManager.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -261,6 +269,7 @@
 				633F13CC2DF888C700BBDD38 /* DronePassApp.swift */,
 				633F13A92DF8340400BBDD38 /* MainView.swift */,
 				633F13CA2DF885DB00BBDD38 /* MainTabView.swift */,
+				634E3FC72E2E979500C60E43 /* Manager */,
 				634E3FC02E2E96AF00C60E43 /* Login */,
 				6387ADA62E30D4CF0049A2BA /* Firebase */,
 				630379692E0A8D5E00F0A84D /* Core */,
@@ -417,10 +426,11 @@
 				63C2D7E02E0EC20E006FFF21 /* DateTimeSelectionView.swift in Sources */,
 				63970D5B2DE9C93400E11238 /* CoordinateManager.swift in Sources */,
 				63AB0F902E1D64EF001F304E /* LocationTermsView.swift in Sources */,
+				63BFDE062E34E7FD0044F1BA /* User.swift in Sources */,
 				632D56F42E05C23D0029ADE5 /* AppInfoView.swift in Sources */,
 				63970D5D2DE9C93400E11238 /* SettingManager.swift in Sources */,
 				63AB0F8A2E1D5ADF001F304E /* LoginView.swift in Sources */,
-				634E3FC22E2E96D000C60E43 /* LoginManager.swift in Sources */,
+				634E3FC22E2E96D000C60E43 /* AppleLoginManager.swift in Sources */,
 				63970D5E2DE9C93400E11238 /* NaverGeocodingService.swift in Sources */,
 				63970D612DE9C93400E11238 /* ShapeUserDefaultsStore.swift in Sources */,
 				63BD52E22E3095540048B7EB /* SavedTableListView.swift in Sources */,
@@ -433,8 +443,10 @@
 				633F13D12DF89AF500BBDD38 /* ColorPickerView.swift in Sources */,
 				633F13CD2DF888CD00BBDD38 /* DronePassApp.swift in Sources */,
 				63970D6A2DE9C93400E11238 /* NotiName.swift in Sources */,
+				63BFDE0A2E3618FD0044F1BA /* MigrationManager.swift in Sources */,
 				630384CB2E02C716007684D1 /* CoordinateView.swift in Sources */,
 				631894412E31021100BD7856 /* FetchWebDocuments.swift in Sources */,
+				63BFDE042E34E3730044F1BA /* AuthManager.swift in Sources */,
 				631894502E3102FC00BD7856 /* MarkdownView.swift in Sources */,
 				633F13CB2DF885DB00BBDD38 /* MainTabView.swift in Sources */,
 			);
@@ -451,7 +463,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;
@@ -488,7 +500,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = DronePass/DronePass.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 38;
+				CURRENT_PROJECT_VERSION = 39;
 				DEVELOPMENT_TEAM = 4823B5JB69;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DronePass/Info.plist;

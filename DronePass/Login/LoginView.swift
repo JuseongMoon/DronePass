@@ -13,7 +13,7 @@ struct LoginView: View {
     @State private var showTerms = false
     @State private var showPrivacy = false
     @State private var showLocationTerms = false
-    @StateObject private var loginManager = LoginManager.shared
+    @StateObject private var loginManager = AppleLoginManager.shared
     @Environment(\.dismiss) private var dismiss
 
     
@@ -44,6 +44,7 @@ struct LoginView: View {
                 // SwiftUI용 Apple 로그인 버튼
                 SignInWithAppleButtonView(isLogin: $loginManager.isLogin, loginError: $loginManager.loginError)
                     .frame(height: 50)
+                    .frame(maxWidth: 350) // 최대 너비 제한 추가
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)
                 
@@ -130,16 +131,15 @@ struct SignInWithAppleButtonView: View {
     @Binding var isLogin: Bool
     @Binding var loginError: Error?
     @State private var currentNonce: String?
-    let loginManager = LoginManager()
     
     var body: some View {
         SignInWithAppleButton(
             .signIn,
             onRequest: { request in
-                let nonce = loginManager.randomNonceString()
+                let nonce = AppleLoginManager.shared.randomNonceString()
                 currentNonce = nonce
                 request.requestedScopes = [.fullName, .email]
-                request.nonce = loginManager.sha256(nonce)
+                request.nonce = AppleLoginManager.shared.sha256(nonce)
             },
             onCompletion: { result in
                 switch result {
@@ -150,14 +150,25 @@ struct SignInWithAppleButtonView: View {
                        let idTokenString = String(data: appleIDToken, encoding: .utf8) {
                         Task {
                             do {
-                                try await loginManager.loginWithApple(idTokenString: idTokenString, nonce: nonce, fullName: appleIDCredential.fullName)
-                                await MainActor.run { self.isLogin = true }
+                                try await AppleLoginManager.shared.loginWithApple(
+                                    idTokenString: idTokenString, 
+                                    nonce: nonce, 
+                                    fullName: appleIDCredential.fullName
+                                )
+                                // AuthManager와 AppleLoginManager의 자동 동기화로 인해 
+                                // 수동으로 isLogin을 설정할 필요 없음
                             } catch {
-                                await MainActor.run { self.loginError = error }
+                                await MainActor.run { 
+                                    self.loginError = error 
+                                }
                             }
                         }
                     } else {
-                        self.loginError = NSError(domain: "AppleLogin", code: -1, userInfo: [NSLocalizedDescriptionKey: "Apple 로그인 토큰을 가져올 수 없습니다."])
+                        self.loginError = NSError(
+                            domain: "AppleLogin", 
+                            code: -1, 
+                            userInfo: [NSLocalizedDescriptionKey: "Apple 로그인 토큰을 가져올 수 없습니다."]
+                        )
                     }
                 case .failure(let error):
                     self.loginError = error

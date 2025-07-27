@@ -163,7 +163,7 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var showPatchNotesSheet = false
     @Published var patchNotes: [FetchWebDocuments.PatchNote] = []
     @Published var isLoadingPatchNotes = false
-    @Published var isLoggedIn: Bool = LoginManager.shared.isLogin // 로그인 상태 관리
+    @Published var isLoggedIn: Bool = AppleLoginManager.shared.isLogin // 로그인 상태 관리
 
     private var loginCancellable: AnyCancellable?
     private var patchNotesCancellables: Set<AnyCancellable> = []
@@ -190,7 +190,7 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         super.init()
         locationManager.delegate = self
         // LoginManager의 isLogin을 구독하여 isLoggedIn과 동기화
-        loginCancellable = LoginManager.shared.$isLogin
+        loginCancellable = AppleLoginManager.shared.$isLogin
             .receive(on: RunLoop.main)
             .assign(to: \Self.isLoggedIn, on: self)
         
