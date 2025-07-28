@@ -75,7 +75,7 @@ final class PlaceShapeLocalManager: ObservableObject {
     public func addShape(_ shape: ShapeModel) {
         shapes.append(shape)
         saveShapes()
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // 알림은 ShapeRepository에서만 전송하도록 제거
     }
     
     public func removeShape(id: UUID) {
@@ -84,8 +84,7 @@ final class PlaceShapeLocalManager: ObservableObject {
             // 1. 메모리에서 도형을 완전히 제거 (UI 즉시 반영)
             shapes.remove(at: index)
             
-            // 2. UI 업데이트를 위한 알림 전송
-            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+            // 2. 알림은 ShapeRepository에서만 전송하도록 제거
             
             // 3. 파일에서 모든 도형을 로드하여 해당 도형에 deletedAt 설정
             do {
@@ -101,11 +100,11 @@ final class PlaceShapeLocalManager: ObservableObject {
                         let newData = try encoder.encode(allShapes)
                         try newData.write(to: shapesFileURL)
                         
-                        print("✅ 도형 soft delete 완료: \(id)")
+                        print("✅ 로컬에서 도형 soft delete 완료: \(id)")
                     }
                 }
             } catch {
-                print("❌ soft delete 실패: \(error)")
+                print("❌ 로컬 soft delete 실패: \(error)")
             }
         }
     }
@@ -136,7 +135,7 @@ final class PlaceShapeLocalManager: ObservableObject {
             newShapes[idx] = shape
             shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
             saveShapes()
-            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+            // 알림은 ShapeRepository에서만 전송하도록 제거
         }
     }
     
@@ -150,8 +149,7 @@ final class PlaceShapeLocalManager: ObservableObject {
         }
         self.shapes = filtered
         saveShapes()
-        // UI 갱신을 위해 Notification 전송
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // 알림은 ShapeRepository에서만 전송하도록 제거
     }
     
     // MARK: - 샘플 데이터 추가 (테스트용)

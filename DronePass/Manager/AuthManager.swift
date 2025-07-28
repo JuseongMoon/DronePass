@@ -22,6 +22,7 @@ class AuthManager {
     }
     
     private var cancellables = Set<AnyCancellable>()
+    private var isLoadingUserData = false // 중복 호출 방지 플래그
     
     init() {
         currentAuthUser = Auth.auth().currentUser
@@ -105,10 +106,19 @@ class AuthManager {
     
     // 현재 사용자 데이터 로드
     func loadCurrentUserData() async {
+        // 중복 호출 방지
+        if isLoadingUserData {
+            print("DEBUG: 사용자 데이터 로딩 중... 중복 호출 방지")
+            return
+        }
+        
         guard let userId = self.currentAuthUser?.uid else { 
             print("DEBUG: No auth user available to load data")
             return 
         }
+        
+        isLoadingUserData = true
+        defer { isLoadingUserData = false }
         
         do {
             let document = try await Firestore.firestore().collection("users").document(userId).getDocument()
@@ -163,6 +173,22 @@ class AuthManager {
             try Auth.auth().signOut()
             currentAuthUser = nil
             currentUser = nil
+            
+            // 로그아웃 시 도형 데이터 정리
+            Task { @MainActor in
+                // ShapeFileStore에서 중복 제거
+                let currentShapes = ShapeFileStore.shared.shapes
+                let uniqueShapes = Array(Set(currentShapes.map { $0.id })).compactMap { id in
+                    currentShapes.first { $0.id == id }
+                }
+                
+                if uniqueShapes.count != currentShapes.count {
+                    print("🧹 로그아웃 시 중복 도형 제거: \(currentShapes.count)개 → \(uniqueShapes.count)개")
+                    ShapeFileStore.shared.shapes = uniqueShapes
+                    ShapeFileStore.shared.saveShapes()
+                }
+            }
+            
             print("DEBUG: Successfully signed out")
         } catch {
             print("DEBUG: Failed to sign out with error \(error.localizedDescription)")

@@ -28,7 +28,12 @@ struct ProfileView: View {
                 Section {
                     Toggle(isOn: $settingManager.isCloudBackupEnabled) {
                         HStack {
-                            Text("실시간 서버 백업")
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("실시간 서버 백업")
+                                Text(backupStatusText)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                             if isSyncing {
                                 Spacer()
                                 ProgressView()
@@ -46,21 +51,21 @@ struct ProfileView: View {
                         }
                     }
                     
-                    Button {
-                        Task {
-                            await syncToCloud()
-                        }
-                    } label: {
-                        HStack {
-                            Text("지금 백업하기")
-                            if isSyncing {
-                                Spacer()
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                            }
-                        }
-                    }
-                    .disabled(!settingManager.isCloudBackupEnabled || !AppleLoginManager.shared.isLogin || isSyncing)
+//                    Button {
+//                        Task {
+//                            await syncToCloud()
+//                        }
+//                    } label: {
+//                        HStack {
+//                            Text("지금 백업하기")
+//                            if isSyncing {
+//                                Spacer()
+//                                ProgressView()
+//                                    .scaleEffect(0.8)
+//                            }
+//                        }
+//                    }
+//                    .disabled(!settingManager.isCloudBackupEnabled || !AppleLoginManager.shared.isLogin || isSyncing)
                     
                     Text(lastBackupTimeText)
                         .font(.caption)
@@ -150,11 +155,23 @@ struct ProfileView: View {
         if let lastBackupTime = UserDefaults.standard.object(forKey: "lastBackupTime") as? Date {
             let formatter = DateFormatter()
             formatter.dateStyle = .long
-            formatter.timeStyle = .short
+            formatter.timeStyle = .medium
             formatter.locale = Locale(identifier: "ko_KR")
             return "마지막 백업시간: \(formatter.string(from: lastBackupTime))"
         } else {
             return "백업 기록이 없습니다."
+        }
+    }
+    
+    private var backupStatusText: String {
+        if isSyncing {
+            return "동기화 중..."
+        } else if !AppleLoginManager.shared.isLogin {
+            return "로그인이 필요합니다"
+        } else if settingManager.isCloudBackupEnabled {
+            return "활성화됨 - 실시간 백업 중"
+        } else {
+            return "비활성화됨"
         }
     }
     
@@ -229,6 +246,9 @@ struct ProfileView: View {
             
             // AuthManager를 통해 로그아웃
             await MainActor.run {
+                // 맵 오버레이 정리
+                NotificationCenter.default.post(name: Notification.Name("ClearMapOverlays"), object: nil)
+                
                 AuthManager.shared.signout()
                 AppleLoginManager.shared.isLogin = false
                 isLoggingOut = false

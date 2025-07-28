@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+
 final class ShapeFileStore: ObservableObject {
     static let shared = ShapeFileStore()
     @Published var shapes: [ShapeModel] = []
@@ -53,10 +54,15 @@ final class ShapeFileStore: ObservableObject {
                         return shape.deletedAt == nil
                     }
                     
+                    // 중복 제거 (ID 기반)
+                    let uniqueShapes = Array(Set(loadedShapes.map { $0.id })).compactMap { id in
+                        loadedShapes.first { $0.id == id }
+                    }
+                    
                     // 데이터 무결성 검증
-                    if validateShapes(loadedShapes) {
-                        shapes = loadedShapes
-                        print("✅ 메인 파일에서 도형 데이터 로드 성공: \(shapes.count)개 (전체: \(allShapes.count)개, 삭제됨: \(allShapes.count - loadedShapes.count)개)")
+                    if validateShapes(uniqueShapes) {
+                        shapes = uniqueShapes
+                        print("✅ 메인 파일에서 도형 데이터 로드 성공: \(shapes.count)개 (전체: \(allShapes.count)개, 삭제됨: \(allShapes.count - loadedShapes.count)개, 중복제거: \(loadedShapes.count - uniqueShapes.count)개)")
                         return
                     } else {
                         print("⚠️ 메인 파일 데이터 무결성 검증 실패, 백업에서 복구 시도")
@@ -77,9 +83,14 @@ final class ShapeFileStore: ObservableObject {
                         return shape.deletedAt == nil
                     }
                     
-                    if validateShapes(loadedShapes) {
-                        shapes = loadedShapes
-                        print("✅ 백업 파일에서 도형 데이터 복구 성공: \(shapes.count)개 (전체: \(allBackupShapes.count)개, 삭제됨: \(allBackupShapes.count - loadedShapes.count)개)")
+                    // 중복 제거 (ID 기반)
+                    let uniqueShapes = Array(Set(loadedShapes.map { $0.id })).compactMap { id in
+                        loadedShapes.first { $0.id == id }
+                    }
+                    
+                    if validateShapes(uniqueShapes) {
+                        shapes = uniqueShapes
+                        print("✅ 백업 파일에서 도형 데이터 복구 성공: \(shapes.count)개 (전체: \(allBackupShapes.count)개, 삭제됨: \(allBackupShapes.count - loadedShapes.count)개, 중복제거: \(loadedShapes.count - uniqueShapes.count)개)")
                         
                         // 메인 파일을 백업으로 복구
                         saveShapesSecurely()
@@ -234,11 +245,13 @@ final class ShapeFileStore: ObservableObject {
     public func addShape(_ shape: ShapeModel) {
         shapes.append(shape)
         saveShapes()
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // NotificationCenter.default.post(name: .shapesDidChange, object: nil) // 중복 방지를 위해 제거
         
         // 로컬 변경 사항 추적
         UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
         print("✅ 도형 추가 완료 및 로컬 변경 추적 기록")
+        
+        // Firebase 백업은 ShapeRepository에서 처리하므로 여기서는 제거
     }
     
     public func removeShape(id: UUID) {
@@ -247,10 +260,7 @@ final class ShapeFileStore: ObservableObject {
             // 1. 메모리에서 도형을 완전히 제거 (UI 즉시 반영)
             shapes.remove(at: index)
             
-            // 2. UI 업데이트를 위한 알림 전송
-            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
-            
-            // 3. 파일에서 모든 도형을 로드하여 해당 도형에 deletedAt 설정
+            // 2. 파일에서 모든 도형을 로드하여 해당 도형에 deletedAt 설정
             do {
                 if fileManager.fileExists(atPath: shapesFileURL.path) {
                     let data = try Data(contentsOf: shapesFileURL)
@@ -260,7 +270,7 @@ final class ShapeFileStore: ObservableObject {
                     if let fileIndex = allShapes.firstIndex(where: { $0.id == id }) {
                         allShapes[fileIndex].deletedAt = Date()
                         
-                        // 파일에 저장
+                        // 파일에 직접 저장
                         let newData = try encoder.encode(allShapes)
                         try newData.write(to: shapesFileURL)
                         
@@ -270,6 +280,12 @@ final class ShapeFileStore: ObservableObject {
             } catch {
                 print("❌ 로컬 soft delete 실패: \(error)")
             }
+            
+            // 로컬 변경 사항 추적
+            UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+            print("✅ 도형 삭제 완료 및 로컬 변경 추적 기록")
+            
+            // Firebase 백업은 ShapeRepository에서 처리하므로 여기서는 제거
         }
     }
     
@@ -291,6 +307,28 @@ final class ShapeFileStore: ObservableObject {
             // 5. 로컬 변경 사항 추적
             UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
             print("✅ 모든 도형 색상 변경 완료 및 로컬 변경 추적 기록")
+            
+            // 실시간 백업이 활성화된 경우 Firebase에도 즉시 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                Task {
+                    do {
+                        // 모든 활성 도형을 Firebase에 업로드
+                        let activeShapes = loadedShapes.filter { $0.deletedAt == nil }
+                        try await ShapeFirebaseStore.shared.saveShapes(activeShapes)
+                        print("✅ 실시간 백업 성공: 모든 도형 색상 변경 (\(activeShapes.count)개)")
+                        
+                        // 백업 시간 업데이트
+                        await MainActor.run {
+                            UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                        }
+                    } catch {
+                        print("❌ 실시간 백업 실패: 모든 도형 색상 변경 - \(error.localizedDescription)")
+                        // 백업 실패 시에도 로컬 데이터는 유지 (사용자 경험 보호)
+                    }
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
+            }
         } catch {
             print("모든 도형 색상 일괄 변경 실패: \(error)")
         }
@@ -302,7 +340,13 @@ final class ShapeFileStore: ObservableObject {
             newShapes[idx] = shape
             shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
             saveShapes()
-            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+            // NotificationCenter.default.post(name: .shapesDidChange, object: nil) // 중복 방지를 위해 제거
+            
+            // 로컬 변경 사항 추적
+            UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+            print("✅ 도형 수정 완료 및 로컬 변경 추적 기록")
+            
+            // Firebase 백업은 ShapeRepository에서 처리하므로 여기서는 제거
         }
     }
     
@@ -310,16 +354,28 @@ final class ShapeFileStore: ObservableObject {
         let filtered = shapes.filter { !$0.isExpired }
         self.shapes = filtered
         saveShapes()
-        // UI 갱신을 위해 Notification 전송
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // UI 갱신을 위해 Notification 전송 (ShapeRepository에서 처리)
+        // NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        
+        // 로컬 변경 사항 추적
+        UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+        print("✅ 만료된 도형 삭제 완료 및 로컬 변경 추적 기록")
+        
+        // Firebase 백업은 ShapeRepository에서 처리하므로 여기서는 제거
     }
     
     
     public func clearAllData() {
         shapes.removeAll()
         saveShapes()
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // NotificationCenter.default.post(name: .shapesDidChange, object: nil) // 중복 방지를 위해 제거
         print("🗑️ 모든 데이터 삭제 완료")
+        
+        // 로컬 변경 사항 추적
+        UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+        print("✅ 모든 데이터 삭제 완료 및 로컬 변경 추적 기록")
+        
+        // Firebase 백업은 ShapeRepository에서 처리하므로 여기서는 제거
     }
 }
 

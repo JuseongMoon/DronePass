@@ -51,8 +51,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 throw FirebaseError.invalidData
             }
             
-            print("✅ Firebase에서 도형 데이터 로드 성공: \(activeShapes.count)개 (전체: \(allShapes.count)개, 삭제됨: \(allShapes.count - activeShapes.count)개)")
-            return activeShapes
+            // 로컬 색상과 파이어스토어 색상 동기화
+            let synchronizedShapes = await self.synchronizeColorsWithLocal(activeShapes)
+            
+            print("✅ Firebase에서 도형 데이터 로드 성공: \(synchronizedShapes.count)개 (전체: \(allShapes.count)개, 삭제됨: \(allShapes.count - activeShapes.count)개)")
+            return synchronizedShapes
         }
     }
     
@@ -184,7 +187,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
     /// 서버 메타데이터 업데이트 (마지막 수정 시간)
     private func updateServerMetadata() async throws {
         try await performWithRetry {
-            let metadataRef = self.db.collection("metadata").document("server")
+            guard let userId = AuthManager.shared.currentAuthUser?.uid else {
+                throw FirebaseError.notAuthenticated
+            }
+            
+            let metadataRef = self.db.collection("users").document(userId).collection("metadata").document("server")
             try await metadataRef.setData([
                 "lastModified": Timestamp(date: Date())
             ])
@@ -194,7 +201,11 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
     /// 서버의 마지막 수정 시간 가져오기
     func getServerLastModifiedTime() async throws -> Date {
         try await performWithRetry {
-            let metadataRef = self.db.collection("metadata").document("server")
+            guard let userId = AuthManager.shared.currentAuthUser?.uid else {
+                throw FirebaseError.notAuthenticated
+            }
+            
+            let metadataRef = self.db.collection("users").document(userId).collection("metadata").document("server")
             let document = try await metadataRef.getDocument()
             
             if let timestamp = document.data()?["lastModified"] as? Timestamp {
@@ -500,6 +511,63 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
         let lng = coordinate.longitude
         return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 &&
                !lat.isNaN && !lng.isNaN && lat.isFinite && lng.isFinite
+    }
+    
+    /// 로컬 색상과 파이어스토어 색상을 동기화
+    private func synchronizeColorsWithLocal(_ firebaseShapes: [ShapeModel]) async -> [ShapeModel] {
+        // 현재 설정된 기본 도형 색상 가져오기
+        let currentDefaultColor = ColorManager.shared.defaultColor.hex
+        print("🎨 현재 설정된 기본 도형 색상: \(currentDefaultColor)")
+        
+        // 파이어스토어 도형들의 색상을 현재 설정된 기본 색상으로 강제 변경
+        var synchronizedShapes = firebaseShapes
+        var colorChangedCount = 0
+        
+        for i in 0..<synchronizedShapes.count {
+            if synchronizedShapes[i].color != currentDefaultColor {
+                synchronizedShapes[i].color = currentDefaultColor
+                colorChangedCount += 1
+            }
+        }
+        
+        if colorChangedCount > 0 {
+            print("🔄 파이어스토어 도형 색상 동기화 완료: \(colorChangedCount)개 도형의 색상을 현재 설정 색상(\(currentDefaultColor))으로 변경")
+            
+            // 변경된 색상을 파이어스토어에 업데이트
+            await updateFirebaseShapesColors(synchronizedShapes)
+        } else {
+            print("✅ 파이어스토어 도형 색상이 이미 현재 설정 색상과 일치합니다.")
+        }
+        
+        return synchronizedShapes
+    }
+    
+
+    
+    /// 파이어스토어의 도형 색상을 일괄 업데이트
+    private func updateFirebaseShapesColors(_ shapes: [ShapeModel]) async {
+        do {
+            guard let collection = self.userCollection else {
+                print("❌ 사용자 컬렉션에 접근할 수 없습니다.")
+                return
+            }
+            
+            let batch = self.db.batch()
+            var updateCount = 0
+            
+            for shape in shapes {
+                let docRef = collection.document(shape.id.uuidString)
+                let colorData: [String: Any] = ["color": shape.color]
+                batch.updateData(colorData, forDocument: docRef)
+                updateCount += 1
+            }
+            
+            try await batch.commit()
+            print("✅ 파이어스토어 색상 업데이트 완료: \(updateCount)개 도형")
+            
+        } catch {
+            print("❌ 파이어스토어 색상 업데이트 실패: \(error)")
+        }
     }
 }
 

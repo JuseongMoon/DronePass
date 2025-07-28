@@ -19,6 +19,10 @@ struct SavedTableListView: View {
     @Binding var selectedShapeID: UUID?
     @Binding var shapeIDToScrollTo: UUID?
     
+    // 중복 loadShapes 호출 방지를 위한 디바운싱
+    @State private var lastLoadTime: Date = Date.distantPast
+    private let loadDebounceInterval: TimeInterval = 0.5 // 500ms
+    
     // MARK: - Notification Names
     static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
     static let shapeOverlayTappedNotification = Notification.Name("ShapeOverlayTapped")
@@ -85,13 +89,24 @@ struct SavedTableListView: View {
     // MARK: - Private Methods
     private func onAppear() {
         print("📱 SavedTableListView appeared, shapes count: \(placeShapeStore.shapes.count)")
-        placeShapeStore.loadShapes()
+        loadShapesIfNeeded()
     }
     
     private func handleShapesDidChange() {
         print("🔄 Received shapesDidChange notification")
-        DispatchQueue.main.async {
-            placeShapeStore.loadShapes()
+        loadShapesIfNeeded()
+    }
+    
+    /// 중복 loadShapes 호출을 방지하는 디바운싱 로드
+    private func loadShapesIfNeeded() {
+        let now = Date()
+        if now.timeIntervalSince(lastLoadTime) >= loadDebounceInterval {
+            DispatchQueue.main.async {
+                placeShapeStore.loadShapes()
+                lastLoadTime = now
+            }
+        } else {
+            print("📝 loadShapes 디바운싱: 이전 로드로부터 \(String(format: "%.3f", now.timeIntervalSince(lastLoadTime)))초 경과")
         }
     }
     

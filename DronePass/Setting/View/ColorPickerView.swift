@@ -10,13 +10,20 @@ import SwiftUI
 struct ColorPickerView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var selectedColor: PaletteColor
+    @State private var lastColorChangeTime: Date = Date.distantPast
+    private let colorChangeDebounceInterval: TimeInterval = 0.5 // 500ms
+    
     let onColorSelected: (PaletteColor) -> Void
-
-    // 회색을 제외한 9가지 색상만 사용
-    private var availableColors: [PaletteColor] {
-        PaletteColor.allCases.filter { $0 != .gray }
+    
+    init(selected: PaletteColor, onColorSelected: @escaping (PaletteColor) -> Void) {
+        self._selectedColor = State(initialValue: selected)
+        self.onColorSelected = onColorSelected
     }
-
+    
+    private var availableColors: [PaletteColor] {
+        PaletteColor.allCases
+    }
+    
     // 색상명 한글 표기
     private func colorName(for color: PaletteColor) -> String {
         switch color {
@@ -32,12 +39,7 @@ struct ColorPickerView: View {
         case .gray:   return "회색"
         }
     }
-
-    init(selected: PaletteColor = ColorManager.shared.defaultColor, onColorSelected: @escaping (PaletteColor) -> Void) {
-        self._selectedColor = State(initialValue: selected)
-        self.onColorSelected = onColorSelected
-    }
-
+    
     var body: some View {
         List {
             ForEach(Array(availableColors.enumerated()), id: \.element) { idx, color in
@@ -56,20 +58,32 @@ struct ColorPickerView: View {
                 .contentShape(Rectangle())
                 .onTapGesture {
                     selectedColor = color
-                    // 전체 도형 색상 변경
-                    ShapeFileStore.shared.updateAllShapesColor(to: color.hex)
-                    
-                    // 로컬 변경 사항 추적
-                    UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
-                    print("✅ 도형 색상 변경 및 로컬 변경 추적 기록")
-                    
-                    ColorManager.shared.defaultColor = color
-                    onColorSelected(color)
-                    presentationMode.wrappedValue.dismiss()
+                    updateAllShapesColorIfNeeded(to: color)
                 }
             }
         }
         .navigationTitle("색상 선택")
+    }
+    
+    /// 중복 색상 변경 작업을 방지하는 디바운싱 업데이트
+    private func updateAllShapesColorIfNeeded(to color: PaletteColor) {
+        let now = Date()
+        if now.timeIntervalSince(lastColorChangeTime) >= colorChangeDebounceInterval {
+            // 전체 도형 색상 변경
+            ShapeFileStore.shared.updateAllShapesColor(to: color.hex)
+            
+            // 로컬 변경 사항 추적
+            UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
+            print("✅ 도형 색상 변경 및 로컬 변경 추적 기록")
+            
+            ColorManager.shared.defaultColor = color
+            onColorSelected(color)
+            presentationMode.wrappedValue.dismiss()
+            
+            lastColorChangeTime = now
+        } else {
+            print("📝 색상 변경 디바운싱: 이전 변경으로부터 \(String(format: "%.3f", now.timeIntervalSince(lastColorChangeTime)))초 경과")
+        }
     }
 
     private var selectedColorIndex: Int {

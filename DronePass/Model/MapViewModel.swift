@@ -11,6 +11,17 @@ class MapViewModel: NSObject, ObservableObject {
 
     private let locationManager = CLLocationManager()
     private var cancellables = Set<AnyCancellable>()
+    
+    // 중복 오버레이 리로드 방지를 위한 디바운싱
+    private var lastReloadTime: Date = Date.distantPast
+    private let reloadDebounceInterval: TimeInterval = 0.2 // 200ms
+    
+    // 하이라이트 오버레이 추적을 위한 변수
+    private var currentHighlightOverlay: NMFCircleOverlay?
+    
+    // 이전 도형 상태 추적을 위한 변수
+    private var lastShapeCount: Int = 0
+    private var lastShapeIDs: Set<UUID> = []
 
     // MARK: - Constants
     private enum CameraConstants {
@@ -56,11 +67,32 @@ class MapViewModel: NSObject, ObservableObject {
     private func setupShapeStoreObserver() {
         ShapeFileStore.shared.$shapes
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                // ⭐️ 상태변이 defer 필요 없음 (이미 MainQueue) – but 코어 함수만 사용
-                self?.reloadOverlays()
+            .sink { [weak self] shapes in
+                guard let self = self else { return }
+                
+                let currentShapeCount = shapes.count
+                let currentShapeIDs = Set(shapes.map { $0.id })
+                
+                // 도형 개수나 ID가 변경된 경우에만 오버레이 리로드
+                if currentShapeCount != self.lastShapeCount || currentShapeIDs != self.lastShapeIDs {
+                    self.reloadOverlaysIfNeeded()
+                    self.lastShapeCount = currentShapeCount
+                    self.lastShapeIDs = currentShapeIDs
+                    print("📊 도형 변경 감지: \(currentShapeCount)개 도형")
+                }
+                // 변경사항이 없는 경우 오버레이 리로드 스킵
             }
             .store(in: &cancellables)
+    }
+    
+    /// 중복 오버레이 리로드를 방지하는 디바운싱 리로드
+    private func reloadOverlaysIfNeeded() {
+        let now = Date()
+        if now.timeIntervalSince(lastReloadTime) >= reloadDebounceInterval {
+            reloadOverlays()
+            lastReloadTime = now
+        }
+        // 디바운싱 로그 제거 (너무 자주 출력되는 문제 해결)
     }
 
     private func setupNotifications() {
@@ -91,14 +123,21 @@ class MapViewModel: NSObject, ObservableObject {
             name: Self.clearMapHighlightNotification,
             object: nil
         )
+        
+        // 로그아웃 시 맵 오버레이 정리 알림
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleClearMapOverlays),
+            name: Notification.Name("ClearMapOverlays"),
+            object: nil
+        )
     }
 
     @objc private func handleShapeOverlayTapped(_ notification: Notification) {
         guard let shape = notification.object as? ShapeModel else { return }
         
-        // 하이라이트 상태 업데이트
-        highlightedShapeID = shape.id
-        reloadOverlays()
+        // 하이라이트 상태 업데이트 (전체 리로드 대신 하이라이트만 변경)
+        updateHighlight(for: shape.id)
         
         // 저장 탭 열기 알림 전송
         NotificationCenter.default.post(
@@ -109,9 +148,52 @@ class MapViewModel: NSObject, ObservableObject {
 
     @objc private func handleClearMapHighlight() {
         if highlightedShapeID != nil {
-            highlightedShapeID = nil
-            reloadOverlays()
+            updateHighlight(for: nil)
         }
+    }
+    
+    // MARK: - 하이라이트 최적화 메서드
+    
+    /// 하이라이트만 효율적으로 업데이트 (전체 오버레이 리로드 없이)
+    private func updateHighlight(for shapeID: UUID?) {
+        guard let mapView = currentMapView else { return }
+        
+        // 기존 하이라이트와 동일한 경우 스킵
+        if highlightedShapeID == shapeID {
+            return
+        }
+        
+        // 기존 하이라이트 오버레이 제거
+        if let currentHighlight = currentHighlightOverlay {
+            currentHighlight.mapView = nil
+            if let index = overlays.firstIndex(where: { $0 === currentHighlight }) {
+                overlays.remove(at: index)
+            }
+            currentHighlightOverlay = nil
+        }
+        
+        // 새로운 하이라이트 설정
+        highlightedShapeID = shapeID
+        
+        // 새로운 하이라이트 오버레이 추가
+        if let shapeID = shapeID,
+           let shape = ShapeFileStore.shared.shapes.first(where: { $0.id == shapeID }),
+           let radius = shape.radius {
+            
+            let center = NMGLatLng(lat: shape.baseCoordinate.latitude, lng: shape.baseCoordinate.longitude)
+            let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
+            highlightOverlay.mapView = mapView
+            overlays.append(highlightOverlay)
+            currentHighlightOverlay = highlightOverlay
+            
+            print("✨ 하이라이트 업데이트: \(shape.title)")
+        } else {
+            print("🚫 하이라이트 제거")
+        }
+    }
+    
+    @objc private func handleClearMapOverlays() {
+        clearAllOverlays()
     }
 
     // MARK: - 카메라 이동 처리
@@ -121,9 +203,8 @@ class MapViewModel: NSObject, ObservableObject {
         
         if shouldSkipMove(for: moveData) { return }
         
-        // 하이라이트 업데이트 및 오버레이 리로드
-        highlightedShapeID = moveData.shapeID
-        reloadOverlays()
+        // 하이라이트 업데이트 (전체 오버레이 리로드 없이)
+        updateHighlight(for: moveData.shapeID)
 
         // 저장 탭 열기 알림 전송
         NotificationCenter.default.post(
@@ -179,9 +260,8 @@ class MapViewModel: NSObject, ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
             guard let self = self else { return }
 
-            // 하이라이트 상태 업데이트 및 오버레이 리로드
-            self.highlightedShapeID = shapeID
-            self.reloadOverlays()
+            // 하이라이트 상태 업데이트 (전체 오버레이 리로드 없이)
+            self.updateHighlight(for: shapeID)
 
             // 줌 레벨이 변경된 후, 올바른 projection으로 오프셋을 계산합니다.
             let (offsetX, offsetY) = self.calculateDynamicOffsets()
@@ -230,13 +310,6 @@ class MapViewModel: NSObject, ObservableObject {
         let circleOverlay = createCircleOverlay(center: center, radius: radius, shape: shape)
         circleOverlay.mapView = mapView
         overlays.append(circleOverlay)
-        
-        // 하이라이트 오버레이 추가
-        if shape.id == highlightedShapeID {
-            let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
-            highlightOverlay.mapView = mapView
-            overlays.append(highlightOverlay)
-        }
         
         // 터치 핸들러 설정
         circleOverlay.touchHandler = { _ in
@@ -287,8 +360,32 @@ class MapViewModel: NSObject, ObservableObject {
         guard let mapView = currentMapView else { return }
         
         let savedShapes = ShapeFileStore.shared.shapes
-        for shape in savedShapes {
+        
+        // 중복 제거를 위해 ID 기반으로 필터링
+        let uniqueShapes = Array(Set(savedShapes.map { $0.id })).compactMap { id in
+            savedShapes.first { $0.id == id }
+        }
+        
+        // 중복이 있을 때만 로그 출력
+        let isDuplicate = uniqueShapes.count != savedShapes.count
+        if isDuplicate {
+            print("🔄 오버레이 리로드 (중복 제거): \(uniqueShapes.count)개 도형 (원본: \(savedShapes.count)개)")
+        }
+        
+        for shape in uniqueShapes {
             addOverlay(for: shape, mapView: mapView)
+        }
+        
+        // 하이라이트가 있는 경우 다시 적용
+        if let highlightedID = highlightedShapeID,
+           let highlightedShape = uniqueShapes.first(where: { $0.id == highlightedID }),
+           let radius = highlightedShape.radius {
+            
+            let center = NMGLatLng(lat: highlightedShape.baseCoordinate.latitude, lng: highlightedShape.baseCoordinate.longitude)
+            let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
+            highlightOverlay.mapView = mapView
+            overlays.append(highlightOverlay)
+            currentHighlightOverlay = highlightOverlay
         }
     }
     
@@ -297,6 +394,56 @@ class MapViewModel: NSObject, ObservableObject {
             overlay.mapView = nil
         }
         overlays.removeAll()
+        currentHighlightOverlay = nil
+        // 로그 메시지 제거 (너무 자주 출력되는 문제 해결)
+    }
+    
+    // 로그아웃 시 호출할 메서드
+    func clearAllOverlays() {
+        // 중복된 오버레이만 정리
+        removeDuplicateOverlays()
+        highlightedShapeID = nil
+        currentHighlightOverlay = nil
+        // 로그 메시지 간소화
+        print("🚪 로그아웃: 오버레이 정리 완료")
+    }
+    
+    // 중복된 오버레이 제거
+    private func removeDuplicateOverlays() {
+        guard let mapView = currentMapView else { return }
+        
+        let savedShapes = ShapeFileStore.shared.shapes
+        
+        // 중복 제거를 위해 ID 기반으로 필터링
+        let uniqueShapes = Array(Set(savedShapes.map { $0.id })).compactMap { id in
+            savedShapes.first { $0.id == id }
+        }
+        
+        // 중복이 있는 경우에만 정리
+        if uniqueShapes.count != savedShapes.count {
+            print("🧹 중복 오버레이 발견: \(savedShapes.count)개 → \(uniqueShapes.count)개")
+            
+            // 기존 오버레이 정리
+            clearOverlays()
+            
+            // 고유한 도형만 다시 추가
+            for shape in uniqueShapes {
+                addOverlay(for: shape, mapView: mapView)
+            }
+            
+            // 하이라이트 재적용
+            if let highlightedID = highlightedShapeID,
+               let highlightedShape = uniqueShapes.first(where: { $0.id == highlightedID }),
+               let radius = highlightedShape.radius {
+                
+                let center = NMGLatLng(lat: highlightedShape.baseCoordinate.latitude, lng: highlightedShape.baseCoordinate.longitude)
+                let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
+                highlightOverlay.mapView = mapView
+                overlays.append(highlightOverlay)
+                currentHighlightOverlay = highlightOverlay
+            }
+        }
+        // 중복이 없는 경우 로그 제거 (불필요한 출력 방지)
     }
     
     func calculateZoomLevel(for radius: Double) -> Double {

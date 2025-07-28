@@ -13,6 +13,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     private let syncQueue = DispatchQueue(label: "com.dronepass.sync", qos: .userInitiated)
     private var storeUpdateWorkItem: DispatchWorkItem?
     
+    // 중복 알림 전송 방지를 위한 디바운싱
+    private var lastNotificationTime: Date = Date.distantPast
+    private let notificationDebounceInterval: TimeInterval = 0.1 // 100ms
+    
     // 동기화 상태 추적
     @Published var syncStatus: SyncStatus = .idle
     
@@ -33,6 +37,18 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             self?.updateStoreWithDebounce()
         }
         .store(in: &cancellables)
+    }
+    
+    /// 중복 알림 전송 방지를 위한 디바운싱 알림 전송
+    private func sendShapesDidChangeNotification() {
+        let now = Date()
+        if now.timeIntervalSince(lastNotificationTime) >= notificationDebounceInterval {
+            NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+            lastNotificationTime = now
+            print("🔄 shapesDidChange 알림 전송")
+        } else {
+            print("📝 알림 디바운싱: 이전 알림으로부터 \(String(format: "%.3f", now.timeIntervalSince(lastNotificationTime)))초 경과")
+        }
     }
     
     /// 현재 상태에 따라 적절한 저장소를 결정
@@ -159,10 +175,6 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     
     /// 안전한 동기화 작업 실행
     private func performSafeSync(operation: SyncOperation, _ syncWork: @escaping () async throws -> Void) async {
-        // 세마포어로 동시 접근 방지
-        syncSemaphore.wait()
-        defer { syncSemaphore.signal() }
-        
         // 이미 동기화 중이면 대기
         guard !isSyncing else {
             print("⚠️ 다른 동기화 작업이 진행 중입니다.")
@@ -220,10 +232,13 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     }
     
     func addShape(_ shape: ShapeModel) async throws {
-        try await performSafeOperation {
+        try await performSafeOperation { [weak self] in
             // 항상 로컬에 먼저 추가 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.addShape(shape)
+                
+                // UI 업데이트를 위한 알림 전송 (한 번만)
+                self?.sendShapesDidChangeNotification()
                 
                 // 로컬 변경 사항 추적
                 UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
@@ -232,16 +247,32 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
-                try await ShapeFirebaseStore.shared.addShape(shape)
+                do {
+                    try await ShapeFirebaseStore.shared.addShape(shape)
+                    print("✅ 실시간 백업 성공: 도형 추가 (\(shape.title))")
+                    
+                    // 백업 시간 업데이트
+                    await MainActor.run {
+                        UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                    }
+                } catch {
+                    print("❌ 실시간 백업 실패: 도형 추가 (\(shape.title)) - \(error.localizedDescription)")
+                    // 백업 실패 시에도 로컬 데이터는 유지 (사용자 경험 보호)
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
             }
         }
     }
     
     func removeShape(id: UUID) async throws {
-        try await performSafeOperation {
+        try await performSafeOperation { [weak self] in
             // 항상 로컬에서 먼저 삭제 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.removeShape(id: id)
+                
+                // UI 업데이트를 위한 알림 전송 (한 번만)
+                self?.sendShapesDidChangeNotification()
                 
                 // 로컬 변경 사항 추적
                 UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
@@ -250,16 +281,32 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
-                try await ShapeFirebaseStore.shared.removeShape(id: id)
+                do {
+                    try await ShapeFirebaseStore.shared.removeShape(id: id)
+                    print("✅ 실시간 백업 성공: 도형 삭제 (\(id))")
+                    
+                    // 백업 시간 업데이트
+                    await MainActor.run {
+                        UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                    }
+                } catch {
+                    print("❌ 실시간 백업 실패: 도형 삭제 (\(id)) - \(error.localizedDescription)")
+                    // 백업 실패 시에도 로컬 데이터는 유지 (사용자 경험 보호)
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
             }
         }
     }
     
     func updateShape(_ shape: ShapeModel) async throws {
-        try await performSafeOperation {
+        try await performSafeOperation { [weak self] in
             // 항상 로컬에 먼저 업데이트 (즉시 UI 반영)
             await MainActor.run {
                 ShapeFileStore.shared.updateShape(shape)
+                
+                // UI 업데이트를 위한 알림 전송 (한 번만)
+                self?.sendShapesDidChangeNotification()
                 
                 // 로컬 변경 사항 추적
                 UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
@@ -268,14 +315,79 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
-                try await ShapeFirebaseStore.shared.updateShape(shape)
+                do {
+                    try await ShapeFirebaseStore.shared.updateShape(shape)
+                    print("✅ 실시간 백업 성공: 도형 수정 (\(shape.title))")
+                    
+                    // 백업 시간 업데이트
+                    await MainActor.run {
+                        UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                    }
+                } catch {
+                    print("❌ 실시간 백업 실패: 도형 수정 (\(shape.title)) - \(error.localizedDescription)")
+                    // 백업 실패 시에도 로컬 데이터는 유지 (사용자 경험 보호)
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
             }
         }
     }
     
     func deleteExpiredShapes() async throws {
-        try await performSafeOperation {
-            try await self.store.deleteExpiredShapes()
+        try await performSafeOperation { [weak self] in
+            // 로컬에서 먼저 만료된 도형 삭제
+            await MainActor.run {
+                ShapeFileStore.shared.deleteExpiredShapes()
+                
+                // UI 업데이트를 위한 알림 전송 (한 번만)
+                self?.sendShapesDidChangeNotification()
+            }
+            
+            // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                do {
+                    try await ShapeFirebaseStore.shared.deleteExpiredShapes()
+                    print("✅ 실시간 백업 성공: 만료된 도형 삭제")
+                    
+                    // 백업 시간 업데이트
+                    await MainActor.run {
+                        UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                    }
+                } catch {
+                    print("❌ 실시간 백업 실패: 만료된 도형 삭제 - \(error.localizedDescription)")
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
+            }
+        }
+    }
+    
+    func clearAllData() async throws {
+        try await performSafeOperation { [weak self] in
+            // 로컬에서 먼저 모든 데이터 삭제
+            await MainActor.run {
+                ShapeFileStore.shared.clearAllData()
+                
+                // UI 업데이트를 위한 알림 전송 (한 번만)
+                self?.sendShapesDidChangeNotification()
+            }
+            
+            // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
+            if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
+                do {
+                    try await ShapeFirebaseStore.shared.saveShapes([])
+                    print("✅ 실시간 백업 성공: 모든 데이터 삭제")
+                    
+                    // 백업 시간 업데이트
+                    await MainActor.run {
+                        UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
+                    }
+                } catch {
+                    print("❌ 실시간 백업 실패: 모든 데이터 삭제 - \(error.localizedDescription)")
+                }
+            } else {
+                print("📝 실시간 백업 비활성화: 로그인 상태 또는 클라우드 백업 설정")
+            }
         }
     }
     
@@ -289,9 +401,16 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             try await Task.sleep(nanoseconds: 100_000_000) // 0.1초 대기
         }
         
-        // 세마포어로 동시 접근 제어
-        syncSemaphore.wait()
-        defer { syncSemaphore.signal() }
+        // 동기화 상태 설정
+        await MainActor.run {
+            isSyncing = true
+        }
+        
+        defer {
+            Task { @MainActor in
+                isSyncing = false
+            }
+        }
         
         return try await operation()
     }

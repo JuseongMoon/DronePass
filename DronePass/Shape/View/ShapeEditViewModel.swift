@@ -147,7 +147,7 @@ final class ShapeEditViewModel: ObservableObject {
             store.updateShape(newShape)
         }
         onAdd?(newShape)
-        NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // 알림은 ShapeRepository에서만 전송하도록 제거
         onComplete()
     }
 }
