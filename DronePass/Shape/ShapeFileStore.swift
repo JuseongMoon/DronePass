@@ -308,6 +308,12 @@ final class ShapeFileStore: ObservableObject {
             UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")
             print("✅ 모든 도형 색상 변경 완료 및 로컬 변경 추적 기록")
             
+            // 6. UI 즉시 업데이트를 위한 알림 전송
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                NotificationCenter.default.post(name: Notification.Name("ReloadMapOverlays"), object: nil)
+            }
+            
             // 실시간 백업이 활성화된 경우 Firebase에도 즉시 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
                 Task {
@@ -351,11 +357,35 @@ final class ShapeFileStore: ObservableObject {
     }
     
     public func deleteExpiredShapes() {
-        let filtered = shapes.filter { !$0.isExpired }
-        self.shapes = filtered
-        saveShapes()
-        // UI 갱신을 위해 Notification 전송 (ShapeRepository에서 처리)
-        // NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+        // 만료된 도형들을 찾아서 soft delete 수행
+        let expiredShapes = shapes.filter { $0.isExpired }
+        
+        // 1. 메모리에서 만료된 도형들을 제거 (UI 즉시 반영)
+        self.shapes = shapes.filter { !$0.isExpired }
+        
+        // 2. 파일에서 모든 도형을 로드하여 만료된 도형들에 deletedAt 설정
+        do {
+            if fileManager.fileExists(atPath: shapesFileURL.path) {
+                let data = try Data(contentsOf: shapesFileURL)
+                var allShapes = try decoder.decode([ShapeModel].self, from: data)
+                
+                // 만료된 도형들에 deletedAt 설정
+                for expiredShape in expiredShapes {
+                    if let fileIndex = allShapes.firstIndex(where: { $0.id == expiredShape.id }) {
+                        allShapes[fileIndex].deletedAt = Date()
+                        print("✅ 만료된 도형 soft delete 완료: \(expiredShape.id)")
+                    }
+                }
+                
+                // 파일에 저장
+                let newData = try encoder.encode(allShapes)
+                try newData.write(to: shapesFileURL)
+                
+                print("✅ 만료된 도형들 soft delete 완료: \(expiredShapes.count)개")
+            }
+        } catch {
+            print("❌ 만료된 도형들 soft delete 실패: \(error)")
+        }
         
         // 로컬 변경 사항 추적
         UserDefaults.standard.set(Date(), forKey: "lastLocalModificationTime")

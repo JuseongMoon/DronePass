@@ -8,6 +8,7 @@
 // 역할: 색상 팔레트 및 HEX-UIColor 변환 유틸리티
 // 연관기능: 도형 색상 선택, 팔레트 관리, HEX 변환
 import UIKit
+import Foundation
 
 // HEX로 UIColor 생성 (확장)
 extension UIColor {
@@ -42,6 +43,7 @@ public enum PaletteColor: String, CaseIterable, Codable {
 final class ColorManager {
     static let shared = ColorManager()
     private let defaultColorKey = "defaultShapeColor"
+    private let colorChangeTimeKey = "lastColorChangeTime"
     
     // 항상 첫 번째 도형의 색상을 변수로 보유
     private(set) var firstShapeColor: PaletteColor = .blue
@@ -81,5 +83,32 @@ final class ColorManager {
         } else {
             firstShapeColor = .blue
         }
+    }
+    
+    // MARK: - 색상 변경 시점 추적
+    
+    /// 색상 변경 시점을 기록
+    func recordColorChange() {
+        UserDefaults.standard.set(Date(), forKey: colorChangeTimeKey)
+        print("📝 색상 변경 시점 기록: \(Date())")
+        print("   - 현재 색상: \(defaultColor.rawValue)")
+    }
+    
+    /// 마지막 색상 변경 시점을 가져오기
+    var lastColorChangeTime: Date? {
+        return UserDefaults.standard.object(forKey: colorChangeTimeKey) as? Date
+    }
+    
+    /// 두 색상 변경 시점 중 더 최근 것을 비교
+    func isMoreRecentThan(_ otherTime: Date?) -> Bool {
+        guard let localTime = lastColorChangeTime else { return false }
+        guard let otherTime = otherTime else { return true }
+        return localTime > otherTime
+    }
+    
+    /// 색상 변경 시점을 초기화 (동기화 후)
+    func resetColorChangeTime() {
+        UserDefaults.standard.removeObject(forKey: colorChangeTimeKey)
+        print("🔄 색상 변경 시점 초기화")
     }
 }

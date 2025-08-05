@@ -102,6 +102,18 @@ struct SettingView: View {
                     Text("도형 색 바꾸기")
                 }
                 
+                Toggle(isOn: $viewModel.isHideExpiredShapesEnabled) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("만료된 도형 숨기기")
+                        Text("만료된 도형을 목록에서 숨깁니다.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+                .onChange(of: viewModel.isHideExpiredShapesEnabled) { newValue in
+                    SettingManager.shared.isHideExpiredShapesEnabled = newValue
+                }
+                
                 Button(role: .destructive) {
                     viewModel.showDeleteExpiredShapesAlert = true
                 } label: {
@@ -156,6 +168,7 @@ final class SettingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     @Published var isEndDateAlarmEnabled: Bool = SettingManager.shared.isEndDateAlarmEnabled
     @Published var isSunriseSunsetAlarmEnabled: Bool = SettingManager.shared.isSunriseSunsetAlarmEnabled
+    @Published var isHideExpiredShapesEnabled: Bool = SettingManager.shared.isHideExpiredShapesEnabled
     @Published var selectedColor: Color = .blue
     
     @Published var showDeleteExpiredShapesAlert = false

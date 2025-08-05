@@ -225,13 +225,13 @@ class AuthManager {
                     // 로컬 데이터가 있고 첫 동기화이거나 변경사항이 있는 경우
                     print("📤 로컬 데이터를 Firebase에 우선 업로드합니다...")
                     
-                    let allLocalShapes = await MainActor.run {
-                        return ShapeFileStore.shared.getAllShapesIncludingDeleted()
+                    let activeLocalShapes = await MainActor.run {
+                        return ShapeFileStore.shared.shapes
                     }
                     
-                    if !allLocalShapes.isEmpty {
-                        try await ShapeFirebaseStore.shared.saveShapes(allLocalShapes)
-                        print("✅ 로컬 데이터 Firebase 업로드 완료: \(allLocalShapes.count)개 (삭제된 도형 포함)")
+                    if !activeLocalShapes.isEmpty {
+                        try await ShapeFirebaseStore.shared.saveShapes(activeLocalShapes)
+                        print("✅ 로컬 데이터 Firebase 업로드 완료: \(activeLocalShapes.count)개 활성 도형")
                         
                         // 변경 추적 초기화
                         await MainActor.run {

@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 
 struct MainTabView: View {
     @State private var selectedTab: Tab = .map
@@ -183,16 +182,25 @@ struct MainTabView: View {
                 // 1. 하이라이트를 위해 selectedShapeID는 즉시 업데이트합니다.
                 self.selectedShapeID = shapeID
 
-                // 2. 시트가 닫혀있었다면, 애니메이션 시간을 고려하여 스크롤을 지연 실행합니다.
-                if !self.isSavedSheetPresented {
-                    self.isSavedSheetPresented = true
-                    // 애니메이션 시간(response: 0.5)보다 약간 긴 딜레이를 줍니다.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                // 2. 도형이 실제로 존재하는지 확인
+                let allShapes = ShapeFileStore.shared.shapes
+                let shapeExists = allShapes.contains { $0.id == shapeID }
+                
+                if shapeExists {
+                    // 3. 시트가 닫혀있었다면, 애니메이션 시간을 고려하여 스크롤을 지연 실행합니다.
+                    if !self.isSavedSheetPresented {
+                        self.isSavedSheetPresented = true
+                        // 애니메이션 시간(response: 0.5)보다 약간 긴 딜레이를 줍니다.
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self.shapeIDToScrollTo = shapeID
+                        }
+                    } else {
+                        // 시트가 이미 열려있었다면, 바로 스크롤을 실행합니다.
                         self.shapeIDToScrollTo = shapeID
                     }
+                    print("🔄 MainTabView: 도형 스크롤 준비 - \(shapeID)")
                 } else {
-                    // 시트가 이미 열려있었다면, 바로 스크롤을 실행합니다.
-                    self.shapeIDToScrollTo = shapeID
+                    print("⚠️ MainTabView: 도형이 존재하지 않음 - \(shapeID)")
                 }
             }
         }
@@ -323,6 +331,8 @@ struct SavedListOverlayView: View {
     @StateObject private var placeShapeStore = ShapeFileStore.shared
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging = false
+    @State private var showSortPopup = false
+    @StateObject private var sortingManager = ShapeSortingManager.shared
     
     private let dismissThreshold: CGFloat = 100
     
@@ -349,10 +359,48 @@ struct SavedListOverlayView: View {
                                 
                                 Spacer()
                                 
-                                if !placeShapeStore.shapes.isEmpty {
-                                    Text("\(placeShapeStore.shapes.count)개")
-                                        .font(.caption2)
-                                        .foregroundColor(.secondary)
+                                HStack(spacing: 8) {
+//                                    if !placeShapeStore.shapes.isEmpty {
+//                                        Text("\(placeShapeStore.shapes.count)개")
+//                                            .font(.caption2)
+//                                            .foregroundColor(.secondary)
+//                                    }
+                                    
+                                    // 정렬 버튼
+                                    Button(action: {
+                                        showSortPopup = true
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.up.arrow.down")
+                                                .font(.caption2)
+                                            Text(sortingManager.selectedSortOption.rawValue)
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(.blue)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // 정렬 방향 버튼
+                                    Button(action: {
+                                        sortingManager.toggleSortDirection()
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: sortingManager.sortDirection.icon)
+                                                .font(.caption2)
+                                            Text(sortingManager.sortDirection.rawValue)
+                                                .font(.caption2)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(.orange)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.orange.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
                                 }
                             }
                             .padding(.horizontal)
@@ -425,10 +473,48 @@ struct SavedListOverlayView: View {
                                 
                                 Spacer()
                                 
-                                if !placeShapeStore.shapes.isEmpty {
-                                    Text("\(placeShapeStore.shapes.count)개")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                                HStack(spacing: 8) {
+//                                    if !placeShapeStore.shapes.isEmpty {
+//                                        Text("\(placeShapeStore.shapes.count)개")
+//                                            .font(.caption)
+//                                            .foregroundColor(.secondary)
+//                                    }
+                                    
+                                    // 정렬 버튼
+                                    Button(action: {
+                                        showSortPopup = true
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.up.arrow.down")
+                                                .font(.caption)
+                                            Text(sortingManager.selectedSortOption.rawValue)
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(.blue)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // 정렬 방향 버튼
+                                    Button(action: {
+                                        sortingManager.toggleSortDirection()
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: sortingManager.sortDirection.icon)
+                                                .font(.caption)
+                                            Text(sortingManager.sortDirection.rawValue)
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                        }
+                                        .foregroundColor(.orange)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.orange.opacity(0.1))
+                                        .cornerRadius(8)
+                                    }
                                 }
                             }
                             .padding(.horizontal)
@@ -478,8 +564,13 @@ struct SavedListOverlayView: View {
             }
         }
         .ignoresSafeArea()
+        .sheet(isPresented: $showSortPopup) {
+            SortPopupView()
+        }
     }
 }
+
+
 
 // MARK: - Settings Overlay View
 struct SettingsOverlayView: View {
@@ -637,7 +728,7 @@ struct SettingsOverlayView: View {
         .ignoresSafeArea()
         .sheet(isPresented: $showColorPicker) {
             ColorPickerView(
-                selected: ColorManager.shared.defaultColor,
+                selected: ColorManager.shared.firstShapeColor,
                 onColorSelected: { color in
                     // 선택된 색상 처리
                     ColorManager.shared.defaultColor = color
@@ -674,6 +765,213 @@ struct SettingsOverlayView: View {
     }
 }
 
-#Preview {
-    MainTabView()
+// MARK: - Preview Helper
+struct MainTabViewPreview: View {
+    @State private var isSavedSheetPresented = false
+    
+    var body: some View {
+        MainTabView()
+            .onAppear {
+                // 프리뷰용 더미 데이터 설정
+                let dummyShapes = [
+                    ShapeModel(
+                        title: "드론 비행 구역 A",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 500.0,
+                        address: "서울특별시 중구 세종대로 110",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                        color: "#FF6B6B"
+                    ),
+                    ShapeModel(
+                        title: "헬기 착륙장",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 300.0,
+                        address: "서울특별시 강남구 테헤란로 152",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
+                        color: "#4ECDC4"
+                    ),
+                    ShapeModel(
+                        title: "공사 현장",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 800.0,
+                        address: "서울특별시 마포구 와우산로 94",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
+                        color: "#45B7D1"
+                    ),
+                    ShapeModel(
+                        title: "이벤트 공간",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 200.0,
+                        address: "서울특별시 종로구 종로 1",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
+                        color: "#96CEB4"
+                    ),
+                    ShapeModel(
+                        title: "보안 구역",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 100000.0,
+                        address: "서울특별시 용산구 이태원로 27",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
+                        color: "#FFEAA7"
+                    ),
+                    ShapeModel(
+                        title: "만료된 도형",
+                        shapeType: .circle,
+                        baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                        radius: 150.0,
+                        address: "서울특별시 서초구 서초대로 396",
+                        createdAt: Date(),
+                        deletedAt: nil,
+                        flightStartDate: Date(),
+                        flightEndDate: Calendar.current.date(byAdding: .day, value: -5, to: Date()), // 5일 전 만료
+                        color: "#8E8E93"
+                    )
+                ]
+                
+                ShapeFileStore.shared.shapes = dummyShapes
+            }
+    }
+}
+
+// MARK: - Simple Preview for Saved Tab
+struct SavedTabPreview: View {
+    @State private var isSavedSheetPresented = true
+    
+    var body: some View {
+        ZStack {
+            Color.gray.opacity(0.1)
+                .ignoresSafeArea()
+            
+            VStack {
+                Text("저장 탭 프리뷰")
+                    .font(.title)
+                    .padding()
+                
+                Button("저장 목록 열기") {
+                    isSavedSheetPresented = true
+                }
+                .padding()
+            }
+        }
+        .overlay(
+            Group {
+                if isSavedSheetPresented {
+                    SavedListOverlayView(
+                        selectedShapeID: .constant(nil),
+                        isPresented: $isSavedSheetPresented,
+                        shapeIDToScrollTo: .constant(nil)
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+        )
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: isSavedSheetPresented)
+        .onAppear {
+            // 프리뷰용 더미 데이터 설정
+            let dummyShapes = [
+                ShapeModel(
+                    title: "드론 비행 구역 A",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 500.0,
+                    address: "서울특별시 중구 세종대로 110",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 30, to: Date()),
+                    color: "#FF6B6B"
+                ),
+                ShapeModel(
+                    title: "헬기 착륙장",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 300.0,
+                    address: "서울특별시 강남구 테헤란로 152",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 15, to: Date()),
+                    color: "#4ECDC4"
+                ),
+                ShapeModel(
+                    title: "공사 현장",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 800.0,
+                    address: "서울특별시 마포구 와우산로 94",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 60, to: Date()),
+                    color: "#45B7D1"
+                ),
+                ShapeModel(
+                    title: "이벤트 공간",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 200.0,
+                    address: "서울특별시 종로구 종로 1",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 7, to: Date()),
+                    color: "#96CEB4"
+                ),
+                ShapeModel(
+                    title: "보안 구역",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 100000.0,
+                    address: "서울특별시 용산구 이태원로 27",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: 90, to: Date()),
+                    color: "#FFEAA7"
+                ),
+                ShapeModel(
+                    title: "만료된 도형",
+                    shapeType: .circle,
+                    baseCoordinate: CoordinateManager(latitude: 37.5665, longitude: 126.9780),
+                    radius: 150.0,
+                    address: "서울특별시 서초구 서초대로 396",
+                    createdAt: Date(),
+                    deletedAt: nil,
+                    flightStartDate: Date(),
+                    flightEndDate: Calendar.current.date(byAdding: .day, value: -5, to: Date()), // 5일 전 만료
+                    color: "#8E8E93"
+                )
+            ]
+            
+            ShapeFileStore.shared.shapes = dummyShapes
+        }
+    }
+}
+
+#Preview("Main Tab View") {
+    MainTabViewPreview()
+}
+
+#Preview("Saved Tab") {
+    SavedTabPreview()
 }

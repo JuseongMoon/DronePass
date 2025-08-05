@@ -131,6 +131,22 @@ class MapViewModel: NSObject, ObservableObject {
             name: Notification.Name("ClearMapOverlays"),
             object: nil
         )
+        
+        // 색상 변경 시 지도 오버레이 리로드 알림
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleReloadMapOverlays),
+            name: Notification.Name("ReloadMapOverlays"),
+            object: nil
+        )
+        
+        // 도형 변경 시 지도 오버레이 리로드 알림
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleShapesDidChange),
+            name: Notification.Name("shapesDidChange"),
+            object: nil
+        )
     }
 
     @objc private func handleShapeOverlayTapped(_ notification: Notification) {
@@ -194,6 +210,71 @@ class MapViewModel: NSObject, ObservableObject {
     
     @objc private func handleClearMapOverlays() {
         clearAllOverlays()
+    }
+    
+    @objc private func handleReloadMapOverlays() {
+        print("🎨 색상 변경 감지: 지도 오버레이 리로드")
+        
+        // 즉시 리로드
+        reloadOverlays()
+        
+        // 강제 리페인트를 위한 추가 처리
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            print("🎨 색상 변경 강제 리페인트")
+            self.forceOverlayRedraw()
+        }
+    }
+    
+    private func forceOverlayRedraw() {
+        guard let mapView = currentMapView else { return }
+        
+        print("🎨 오버레이 완전 재생성 시작")
+        
+        // 기존 오버레이 완전 제거
+        clearOverlays()
+        
+        // 새로운 오버레이 다시 생성
+        let savedShapes = ShapeFileStore.shared.shapes
+        
+        // 중복 제거를 위해 ID 기반으로 필터링
+        let uniqueShapes = Array(Set(savedShapes.map { $0.id })).compactMap { id in
+            savedShapes.first { $0.id == id }
+        }
+        
+        // 만료된 도형 숨기기 설정이 활성화되어 있으면 만료된 도형 필터링
+        let filteredShapes: [ShapeModel]
+        if SettingManager.shared.isHideExpiredShapesEnabled {
+            filteredShapes = uniqueShapes.filter { !$0.isExpired }
+        } else {
+            filteredShapes = uniqueShapes
+        }
+        
+        // 새로운 오버레이 생성
+        for shape in filteredShapes {
+            addOverlay(for: shape, mapView: mapView)
+            print("🎨 새 오버레이 생성: \(shape.title) - \(shape.color)")
+        }
+        
+        // 하이라이트 다시 적용
+        if let highlightedID = highlightedShapeID,
+           let highlightedShape = filteredShapes.first(where: { $0.id == highlightedID }),
+           let radius = highlightedShape.radius {
+            
+            let center = NMGLatLng(lat: highlightedShape.baseCoordinate.latitude, lng: highlightedShape.baseCoordinate.longitude)
+            let highlightOverlay = createHighlightOverlay(center: center, radius: radius)
+            highlightOverlay.mapView = mapView
+            overlays.append(highlightOverlay)
+            currentHighlightOverlay = highlightOverlay
+        }
+        
+        print("🎨 오버레이 완전 재생성 완료: \(filteredShapes.count)개")
+    }
+    
+
+    
+    @objc private func handleShapesDidChange() {
+        print("🔄 MapViewModel: shapesDidChange 알림 수신 - 지도 오버레이 리로드")
+        reloadOverlays()
     }
 
     // MARK: - 카메라 이동 처리
@@ -282,8 +363,8 @@ class MapViewModel: NSObject, ObservableObject {
         if isPad && isLandscape {
             // iPad 가로 모드
             // Y축: 중앙 정렬 (오프셋 0)
-            // X축: 화면 너비의 15%만큼 왼쪽으로 이동 (오른쪽으로 보이게)
-            let offsetX = -screenSize.width * 0.15
+            // X축: 화면 너비의 14%만큼 왼쪽으로 이동 (오른쪽으로 보이게)
+            let offsetX = -screenSize.width * 0.14
             return (x: offsetX, y: 0)
         } else {
             // iPhone 세로 & iPad 세로 모드
@@ -313,15 +394,12 @@ class MapViewModel: NSObject, ObservableObject {
         
         // 터치 핸들러 설정
         circleOverlay.touchHandler = { _ in
-            let moveData = SavedTableListView.MoveToShapeData(
-                coordinate: shape.baseCoordinate,
-                radius: shape.radius ?? CameraConstants.defaultRadius,
-                shapeID: shape.id
-            )
+            // ShapeOverlayTapped 알림 전송 (MainView에서 처리)
             NotificationCenter.default.post(
-                name: Self.moveWithoutZoomNotification,
-                object: moveData
+                name: Self.shapeOverlayTappedNotification,
+                object: shape
             )
+            
             return true
         }
     }
@@ -366,19 +444,27 @@ class MapViewModel: NSObject, ObservableObject {
             savedShapes.first { $0.id == id }
         }
         
-        // 중복이 있을 때만 로그 출력
-        let isDuplicate = uniqueShapes.count != savedShapes.count
-        if isDuplicate {
-            print("🔄 오버레이 리로드 (중복 제거): \(uniqueShapes.count)개 도형 (원본: \(savedShapes.count)개)")
+        // 만료된 도형 숨기기 설정이 활성화되어 있으면 만료된 도형 필터링
+        let filteredShapes: [ShapeModel]
+        if SettingManager.shared.isHideExpiredShapesEnabled {
+            filteredShapes = uniqueShapes.filter { !$0.isExpired }
+            print("🔄 오버레이 리로드 (만료된 도형 숨김): \(filteredShapes.count)개 도형 (전체: \(uniqueShapes.count)개)")
+        } else {
+            filteredShapes = uniqueShapes
+            // 중복이 있을 때만 로그 출력
+            let isDuplicate = uniqueShapes.count != savedShapes.count
+            if isDuplicate {
+                print("🔄 오버레이 리로드 (중복 제거): \(uniqueShapes.count)개 도형 (원본: \(savedShapes.count)개)")
+            }
         }
         
-        for shape in uniqueShapes {
+        for shape in filteredShapes {
             addOverlay(for: shape, mapView: mapView)
         }
         
-        // 하이라이트가 있는 경우 다시 적용
+        // 하이라이트가 있는 경우 다시 적용 (필터링된 도형 중에서만)
         if let highlightedID = highlightedShapeID,
-           let highlightedShape = uniqueShapes.first(where: { $0.id == highlightedID }),
+           let highlightedShape = filteredShapes.first(where: { $0.id == highlightedID }),
            let radius = highlightedShape.radius {
             
             let center = NMGLatLng(lat: highlightedShape.baseCoordinate.latitude, lng: highlightedShape.baseCoordinate.longitude)
@@ -419,21 +505,29 @@ class MapViewModel: NSObject, ObservableObject {
             savedShapes.first { $0.id == id }
         }
         
+        // 만료된 도형 숨기기 설정이 활성화되어 있으면 만료된 도형 필터링
+        let filteredShapes: [ShapeModel]
+        if SettingManager.shared.isHideExpiredShapesEnabled {
+            filteredShapes = uniqueShapes.filter { !$0.isExpired }
+        } else {
+            filteredShapes = uniqueShapes
+        }
+        
         // 중복이 있는 경우에만 정리
         if uniqueShapes.count != savedShapes.count {
-            print("🧹 중복 오버레이 발견: \(savedShapes.count)개 → \(uniqueShapes.count)개")
+            print("🧹 중복 오버레이 발견: \(savedShapes.count)개 → \(filteredShapes.count)개")
             
             // 기존 오버레이 정리
             clearOverlays()
             
-            // 고유한 도형만 다시 추가
-            for shape in uniqueShapes {
+            // 필터링된 도형만 다시 추가
+            for shape in filteredShapes {
                 addOverlay(for: shape, mapView: mapView)
             }
             
-            // 하이라이트 재적용
+            // 하이라이트 재적용 (필터링된 도형 중에서만)
             if let highlightedID = highlightedShapeID,
-               let highlightedShape = uniqueShapes.first(where: { $0.id == highlightedID }),
+               let highlightedShape = filteredShapes.first(where: { $0.id == highlightedID }),
                let radius = highlightedShape.radius {
                 
                 let center = NMGLatLng(lat: highlightedShape.baseCoordinate.latitude, lng: highlightedShape.baseCoordinate.longitude)
@@ -448,9 +542,9 @@ class MapViewModel: NSObject, ObservableObject {
     
     func calculateZoomLevel(for radius: Double) -> Double {
         let minRadius: Double = 100
-        let maxRadius: Double = 2000
+        let maxRadius: Double = 3000
         let minZoom: Double = 11
-        let maxZoom: Double = 15
+        let maxZoom: Double = 14
         
         if radius <= minRadius { return maxZoom }
         if radius >= maxRadius { return minZoom }

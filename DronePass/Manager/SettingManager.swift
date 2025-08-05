@@ -81,6 +81,21 @@ final class SettingManager: ObservableObject {
         isSunriseSunsetAlarmEnabled ? "일출/일몰 시간에 알림을 받습니다." : "알림이 꺼져 있습니다."
     }
     
+    // MARK: - 만료된 도형 숨기기 관련 프로퍼티
+    
+    /// 만료된 도형 숨기기 활성화 여부를 저장하는 UserDefaults 키
+    private let hideExpiredShapesKey = "hideExpiredShapesEnabled"
+    
+    /// 만료된 도형 숨기기 활성화 여부 프로퍼티 (UserDefaults에 저장/불러오기)
+    var isHideExpiredShapesEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: hideExpiredShapesKey) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: hideExpiredShapesKey)
+            // 설정 변경 시 지도 오버레이 리로드 알림 전송
+            NotificationCenter.default.post(name: Notification.Name("ReloadMapOverlays"), object: nil)
+        }
+    }
+    
     // MARK: - 클라우드 백업 관련 프로퍼티
     
     /// 클라우드 백업 활성화 여부를 저장하는 UserDefaults 키
@@ -205,9 +220,15 @@ final class SettingManager: ObservableObject {
     
     // MARK: - 종료일 지난 도형 일괄 삭제
 
-    /// 앱의 ShapeManager를 호출하여, 종료일이 지난 도형을 일괄 삭제
+    /// 앱의 ShapeRepository를 호출하여, 종료일이 지난 도형을 일괄 삭제
     func deleteExpiredShapes() {
-        ShapeFileStore.shared.deleteExpiredShapes()
+        Task {
+            do {
+                try await ShapeRepository.shared.deleteExpiredShapes()
+            } catch {
+                print("❌ 만료된 도형 삭제 실패: \(error)")
+            }
+        }
     }
     
     // MARK: - 알림 예약을 위한 공통 함수

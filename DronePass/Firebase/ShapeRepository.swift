@@ -108,14 +108,14 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     private func syncLocalToFirebaseSafely() async {
         await performSafeSync(operation: .localToFirebase) {
             do {
-                // 로컬의 모든 데이터(삭제된 도형 포함)를 Firebase에 업로드
-                let allLocalShapes = await MainActor.run {
-                    return ShapeFileStore.shared.getAllShapesIncludingDeleted()
+                // 로컬의 활성 도형만 Firebase에 업로드
+                let activeLocalShapes = await MainActor.run {
+                    return ShapeFileStore.shared.shapes
                 }
                 
-                if !allLocalShapes.isEmpty {
-                    try await ShapeFirebaseStore.shared.saveShapes(allLocalShapes)
-                    print("✅ 로컬 도형 \(allLocalShapes.count)개를 Firebase에 안전 동기화 완료 (삭제된 도형 포함)")
+                if !activeLocalShapes.isEmpty {
+                    try await ShapeFirebaseStore.shared.saveShapes(activeLocalShapes)
+                    print("✅ 로컬 활성 도형 \(activeLocalShapes.count)개를 Firebase에 안전 동기화 완료")
                 }
                 
                 // 동기화 성공 시점에 마지막 백업 시간 저장
@@ -335,7 +335,7 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     
     func deleteExpiredShapes() async throws {
         try await performSafeOperation { [weak self] in
-            // 로컬에서 먼저 만료된 도형 삭제
+            // 로컬에서 먼저 만료된 도형 삭제 (soft delete)
             await MainActor.run {
                 ShapeFileStore.shared.deleteExpiredShapes()
                 
@@ -636,3 +636,5 @@ enum DataIntegrityResult {
         }
     }
 } 
+
+

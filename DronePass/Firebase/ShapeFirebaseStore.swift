@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseFirestore
+import UIKit
 
 final class ShapeFirebaseStore: ShapeStoreProtocol {
     typealias ShapeType = ShapeModel
@@ -170,21 +171,27 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 if let shape = try? self.parseShapeFromDocument(document.data(), id: document.documentID),
                    let expireDate = shape.flightEndDate,
                    expireDate < now {
-                    batch.deleteDocument(document.reference)
+                    // Soft delete: deletedAt 필드에 현재 시간 설정
+                    let deleteData: [String: Any] = ["deletedAt": Timestamp(date: now)]
+                    batch.updateData(deleteData, forDocument: document.reference)
                     deletedCount += 1
                 }
             }
             
             if deletedCount > 0 {
                 try await batch.commit()
-                print("✅ Firebase에서 만료된 도형 삭제 성공: \(deletedCount)개")
+                
+                // 서버 메타데이터 업데이트
+                try await self.updateServerMetadata()
+                
+                print("✅ Firebase에서 만료된 도형 soft delete 성공: \(deletedCount)개")
             }
         }
     }
     
     // MARK: - Server Metadata Methods
     
-    /// 서버 메타데이터 업데이트 (마지막 수정 시간)
+    /// 서버 메타데이터 업데이트 (마지막 수정 시간 및 색상 변경 시점)
     private func updateServerMetadata() async throws {
         try await performWithRetry {
             guard let userId = AuthManager.shared.currentAuthUser?.uid else {
@@ -192,9 +199,16 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             }
             
             let metadataRef = self.db.collection("users").document(userId).collection("metadata").document("server")
-            try await metadataRef.setData([
+            var metadata: [String: Any] = [
                 "lastModified": Timestamp(date: Date())
-            ])
+            ]
+            
+            // 색상 변경 시점이 있으면 포함
+            if let colorChangeTime = ColorManager.shared.lastColorChangeTime {
+                metadata["lastColorChange"] = Timestamp(date: colorChangeTime)
+            }
+            
+            try await metadataRef.setData(metadata)
         }
     }
     
@@ -213,6 +227,24 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             } else {
                 // 메타데이터가 없으면 과거 시간 반환 (변경사항 없음으로 처리)
                 return Date.distantPast
+            }
+        }
+    }
+    
+    /// 서버의 마지막 색상 변경 시점 가져오기
+    func getServerLastColorChangeTime() async throws -> Date? {
+        try await performWithRetry {
+            guard let userId = AuthManager.shared.currentAuthUser?.uid else {
+                throw FirebaseError.notAuthenticated
+            }
+            
+            let metadataRef = self.db.collection("users").document(userId).collection("metadata").document("server")
+            let document = try await metadataRef.getDocument()
+            
+            if let timestamp = document.data()?["lastColorChange"] as? Timestamp {
+                return timestamp.dateValue()
+            } else {
+                return nil
             }
         }
     }
@@ -513,33 +545,69 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                !lat.isNaN && !lng.isNaN && lat.isFinite && lng.isFinite
     }
     
-    /// 로컬 색상과 파이어스토어 색상을 동기화
+    /// 로컬 색상과 파이어스토어 색상을 동기화 (서버 색상으로 통일)
     private func synchronizeColorsWithLocal(_ firebaseShapes: [ShapeModel]) async -> [ShapeModel] {
-        // 현재 설정된 기본 도형 색상 가져오기
-        let currentDefaultColor = ColorManager.shared.defaultColor.hex
-        print("🎨 현재 설정된 기본 도형 색상: \(currentDefaultColor)")
-        
-        // 파이어스토어 도형들의 색상을 현재 설정된 기본 색상으로 강제 변경
-        var synchronizedShapes = firebaseShapes
-        var colorChangedCount = 0
-        
-        for i in 0..<synchronizedShapes.count {
-            if synchronizedShapes[i].color != currentDefaultColor {
-                synchronizedShapes[i].color = currentDefaultColor
-                colorChangedCount += 1
-            }
-        }
-        
-        if colorChangedCount > 0 {
-            print("🔄 파이어스토어 도형 색상 동기화 완료: \(colorChangedCount)개 도형의 색상을 현재 설정 색상(\(currentDefaultColor))으로 변경")
+        do {
+            // 서버의 색상 변경 시점 가져오기
+            let serverColorChangeTime = try await getServerLastColorChangeTime()
+            let localColorChangeTime = ColorManager.shared.lastColorChangeTime
             
-            // 변경된 색상을 파이어스토어에 업데이트
-            await updateFirebaseShapesColors(synchronizedShapes)
-        } else {
-            print("✅ 파이어스토어 도형 색상이 이미 현재 설정 색상과 일치합니다.")
+            print("🎨 색상 동기화 비교:")
+            print("   - 서버 색상 변경 시점: \(serverColorChangeTime?.description ?? "없음")")
+            print("   - 로컬 색상 변경 시점: \(localColorChangeTime?.description ?? "없음")")
+            
+            // 서버에서 넘어온 활성 도형들의 색상을 통일할 색상으로 결정
+            let activeShapes = firebaseShapes.filter { $0.deletedAt == nil }
+            guard let firstActiveShape = activeShapes.first else {
+                print("📝 활성 도형이 없음: 색상 통일 불필요")
+                return firebaseShapes
+            }
+            
+            let unifiedColor = firstActiveShape.color
+            print("🎨 서버 활성 도형 색상: \(unifiedColor)")
+            
+            // 로컬이 더 최근에 색상을 변경했다면 로컬 색상으로 통일
+            if ColorManager.shared.isMoreRecentThan(serverColorChangeTime) {
+                print("✅ 로컬 색상이 더 최근: 모든 활성 도형을 로컬 색상으로 통일")
+                let localColor = ColorManager.shared.defaultColor.hex
+                var updatedShapes = firebaseShapes
+                
+                // 활성 도형들만 로컬 색상으로 통일 (만료된 도형은 제외)
+                for i in 0..<updatedShapes.count {
+                    if updatedShapes[i].deletedAt == nil {
+                        updatedShapes[i].color = localColor
+                    }
+                }
+                
+                return updatedShapes
+            }
+            // 서버가 더 최근에 색상을 변경했거나 색상 변경 시점이 없는 경우 서버 색상으로 통일
+            else {
+                print("✅ 서버 색상으로 통일: 모든 활성 도형을 서버 색상으로 통일")
+                var updatedShapes = firebaseShapes
+                
+                // 활성 도형들만 서버 색상으로 통일 (만료된 도형은 제외)
+                for i in 0..<updatedShapes.count {
+                    if updatedShapes[i].deletedAt == nil {
+                        updatedShapes[i].color = unifiedColor
+                    }
+                }
+                
+                // 로컬의 기본 색상도 서버 색상으로 업데이트
+                if let serverColor = PaletteColor.allCases.first(where: { $0.hex.lowercased() == unifiedColor.lowercased() }) {
+                    await MainActor.run {
+                        ColorManager.shared.defaultColor = serverColor
+                        print("🔄 로컬 기본 색상을 서버 색상으로 업데이트: \(serverColor.rawValue)")
+                    }
+                }
+                
+                return updatedShapes
+            }
+            
+        } catch {
+            print("❌ 색상 동기화 실패: \(error.localizedDescription)")
+            return firebaseShapes
         }
-        
-        return synchronizedShapes
     }
     
 
@@ -597,3 +665,7 @@ extension Array {
         }
     }
 } 
+
+
+ 
+

@@ -16,8 +16,8 @@ struct ShapeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @StateObject private var repository = ShapeRepository.shared
+    @StateObject private var shapeObserver: ShapeRealtimeObserver
     
-    @State private var shape: ShapeModel
     private let originalShape: ShapeModel
     
     var onClose: (() -> Void)?
@@ -33,7 +33,7 @@ struct ShapeDetailView: View {
     @State private var isDeleting = false // 삭제 중 상태 추가
     
     init(shape: ShapeModel, onClose: (() -> Void)? = nil, onEdit: (() -> Void)? = nil, onDelete: (() -> Void)? = nil) {
-        _shape = State(initialValue: shape)
+        _shapeObserver = StateObject(wrappedValue: ShapeRealtimeObserver(shape: shape))
         self.originalShape = shape
         self.onClose = onClose
         self.onEdit = onEdit
@@ -41,15 +41,15 @@ struct ShapeDetailView: View {
     }
     
     private var addressURL: URL? {
-        guard let address = shape.address else { return nil }
+        guard let address = shapeObserver.shape.address else { return nil }
         let encoded = address.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         return URL(string: "http://maps.apple.com/?q=\(encoded)")
     }
     
     // MARK: - 지도앱 연동 버튼
     private var mapButtons: [(title: String, action: () -> Void)] {
-        let coordinate = shape.baseCoordinate
-        let name = shape.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "목적지"
+        let coordinate = shapeObserver.shape.baseCoordinate
+        let name = shapeObserver.shape.title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "목적지"
         
         return [
             ("네이버지도", {
@@ -92,7 +92,7 @@ struct ShapeDetailView: View {
                         Text("제목")
                             .bold()
                         Spacer()
-                        Text(shape.title)
+                        Text(shapeObserver.shape.title)
                             .foregroundColor(.secondary)
                     }
                     
@@ -100,7 +100,7 @@ struct ShapeDetailView: View {
                         Text("좌표")
                             .bold()
                         Spacer()
-                        Text(shape.baseCoordinate.formattedCoordinate)
+                        Text(shapeObserver.shape.baseCoordinate.formattedCoordinate)
                             .foregroundColor(.secondary)
                     }
                     
@@ -112,7 +112,7 @@ struct ShapeDetailView: View {
                         Button(action: {
                             showActionSheet = true
                         }) {
-                            Text(shape.address ?? "-")
+                            Text(shapeObserver.shape.address ?? "-")
                                 .multilineTextAlignment(.trailing)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.5)
@@ -120,7 +120,7 @@ struct ShapeDetailView: View {
                         .foregroundColor(.blue)
                     }
                     
-                    if let radius = shape.radius {
+                    if let radius = shapeObserver.shape.radius {
                         HStack {
                             Text("반경")
                                 .bold()
@@ -136,11 +136,11 @@ struct ShapeDetailView: View {
                             .bold()
 
                         Spacer()
-                        Text(DateFormatter.koreanDateTime.string(from: shape.flightStartDate))
+                        Text(DateFormatter.koreanDateTime.string(from: shapeObserver.shape.flightStartDate))
                             .foregroundColor(.secondary)
                     }
                     
-                    if let expire = shape.flightEndDate {
+                    if let expire = shapeObserver.shape.flightEndDate {
                         HStack {
                             Text("종료일")
                                 .bold()
@@ -155,7 +155,7 @@ struct ShapeDetailView: View {
                 Section("메모") {
                     VStack {
                         HyperlinkTextView(
-                            text: shape.memo ?? "-",
+                            text: shapeObserver.shape.memo ?? "-",
                             font: .systemFont(ofSize: 16),
                             textColor: UIColor.secondaryLabel,
                             showSafari: $showSafari,
@@ -191,8 +191,8 @@ struct ShapeDetailView: View {
                     isDeleting = true
                     Task {
                         do {
-                            try await repository.removeShape(id: shape.id)
-                            print("✅ 도형 삭제 완료: \(shape.title)")
+                            try await repository.removeShape(id: shapeObserver.shape.id)
+                            print("✅ 도형 삭제 완료: \(shapeObserver.shape.title)")
                             await MainActor.run {
                                 onDelete?()
                                 dismiss()
@@ -208,7 +208,7 @@ struct ShapeDetailView: View {
                     }
                 }
             } message: {
-                Text("'\(shape.title)' 도형을 삭제하시겠습니까?")
+                Text("'\(shapeObserver.shape.title)' 도형을 삭제하시겠습니까?")
             }
             .confirmationDialog("길찾기 앱 선택", isPresented: $showActionSheet, titleVisibility: .visible) {
                 ForEach(mapButtons, id: \.title) { button in
@@ -225,12 +225,12 @@ struct ShapeDetailView: View {
             }
             .sheet(isPresented: $showEditSheet) {
                 ShapeEditView(
-                    coordinate: shape.baseCoordinate,
+                    coordinate: shapeObserver.shape.baseCoordinate,
                     onAdd: { updatedShape in
-                        shape = updatedShape
+                        shapeObserver.shape = updatedShape
                         showEditSheet = false
                     },
-                    originalShape: shape
+                    originalShape: shapeObserver.shape
                 )
             }
         }

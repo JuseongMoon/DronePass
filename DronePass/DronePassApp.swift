@@ -26,12 +26,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     MigrationManager.shared.performAllMigrationsIfNeeded()
     print("✅ 앱 시작 시 마이그레이션 체크 완료")
     
+    // 실시간 동기화 매니저 초기화 (로그인 상태에 따라 자동으로 시작/중지됨)
+    _ = RealtimeSyncManager.shared
+    print("✅ 실시간 동기화 매니저 초기화 완료")
+    
     return true
   }
   
   func applicationDidBecomeActive(_ application: UIApplication) {
-    // 앱이 포그라운드로 올 때 변경사항 체크
-    ChangeDetectionManager.shared.checkForChangesIfNeeded()
+    // 실시간 동기화가 비활성화된 경우에만 변경사항 체크
+    if !RealtimeSyncManager.shared.isRealtimeSyncEnabled {
+      ChangeDetectionManager.shared.checkForChangesIfNeeded()
+    } else {
+      print("📝 실시간 동기화가 활성화되어 있어 수동 변경사항 체크를 건너뜁니다.")
+    }
   }
   
   func applicationWillResignActive(_ application: UIApplication) {

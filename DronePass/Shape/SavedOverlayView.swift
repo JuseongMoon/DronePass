@@ -3,6 +3,7 @@ import SwiftUI
 struct SavedOverlayView: View {
     @Binding var isPresented: Bool
     @Binding var selectedShapeID: UUID?
+    @State private var shapeIDToScrollTo: UUID?
     @State private var dragOffset: CGFloat = 0
     @State private var isDragging = false
     
@@ -48,7 +49,10 @@ struct SavedOverlayView: View {
             .padding()
             
             // 리스트
-            SavedTableListView(selectedShapeID: $selectedShapeID)
+            SavedTableListView(
+                selectedShapeID: $selectedShapeID,
+                shapeIDToScrollTo: $shapeIDToScrollTo
+            )
         }
         .offset(y: dragOffset)
         .animation(.interactiveSpring(), value: isDragging)

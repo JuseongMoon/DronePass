@@ -238,6 +238,25 @@ struct MainView: View {
                 DispatchQueue.main.async {
                     viewModel.highlightedShapeID = shape.id
                     viewModel.reloadOverlays()
+                    
+                    // 저장 탭 열기 및 스크롤 알림 전송
+                    NotificationCenter.default.post(
+                        name: Notification.Name("OpenSavedTabNotification"),
+                        object: shape.id
+                    )
+                }
+            }
+        }
+        
+        // 색상 변경 시 지도 오버레이 즉시 리로드
+        NotificationCenter.default.addObserver(forName: Notification.Name("ReloadMapOverlays"), object: nil, queue: .main) { _ in
+            DispatchQueue.main.async {
+                print("🎨 MainView: 색상 변경 알림 수신")
+                viewModel.reloadOverlays()
+                
+                // 추가 지연 없이 한 번 더 리로드
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    viewModel.reloadOverlays()
                 }
             }
         }

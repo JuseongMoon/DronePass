@@ -11,6 +11,8 @@ struct SavedShapeListView: View {
     @Environment(\.dismiss) private var dismiss
     @GestureState private var dragState = DragState.inactive
     @State private var position: CGFloat = UIScreen.main.bounds.height - 400
+    @State private var selectedShapeID: UUID?
+    @State private var shapeIDToScrollTo: UUID?
     
     private let dismissThreshold: CGFloat = 100
     
@@ -51,7 +53,10 @@ struct SavedShapeListView: View {
             )
             
             // 나머지 컨텐츠
-            SavedTableListView()
+            SavedTableListView(
+                selectedShapeID: $selectedShapeID,
+                shapeIDToScrollTo: $shapeIDToScrollTo
+            )
         }
         .offset(y: dragState.translation)
         .animation(.interactiveSpring(), value: dragState.translation)

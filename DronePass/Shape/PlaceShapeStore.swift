@@ -124,6 +124,14 @@ final class PlaceShapeLocalManager: ObservableObject {
             try newData.write(to: shapesFileURL)
             // 4. 메모리의 shapes도 동기화 (여기서 @Published가 UI에 반영)
             self.shapes = loadedShapes.filter { $0.deletedAt == nil }
+            
+            // 5. UI 즉시 업데이트를 위한 알림 전송
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                NotificationCenter.default.post(name: Notification.Name("ReloadMapOverlays"), object: nil)
+            }
+            
+            print("✅ 모든 도형 색상 변경 완료: \(newColor)")
         } catch {
             print("모든 도형 색상 일괄 변경 실패: \(error)")
         }

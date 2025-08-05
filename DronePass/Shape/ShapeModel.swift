@@ -28,7 +28,7 @@ public enum ShapeType: String, Codable { // 도형의 타입을 정의하는 열
 }
 
 // ✅ color: PaletteColor(컬러매니저 기반 enum)로 변경
-public struct ShapeModel: Codable, Identifiable { // 지도에 표시될 도형의 데이터 모델입니다. Codable과 Identifiable 프로토콜을 준수합니다.
+public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시될 도형의 데이터 모델입니다. Codable과 Identifiable 프로토콜을 준수합니다.
     public let id: UUID // 도형의 고유 식별자입니다.
     public var title: String // 도형의 제목입니다.
     public var shapeType: ShapeType // 도형의 타입입니다.

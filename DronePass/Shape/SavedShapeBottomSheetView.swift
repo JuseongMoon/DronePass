@@ -12,6 +12,7 @@ struct SavedShapeBottomSheetView: View {
     @GestureState private var dragState = DragState.inactive
     @State private var position: CGFloat = UIScreen.main.bounds.height - 400
     @State private var selectedShapeID: UUID? = nil
+    @State private var shapeIDToScrollTo: UUID? = nil
     
     private let dismissThreshold: CGFloat = 100
     private let minHeight: CGFloat = 200
@@ -62,7 +63,10 @@ struct SavedShapeBottomSheetView: View {
             )
             
             // 나머지 컨텐츠
-            SavedTableListView(selectedShapeID: $selectedShapeID)
+            SavedTableListView(
+                selectedShapeID: $selectedShapeID,
+                shapeIDToScrollTo: $shapeIDToScrollTo
+            )
         }
         .offset(y: dragState.translation)
         .animation(.interactiveSpring(), value: dragState.translation)

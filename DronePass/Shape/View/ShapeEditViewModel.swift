@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 
 final class ShapeEditViewModel: ObservableObject {
     // 입력값 상태
@@ -30,9 +31,12 @@ final class ShapeEditViewModel: ObservableObject {
     private var initialCoordinate: CoordinateManager?
 
     // 외부 의존성
-    private let store = ShapeFileStore.shared
+    private let store = ShapeRepository.shared
     var onAdd: ((ShapeModel) -> Void)?
     var originalShape: ShapeModel?
+    
+    // 편집 충돌 해결을 위한 실시간 관찰자 (편집 모드에서만 사용)
+    private var shapeObserver: ShapeRealtimeObserver?
 
     // UserDefaults 키
     private let dateOnlyKey = "isDateOnlyMode"
@@ -65,6 +69,12 @@ final class ShapeEditViewModel: ObservableObject {
         if isOriginalShapeTitleEmpty {
             self.address = originalShape?.address ?? ""
             self.initialAddress = originalShape?.address ?? ""
+        }
+        
+        // 편집 모드인 경우 실시간 관찰자 설정
+        if let shape = originalShape {
+            self.shapeObserver = ShapeRealtimeObserver(shape: shape)
+            self.shapeObserver?.startEditing()
         }
     }
 
@@ -142,13 +152,99 @@ final class ShapeEditViewModel: ObservableObject {
         UserDefaults.standard.set(startDate, forKey: lastStartDateKey)
         UserDefaults.standard.set(endDate, forKey: lastEndDateKey)
         if originalShape?.title.isEmpty ?? true {
-            store.addShape(newShape)
+            Task {
+                do {
+                    try await store.addShape(newShape)
+                    await MainActor.run {
+                        onAdd?(newShape)
+                        onComplete()
+                    }
+                } catch {
+                    await MainActor.run {
+                        alertMessage = "도형 추가 중 오류가 발생했습니다: \(error.localizedDescription)"
+                        showingAlert = true
+                    }
+                }
+            }
         } else {
-            store.updateShape(newShape)
+            // 편집 모드 - 충돌 해결 후 저장
+            Task {
+                do {
+                    let finalShape: ShapeModel
+                    
+                    // 편집 충돌 해결
+                    if let observer = shapeObserver {
+                        // 편집한 필드들을 관찰자에게 알림
+                        trackEditedFields(observer: observer)
+                        
+                        // 충돌 해결 후 최종 도형 생성
+                        finalShape = try await observer.resolveConflictsAndSave(editedShape: newShape)
+                        
+                        // 편집 모드 종료
+                        observer.stopEditing()
+                    } else {
+                        finalShape = newShape
+                    }
+                    
+                    // 최종 도형 저장
+                    try await store.updateShape(finalShape)
+                    
+                    await MainActor.run {
+                        onAdd?(finalShape)
+                        onComplete()
+                    }
+                } catch {
+                    await MainActor.run {
+                        alertMessage = "도형 수정 중 오류가 발생했습니다: \(error.localizedDescription)"
+                        showingAlert = true
+                    }
+                }
+            }
         }
-        onAdd?(newShape)
-        // 알림은 ShapeRepository에서만 전송하도록 제거
-        onComplete()
+    }
+    
+    /// 편집한 필드들을 추적하여 관찰자에게 알림
+    private func trackEditedFields(observer: ShapeRealtimeObserver) {
+        // 각 필드가 초기값과 다른지 확인하여 편집된 필드 추적
+        if title != initialTitle {
+            observer.finishEditingField("title")
+        }
+        
+        if address != initialAddress {
+            observer.finishEditingField("address")
+        }
+        
+        if radius != initialRadius {
+            observer.finishEditingField("radius")
+        }
+        
+        if memo != initialMemo {
+            observer.finishEditingField("memo")
+        }
+        
+        if let currentCoord = coordinate, let initialCoord = initialCoordinate {
+            if currentCoord.latitude != initialCoord.latitude || currentCoord.longitude != initialCoord.longitude {
+                observer.finishEditingField("coordinates")
+            }
+        } else if coordinate != initialCoordinate {
+            observer.finishEditingField("coordinates")
+        }
+        
+        // 날짜 필드들 (원본 데이터와 비교)
+        if let originalShape = originalShape {
+            if startDate != originalShape.flightStartDate {
+                observer.finishEditingField("flightStartDate")
+            }
+            
+            if endDate != (originalShape.flightEndDate ?? Date()) {
+                observer.finishEditingField("flightEndDate")
+            }
+        }
+    }
+    
+    deinit {
+        // 뷰모델이 해제될 때 편집 모드 종료
+        shapeObserver?.stopEditing()
     }
 }
 
