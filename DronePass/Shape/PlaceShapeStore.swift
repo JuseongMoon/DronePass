@@ -73,7 +73,9 @@ final class PlaceShapeLocalManager: ObservableObject {
     }
     
     public func addShape(_ shape: ShapeModel) {
-        shapes.append(shape)
+        var s = shape
+        s.updatedAt = Date()
+        shapes.append(s)
         saveShapes()
         // 알림은 ShapeRepository에서만 전송하도록 제거
     }
@@ -140,7 +142,9 @@ final class PlaceShapeLocalManager: ObservableObject {
     public func updateShape(_ shape: ShapeModel) {
         if let idx = shapes.firstIndex(where: { $0.id == shape.id }) {
             var newShapes = shapes
-            newShapes[idx] = shape
+            var updated = shape
+            updated.updatedAt = Date()
+            newShapes[idx] = updated
             shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
             saveShapes()
             // 알림은 ShapeRepository에서만 전송하도록 제거

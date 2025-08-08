@@ -91,7 +91,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             }
             
             // 비동기적으로 동기화 수행하여 SwiftUI 상태 업데이트 문제 방지
-            Task { @MainActor in
+            Task {
+                // 인증 준비 보장 (로그인 전환 직후 경합 방지)
+                _ = await AuthManager.shared.ensureAuthUserAvailable()
+                await MainActor.run {}
                 // 로그인 시 로컬 -> Firebase 동기화
                 if newIsFirebase {
                     await syncLocalToFirebaseSafely()
@@ -234,8 +237,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     func addShape(_ shape: ShapeModel) async throws {
         try await performSafeOperation { [weak self] in
             // 항상 로컬에 먼저 추가 (즉시 UI 반영)
+            var newShape = shape
+            newShape.updatedAt = Date()
             await MainActor.run {
-                ShapeFileStore.shared.addShape(shape)
+                ShapeFileStore.shared.addShape(newShape)
                 
                 // UI 업데이트를 위한 알림 전송 (한 번만)
                 self?.sendShapesDidChangeNotification()
@@ -248,8 +253,8 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
                 do {
-                    try await ShapeFirebaseStore.shared.addShape(shape)
-                    print("✅ 실시간 백업 성공: 도형 추가 (\(shape.title))")
+                    try await ShapeFirebaseStore.shared.addShape(newShape)
+                    print("✅ 실시간 백업 성공: 도형 추가 (\(newShape.title))")
                     
                     // 백업 시간 업데이트
                     await MainActor.run {
@@ -302,8 +307,10 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
     func updateShape(_ shape: ShapeModel) async throws {
         try await performSafeOperation { [weak self] in
             // 항상 로컬에 먼저 업데이트 (즉시 UI 반영)
+            var updatedShape = shape
+            updatedShape.updatedAt = Date()
             await MainActor.run {
-                ShapeFileStore.shared.updateShape(shape)
+                ShapeFileStore.shared.updateShape(updatedShape)
                 
                 // UI 업데이트를 위한 알림 전송 (한 번만)
                 self?.sendShapesDidChangeNotification()
@@ -316,15 +323,15 @@ final class ShapeRepository: ShapeStoreProtocol, ObservableObject {
             // 로그인 상태이고 클라우드 백업이 활성화된 경우 Firebase에도 반영
             if AppleLoginManager.shared.isLogin && SettingManager.shared.isCloudBackupEnabled {
                 do {
-                    try await ShapeFirebaseStore.shared.updateShape(shape)
-                    print("✅ 실시간 백업 성공: 도형 수정 (\(shape.title))")
+                    try await ShapeFirebaseStore.shared.updateShape(updatedShape)
+                    print("✅ 실시간 백업 성공: 도형 수정 (\(updatedShape.title))")
                     
                     // 백업 시간 업데이트
                     await MainActor.run {
                         UserDefaults.standard.set(Date(), forKey: "lastBackupTime")
                     }
                 } catch {
-                    print("❌ 실시간 백업 실패: 도형 수정 (\(shape.title)) - \(error.localizedDescription)")
+                    print("❌ 실시간 백업 실패: 도형 수정 (\(updatedShape.title)) - \(error.localizedDescription)")
                     // 백업 실패 시에도 로컬 데이터는 유지 (사용자 경험 보호)
                 }
             } else {

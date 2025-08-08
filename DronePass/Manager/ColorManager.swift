@@ -80,6 +80,11 @@ final class ColorManager {
         if let firstShape = ShapeFileStore.shared.shapes.first,
            let color = PaletteColor.allCases.first(where: { $0.hex.lowercased() == firstShape.color.lowercased() }) {
             firstShapeColor = color
+            // 서버/동기화로 인해 도형 색이 통일되면 신규 도형 기본 색도 동일하게 맞춘다
+            if defaultColor != color {
+                defaultColor = color
+                print("🎨 기본 색상 동기화: 첫 도형 색상으로 기본 색 업데이트 → \(color.rawValue)")
+            }
         } else {
             firstShapeColor = .blue
         }

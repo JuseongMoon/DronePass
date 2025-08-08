@@ -32,6 +32,7 @@ struct SavedTableListView: View {
     // 정렬된 배열을 직접 관리
     @State private var sortedActiveShapes: [ShapeModel] = []
     @State private var sortedExpiredShapes: [ShapeModel] = []
+    @State private var detailShape: ShapeModel? = nil
     
     // MARK: - Notification Names
     static let moveToShapeNotification = Notification.Name("MoveToShapeNotification")
@@ -71,6 +72,7 @@ struct SavedTableListView: View {
                             shapes: sortedActiveShapes,
                             selectedShapeID: $selectedShapeID,
                             onDelete: deleteShape,
+                            onShowDetail: { shape in detailShape = shape },
                             sortingContext: "active-\(sortingManager.selectedSortOption.rawValue)-\(sortingManager.sortDirection.rawValue)"
                         )
                     }
@@ -82,6 +84,7 @@ struct SavedTableListView: View {
                                 shapes: sortedExpiredShapes,
                                 selectedShapeID: $selectedShapeID,
                                 onDelete: deleteShape,
+                                onShowDetail: { shape in detailShape = shape },
                                 sortingContext: "expired-\(sortingManager.selectedSortOption.rawValue)-\(sortingManager.sortDirection.rawValue)"
                             )
                         }
@@ -139,6 +142,9 @@ struct SavedTableListView: View {
                     }
                 }
             }
+        }
+        .sheet(item: $detailShape) { shape in
+            ShapeDetailView(shape: shape)
         }
     }
     
@@ -288,11 +294,12 @@ private struct ShapeListContent: View {
     let shapes: [ShapeModel]
     @Binding var selectedShapeID: UUID?
     let onDelete: (IndexSet) -> Void
+    let onShowDetail: (ShapeModel) -> Void
     let sortingContext: String // 정렬 컨텍스트를 추가
     
     var body: some View {
         ForEach(shapes, id: \.id) { shape in
-            ShapeListRow(shape: shape, selectedShapeID: $selectedShapeID)
+            ShapeListRow(shape: shape, selectedShapeID: $selectedShapeID, onShowDetail: onShowDetail)
                 .id(shape.id) // 스크롤을 위해 단순한 ID 사용
         }
         .onDelete(perform: onDelete)
@@ -302,13 +309,14 @@ private struct ShapeListContent: View {
 // MARK: - ShapeListRow
 private struct ShapeListRow: View {
     @Binding var selectedShapeID: UUID?
-    @State private var showingDetailView = false
+    let onShowDetail: (ShapeModel) -> Void
     
     let shape: ShapeModel
     
-    init(shape: ShapeModel, selectedShapeID: Binding<UUID?>) {
+    init(shape: ShapeModel, selectedShapeID: Binding<UUID?>, onShowDetail: @escaping (ShapeModel) -> Void) {
         self.shape = shape
         _selectedShapeID = selectedShapeID
+        self.onShowDetail = onShowDetail
     }
     
     private var isSelected: Bool {
@@ -342,15 +350,12 @@ private struct ShapeListRow: View {
                 Spacer()
                 
                 // 오른쪽: 상세 정보 및 액션
-                ShapeDetailContent(showingDetailView: $showingDetailView)
+                ShapeDetailContent(onShowDetail: { onShowDetail(shape) })
                     .padding(.trailing, 4)
             }
             .contentShape(Rectangle())
             .onTapGesture { handleShapeTap() }
             .frame(minHeight: 55)
-        }
-        .sheet(isPresented: $showingDetailView) {
-            ShapeDetailView(shape: shape)
         }
     }
     
@@ -425,11 +430,11 @@ private struct ShapeInfoContent: View {
 }
 
 private struct ShapeDetailContent: View {
-    @Binding var showingDetailView: Bool
+    let onShowDetail: () -> Void
     
     var body: some View {
         Button(action: {
-            showingDetailView = true
+            onShowDetail()
         }) {
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)

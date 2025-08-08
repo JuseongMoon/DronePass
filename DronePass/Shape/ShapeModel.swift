@@ -48,6 +48,7 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
     public var deletedAt: Date? // 도형이 삭제된 시간 (삭제되지 않았다면 nil)
     public var flightStartDate: Date // 드론비행승인 시작날짜
     public var flightEndDate: Date? // 드론비행승인 종료날짜
+    public var updatedAt: Date // 마지막 수정 시간 (LWW 동기화 기준)
 
     /// **팔레트 컬러 (색상 팔레트에서 고름)**
     public var color: String // 도형의 색상입니다. (16진수 색상 코드)
@@ -112,6 +113,13 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
             } else {
                 flightEndDate = nil
             }
+        }
+        
+        // updatedAt 처리 (없으면 createdAt을 사용)
+        if let existingUpdatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) {
+            updatedAt = existingUpdatedAt
+        } else {
+            updatedAt = createdAt
         }
         
     }
@@ -183,6 +191,7 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
         try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
         try container.encode(flightStartDate, forKey: .flightStartDate)
         try container.encodeIfPresent(flightEndDate, forKey: .flightEndDate)
+        try container.encode(updatedAt, forKey: .updatedAt)
     }
     
     // MARK: - CodingKeys
@@ -191,7 +200,7 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
         case id, title, shapeType, baseCoordinate, address
         case radius, secondCoordinate, polygonCoordinates, polylineCoordinates
         case memo, color
-        case createdAt, deletedAt, flightStartDate, flightEndDate
+        case createdAt, deletedAt, flightStartDate, flightEndDate, updatedAt
         case startedAt, expireDate // 기존 필드 (호환성)
     }
     
@@ -221,7 +230,8 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
         deletedAt: Date? = nil, // 도형이 삭제된 시간을 설정합니다. (선택적)
         flightStartDate: Date = Date(), // 드론비행승인 시작날짜를 설정합니다. 기본값은 현재 시간입니다.
         flightEndDate: Date? = nil, // 드론비행승인 종료날짜를 설정합니다. (선택적)
-        color: String = "#007AFF" // 도형의 색상을 설정합니다. 기본값은 파란색입니다.
+        color: String = "#007AFF", // 도형의 색상을 설정합니다. 기본값은 파란색입니다.
+        updatedAt: Date = Date()
     ) {
         self.id = id
         self.title = title
@@ -238,6 +248,7 @@ public struct ShapeModel: Codable, Identifiable, Equatable { // 지도에 표시
         self.flightStartDate = flightStartDate
         self.flightEndDate = flightEndDate
         self.color = color
+        self.updatedAt = updatedAt
     }
 }
 

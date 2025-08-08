@@ -105,7 +105,7 @@ struct SettingView: View {
                 Toggle(isOn: $viewModel.isHideExpiredShapesEnabled) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("만료된 도형 숨기기")
-                        Text("만료된 도형을 목록에서 숨깁니다.")
+                        Text("만료된 도형을 목록과 지도에서 숨깁니다.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }

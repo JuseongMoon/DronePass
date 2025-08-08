@@ -50,6 +50,8 @@ struct ProfileView: View {
                         if newValue && AppleLoginManager.shared.isLogin {
                             // 실시간 클라우드 동기화 활성화 시 즉시 백업 및 동기화
                             Task {
+                                // 인증 준비 보장 후 업로드 수행
+                                _ = await AuthManager.shared.ensureAuthUserAvailable()
                                 await syncToCloud()
                             }
                             
@@ -83,6 +85,24 @@ struct ProfileView: View {
                         }
                         .disabled(isSyncing || realtimeSyncManager.syncInProgress)
                     }
+                    
+                    // 백업 복구 버튼 (데이터 손실 시 사용)
+                    // Button {
+                    //     Task {
+                    //         await restoreFromBackup()
+                    //     }
+                    // } label: {
+                    //     HStack {
+                    //         Text("백업에서 복구")
+                    //             .foregroundColor(.orange)
+                    //         if isSyncing {
+                    //             Spacer()
+                    //             ProgressView()
+                    //                 .scaleEffect(0.8)
+                    //         }
+                    //     }
+                    // }
+                    // .disabled(isSyncing)
                     
                 } header: {
                     Text("동기화")
@@ -225,6 +245,8 @@ struct ProfileView: View {
         }
         
         do {
+            // 로그인 직후 경합 방지를 위해 인증 준비를 한 번 더 보장
+            _ = await AuthManager.shared.ensureAuthUserAvailable()
             // 로컬에서 활성 도형만 로드 (삭제된 도형 제외)
             let activeLocalShapes = await MainActor.run {
                 return ShapeFileStore.shared.shapes
@@ -234,6 +256,9 @@ struct ProfileView: View {
             
             // Firebase에 활성 도형만 저장
             try await ShapeFirebaseStore.shared.saveShapes(activeLocalShapes)
+
+            // 저장 직후 서버 상태를 다시 받아 로컬 정합성 확보 (삭제 전파 포함)
+            await RealtimeSyncManager.shared.forceSyncNow()
             
             // 동기화/백업 시간 저장
             await MainActor.run {
@@ -255,6 +280,40 @@ struct ProfileView: View {
             }
             
             print("❌ 실시간 클라우드 동기화 실패: \(error)")
+        }
+    }
+    
+    private func restoreFromBackup() async {
+        await MainActor.run {
+            isSyncing = true
+        }
+        
+        do {
+            // Firebase에서 모든 도형을 가져와서 로컬에 저장
+            let shapesFromFirebase = try await ShapeFirebaseStore.shared.loadShapes()
+            
+            print("📥 백업에서 복구할 도형: \(shapesFromFirebase.count)개")
+            
+            await MainActor.run {
+                ShapeFileStore.shared.shapes = shapesFromFirebase
+                UserDefaults.standard.set(Date(), forKey: "lastBackupTime") // 복구 시간 업데이트
+                isSyncing = false
+                syncResultMessage = "\(shapesFromFirebase.count)개 도형의 복구가 완료되었습니다."
+                syncResultIsSuccess = true
+                showSyncResult = true
+            }
+            
+            print("✅ 백업에서 복구 완료: \(shapesFromFirebase.count)개 도형")
+            
+        } catch {
+            await MainActor.run {
+                isSyncing = false
+                syncResultMessage = "백업에서 복구하는데 실패했습니다: \(error.localizedDescription)"
+                syncResultIsSuccess = false
+                showSyncResult = true
+            }
+            
+            print("❌ 백업에서 복구 실패: \(error)")
         }
     }
     

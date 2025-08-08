@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
 import UIKit
 
 final class ShapeFirebaseStore: ShapeStoreProtocol {
@@ -19,11 +20,17 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
     
     // 현재 사용자의 컬렉션 참조를 가져옵니다
     private var userCollection: CollectionReference? {
-        guard let userId = AuthManager.shared.currentAuthUser?.uid else {
-            print("❌ Firebase: 인증된 사용자가 없습니다")
-            return nil
+        // 우선 AuthManager 캐시 확인, 없으면 FirebaseAuth에서 폴백으로 가져와 설정
+        if let cachedUser = AuthManager.shared.currentAuthUser {
+            return db.collection("users").document(cachedUser.uid).collection(collectionName)
         }
-        return db.collection("users").document(userId).collection(collectionName)
+        if let authUser = Auth.auth().currentUser {
+            // 캐시 동기화
+            AuthManager.shared.currentAuthUser = authUser
+            return db.collection("users").document(authUser.uid).collection(collectionName)
+        }
+        print("❌ Firebase: 인증된 사용자가 없습니다")
+        return nil
     }
     
     func loadShapes() async throws -> [ShapeModel] {
@@ -52,11 +59,31 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 throw FirebaseError.invalidData
             }
             
-            // 로컬 색상과 파이어스토어 색상 동기화
+            // 로컬 색상과 파이어스토어 색상 동기화 (서버 기준으로 활성 도형 색상 통일)
             let synchronizedShapes = await self.synchronizeColorsWithLocal(activeShapes)
             
             print("✅ Firebase에서 도형 데이터 로드 성공: \(synchronizedShapes.count)개 (전체: \(allShapes.count)개, 삭제됨: \(allShapes.count - activeShapes.count)개)")
             return synchronizedShapes
+        }
+    }
+
+    /// 삭제된 도형을 포함하여 모든 도형을 로드 (동기화/검증용)
+    func loadAllShapesIncludingDeleted() async throws -> [ShapeModel] {
+        return try await performWithRetry {
+            guard let collection = self.userCollection else {
+                throw FirebaseError.notAuthenticated
+            }
+            let snapshot = try await collection.getDocuments()
+            let allShapes = snapshot.documents.compactMap { document in
+                do {
+                    return try self.parseShapeFromDocument(document.data(), id: document.documentID)
+                } catch {
+                    print("⚠️ 도형 파싱 실패 (ID: \(document.documentID)): \(error)")
+                    return nil
+                }
+            }
+            print("✅ Firebase에서 모든 도형 로드 (삭제 포함): \(allShapes.count)개")
+            return allShapes
         }
     }
     
@@ -81,7 +108,8 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
                 for shape in shapeBatch {
                     let docRef = collection.document(shape.id.uuidString)
                     let data = try self.shapeToFirestoreData(shape)
-                    batch.setData(data, forDocument: docRef)
+                    // merge:true로 설정하여 존재하는 필드만 업데이트하고 누락된 필드(예: deletedAt)를 보존
+                    batch.setData(data, forDocument: docRef, merge: true)
                 }
                 
                 try await batch.commit()
@@ -122,8 +150,10 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             }
             
             // soft delete: 문서를 완전히 삭제하지 않고 deletedAt 필드만 설정
+            let now = Date()
             let data: [String: Any] = [
-                "deletedAt": Timestamp(date: Date())
+                "deletedAt": Timestamp(date: now),
+                "updatedAt": Timestamp(date: now)
             ]
             
             try await collection.document(id.uuidString).setData(data, merge: true)
@@ -132,6 +162,29 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             try await self.updateServerMetadata()
             
             print("✅ Firebase에서 도형 soft delete 및 메타데이터 업데이트 성공: \(id)")
+        }
+    }
+
+    /// 여러 개의 도형을 일괄 soft delete 처리
+    func markDeleted(ids: [UUID]) async throws {
+        guard !ids.isEmpty else { return }
+        try await performWithRetry {
+            guard let collection = self.userCollection else {
+                throw FirebaseError.notAuthenticated
+            }
+            let batch = self.db.batch()
+            let now = Date()
+            for id in ids {
+                let docRef = collection.document(id.uuidString)
+                let data: [String: Any] = [
+                    "deletedAt": Timestamp(date: now),
+                    "updatedAt": Timestamp(date: now)
+                ]
+                batch.setData(data, forDocument: docRef, merge: true)
+            }
+            try await batch.commit()
+            try await self.updateServerMetadata()
+            print("✅ Firebase 일괄 soft delete 완료: \(ids.count)개")
         }
     }
     
@@ -273,7 +326,8 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             "address": shape.address ?? "",
             "createdAt": Timestamp(date: shape.createdAt),
             "flightStartDate": Timestamp(date: shape.flightStartDate),
-            "color": shape.color
+            "color": shape.color,
+            "updatedAt": Timestamp(date: shape.updatedAt)
         ]
         
         // flightEndDate가 있는 경우에만 추가
@@ -406,6 +460,14 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             }
         }
         
+        // updatedAt 처리
+        let updatedAt: Date
+        if let updatedAtTimestamp = data["updatedAt"] as? Timestamp {
+            updatedAt = updatedAtTimestamp.dateValue()
+        } else {
+            updatedAt = createdAt
+        }
+
         return ShapeModel(
             id: uuid,
             title: title,
@@ -421,7 +483,8 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
             deletedAt: deletedAt,
             flightStartDate: flightStartDate,
             flightEndDate: flightEndDate,
-            color: color
+            color: color,
+            updatedAt: updatedAt
         )
     }
     
@@ -547,67 +610,30 @@ final class ShapeFirebaseStore: ShapeStoreProtocol {
     
     /// 로컬 색상과 파이어스토어 색상을 동기화 (서버 색상으로 통일)
     private func synchronizeColorsWithLocal(_ firebaseShapes: [ShapeModel]) async -> [ShapeModel] {
-        do {
-            // 서버의 색상 변경 시점 가져오기
-            let serverColorChangeTime = try await getServerLastColorChangeTime()
-            let localColorChangeTime = ColorManager.shared.lastColorChangeTime
-            
-            print("🎨 색상 동기화 비교:")
-            print("   - 서버 색상 변경 시점: \(serverColorChangeTime?.description ?? "없음")")
-            print("   - 로컬 색상 변경 시점: \(localColorChangeTime?.description ?? "없음")")
-            
-            // 서버에서 넘어온 활성 도형들의 색상을 통일할 색상으로 결정
-            let activeShapes = firebaseShapes.filter { $0.deletedAt == nil }
-            guard let firstActiveShape = activeShapes.first else {
-                print("📝 활성 도형이 없음: 색상 통일 불필요")
-                return firebaseShapes
-            }
-            
-            let unifiedColor = firstActiveShape.color
-            print("🎨 서버 활성 도형 색상: \(unifiedColor)")
-            
-            // 로컬이 더 최근에 색상을 변경했다면 로컬 색상으로 통일
-            if ColorManager.shared.isMoreRecentThan(serverColorChangeTime) {
-                print("✅ 로컬 색상이 더 최근: 모든 활성 도형을 로컬 색상으로 통일")
-                let localColor = ColorManager.shared.defaultColor.hex
-                var updatedShapes = firebaseShapes
-                
-                // 활성 도형들만 로컬 색상으로 통일 (만료된 도형은 제외)
-                for i in 0..<updatedShapes.count {
-                    if updatedShapes[i].deletedAt == nil {
-                        updatedShapes[i].color = localColor
-                    }
-                }
-                
-                return updatedShapes
-            }
-            // 서버가 더 최근에 색상을 변경했거나 색상 변경 시점이 없는 경우 서버 색상으로 통일
-            else {
-                print("✅ 서버 색상으로 통일: 모든 활성 도형을 서버 색상으로 통일")
-                var updatedShapes = firebaseShapes
-                
-                // 활성 도형들만 서버 색상으로 통일 (만료된 도형은 제외)
-                for i in 0..<updatedShapes.count {
-                    if updatedShapes[i].deletedAt == nil {
-                        updatedShapes[i].color = unifiedColor
-                    }
-                }
-                
-                // 로컬의 기본 색상도 서버 색상으로 업데이트
-                if let serverColor = PaletteColor.allCases.first(where: { $0.hex.lowercased() == unifiedColor.lowercased() }) {
-                    await MainActor.run {
-                        ColorManager.shared.defaultColor = serverColor
-                        print("🔄 로컬 기본 색상을 서버 색상으로 업데이트: \(serverColor.rawValue)")
-                    }
-                }
-                
-                return updatedShapes
-            }
-            
-        } catch {
-            print("❌ 색상 동기화 실패: \(error.localizedDescription)")
+        // 색상은 서버 기준으로 항상 통일하여 다른 디바이스에도 동일하게 반영
+        let activeShapes = firebaseShapes.filter { $0.deletedAt == nil }
+        guard let firstActiveShape = activeShapes.first else {
+            print("📝 활성 도형이 없음: 색상 통일 불필요")
             return firebaseShapes
         }
+        let unifiedColor = firstActiveShape.color
+        print("🎨 서버 활성 도형 색상(소스 오브 트루스): \(unifiedColor)")
+
+        var updatedShapes = firebaseShapes
+        for i in 0..<updatedShapes.count {
+            if updatedShapes[i].deletedAt == nil {
+                updatedShapes[i].color = unifiedColor
+            }
+        }
+
+        if let serverColor = PaletteColor.allCases.first(where: { $0.hex.lowercased() == unifiedColor.lowercased() }) {
+            await MainActor.run {
+                ColorManager.shared.defaultColor = serverColor
+                print("🔄 로컬 기본 색상을 서버 색상으로 업데이트: \(serverColor.rawValue)")
+            }
+        }
+
+        return updatedShapes
     }
     
 

@@ -50,11 +50,37 @@ class AuthManager {
         }
     }
     
+    /// Firebase Auth의 현재 사용자 객체가 준비될 때까지 대기하고 `currentAuthUser`를 설정합니다.
+    /// 로그인 직후 즉시 접근 시점 경합을 방지하기 위한 안전장치입니다.
+    /// - Parameter timeout: 최대 대기 시간(초)
+    /// - Returns: 인증 사용자 객체가 준비되었는지 여부
+    @discardableResult
+    func ensureAuthUserAvailable(timeout: TimeInterval = 3.0) async -> Bool {
+        // 이미 설정되어 있으면 즉시 성공
+        if let user = self.currentAuthUser ?? Auth.auth().currentUser {
+            self.currentAuthUser = user
+            return true
+        }
+        let start = Date()
+        while Date().timeIntervalSince(start) < timeout {
+            if let user = Auth.auth().currentUser {
+                await MainActor.run {
+                    self.currentAuthUser = user
+                }
+                return true
+            }
+            try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+        }
+        return self.currentAuthUser != nil
+    }
+
     // Apple 로그인 완료 후 사용자 데이터 생성 또는 업데이트
     func handleAppleLoginSuccess(email: String?) async {
-        guard let userId = currentAuthUser?.uid else { 
+        // 로그인 직후 Auth.user가 nil일 수 있어 보장 루틴 수행
+        let authReady = await ensureAuthUserAvailable()
+        guard authReady, let userId = (self.currentAuthUser ?? Auth.auth().currentUser)?.uid else {
             print("DEBUG: No current auth user found")
-            return 
+            return
         }
         
         print("🔍 DEBUG: Firebase Auth UID: \(userId)")
@@ -82,6 +108,60 @@ class AuthManager {
         
         // 로그인 성공 후 실시간 백업이 활성화된 경우 자동 동기화
         await performAutoSyncIfEnabled()
+
+        // 실시간 동기화 리스너도 즉시 재가동하여 재시작 없이 동작 보장
+        await MainActor.run {
+            RealtimeSyncManager.shared.resetAndRestartRealtimeSync()
+        }
+    }
+    
+    /// 로컬 데이터 백업 생성
+    private func createLocalDataBackup() async {
+        await MainActor.run {
+            let localShapes = ShapeFileStore.shared.shapes
+            if !localShapes.isEmpty {
+                // 백업 파일 생성
+                let backupURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+                    .appendingPathComponent("shapes_backup_\(Date().timeIntervalSince1970).json")
+                
+                do {
+                    let data = try JSONEncoder().encode(localShapes)
+                    try data.write(to: backupURL)
+                    print("💾 로컬 데이터 백업 생성: \(backupURL.lastPathComponent)")
+                } catch {
+                    print("❌ 로컬 데이터 백업 생성 실패: \(error)")
+                }
+            }
+        }
+    }
+    
+    /// 로컬 데이터 백업에서 복구
+    private func restoreFromLocalBackup() async -> Bool {
+        await MainActor.run {
+            let fileManager = FileManager.default
+            let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+            
+            do {
+                let backupFiles = try fileManager.contentsOfDirectory(at: documentsURL, includingPropertiesForKeys: nil)
+                    .filter { $0.lastPathComponent.hasPrefix("shapes_backup_") }
+                    .sorted { $0.lastPathComponent > $1.lastPathComponent } // 최신 파일 우선
+                
+                if let latestBackup = backupFiles.first {
+                    let data = try Data(contentsOf: latestBackup)
+                    let shapes = try JSONDecoder().decode([ShapeModel].self, from: data)
+                    
+                    ShapeFileStore.shared.shapes = shapes
+                    ShapeFileStore.shared.saveShapes()
+                    
+                    print("✅ 로컬 백업에서 복구 완료: \(shapes.count)개 도형")
+                    return true
+                }
+            } catch {
+                print("❌ 로컬 백업 복구 실패: \(error)")
+            }
+            
+            return false
+        }
     }
     
     // Apple 로그인용 사용자 데이터 업로드
@@ -195,11 +275,17 @@ class AuthManager {
         }
     }
     
-    // 로그인 후 실시간 백업이 활성화된 경우 자동 동기화
+    /// 로그인 성공 후 실시간 백업이 활성화된 경우 자동 동기화
     private func performAutoSyncIfEnabled() async {
-        // 실시간 백업이 활성화되어 있는지 확인
         if SettingManager.shared.isCloudBackupEnabled {
+            print("🔄 로그인 후 자동 동기화 시작...")
+            
+            // 동기화 전 로컬 데이터 백업 생성
+            await createLocalDataBackup()
+            
             do {
+                // 인증 준비 보장 (로그인 직후 경합 방지)
+                _ = await ensureAuthUserAvailable()
                 // 1. 로컬 데이터 상태 확인
                 let localShapes = await MainActor.run {
                     return ShapeFileStore.shared.shapes
@@ -239,16 +325,57 @@ class AuthManager {
                         }
                     }
                     
-                    // 업로드 후 Firebase에서 최신 데이터 다운로드 (다른 기기 데이터 포함)
-                    print("📥 Firebase에서 최신 데이터 다운로드 시작...")
+                    // 로컬 데이터를 유지하면서 Firebase의 추가 데이터 병합 + 색상 동기화
+                    print("🔄 로컬 데이터를 유지하면서 Firebase의 추가 데이터 병합...")
                     let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
                     
-                    print("📥 Firebase 데이터로 로컬 업데이트합니다...")
                     await MainActor.run {
-                        ShapeFileStore.shared.shapes = firebaseShapes
+                        let currentLocalShapes = ShapeFileStore.shared.shapes
+                        let localShapeIds = Set(currentLocalShapes.map { $0.id })
+                        
+                        // Firebase에만 있는 도형들을 로컬에 추가 (로컬 데이터는 보존)
+                        let shapesToAdd = firebaseShapes.filter { !localShapeIds.contains($0.id) }
+                        
+                        var mutatedLocal = currentLocalShapes
+                        if !shapesToAdd.isEmpty {
+                            mutatedLocal.append(contentsOf: shapesToAdd)
+                            print("✅ Firebase의 추가 도형 \(shapesToAdd.count)개를 로컬에 병합 완료")
+                        } else {
+                            print("✅ Firebase에 추가 데이터가 없어 로컬 데이터 유지")
+                        }
+                        
+                        // 서버 기준으로 활성 도형 색상 통일 (만료된 도형 제외)
+                        if let unifiedColor = firebaseShapes.first(where: { $0.deletedAt == nil })?.color {
+                            var changedCount = 0
+                            for i in 0..<mutatedLocal.count {
+                                if mutatedLocal[i].deletedAt == nil && mutatedLocal[i].color != unifiedColor {
+                                    mutatedLocal[i].color = unifiedColor
+                                    changedCount += 1
+                                }
+                            }
+                            if changedCount > 0 {
+                                print("🎨 로컬 활성 도형 색상 통일: \(changedCount)개 → \(unifiedColor)")
+                            }
+                        }
+                        
+                        // 동일 ID 도형은 서버 updatedAt이 더 최신인 경우에만 서버로 덮어쓰기 (LWW)
+                        let serverById = Dictionary(uniqueKeysWithValues: firebaseShapes.map { ($0.id, $0) })
+                        var overwriteCount = 0
+                        for i in 0..<mutatedLocal.count {
+                            if let serverShape = serverById[mutatedLocal[i].id], serverShape.updatedAt >= mutatedLocal[i].updatedAt {
+                                if mutatedLocal[i] != serverShape {
+                                    mutatedLocal[i] = serverShape
+                                    overwriteCount += 1
+                                }
+                            }
+                        }
+                        if overwriteCount > 0 {
+                            print("🔁 서버 값으로 덮어쓰기(LWW): \(overwriteCount)개")
+                        }
+                        
+                        ShapeFileStore.shared.shapes = mutatedLocal
                         ShapeFileStore.shared.saveShapes()
                     }
-                    print("✅ Firebase 데이터로 로컬 업데이트 완료: \(firebaseShapes.count)개")
                     
                 } else if !hasLocalData {
                     // 로컬 데이터가 없는 경우 Firebase에서 다운로드
@@ -272,14 +399,56 @@ class AuthManager {
                     let hasChanges = try await ShapeFirebaseStore.shared.hasChanges()
                     
                     if hasChanges {
-                        print("🔄 Firebase에 변경사항이 감지되어 다운로드합니다...")
+                        print("🔄 Firebase에 변경사항이 감지되어 병합합니다...")
                         let firebaseShapes = try await ShapeFirebaseStore.shared.loadShapes()
                         
                         await MainActor.run {
-                            ShapeFileStore.shared.shapes = firebaseShapes
+                            let currentLocalShapes = ShapeFileStore.shared.shapes
+                            let localShapeIds = Set(currentLocalShapes.map { $0.id })
+                            
+                            // Firebase에만 있는 도형들을 로컬에 추가
+                            let shapesToAdd = firebaseShapes.filter { !localShapeIds.contains($0.id) }
+                            
+                            var mutatedLocal = currentLocalShapes
+                            if !shapesToAdd.isEmpty {
+                                mutatedLocal.append(contentsOf: shapesToAdd)
+                                print("✅ Firebase의 추가 도형 \(shapesToAdd.count)개를 로컬에 병합 완료")
+                            } else {
+                                print("✅ Firebase에 추가 데이터가 없음")
+                            }
+                            
+                            // 서버 기준으로 활성 도형 색상 통일 (만료된 도형 제외)
+                            if let unifiedColor = firebaseShapes.first(where: { $0.deletedAt == nil })?.color {
+                                var changedCount = 0
+                                for i in 0..<mutatedLocal.count {
+                                    if mutatedLocal[i].deletedAt == nil && mutatedLocal[i].color != unifiedColor {
+                                        mutatedLocal[i].color = unifiedColor
+                                        changedCount += 1
+                                    }
+                                }
+                                if changedCount > 0 {
+                                    print("🎨 로컬 활성 도형 색상 통일: \(changedCount)개 → \(unifiedColor)")
+                                }
+                            }
+                            
+                            // 동일 ID 도형은 서버 updatedAt이 더 최신인 경우에만 서버로 덮어쓰기 (LWW)
+                            let serverById = Dictionary(uniqueKeysWithValues: firebaseShapes.map { ($0.id, $0) })
+                            var overwriteCount = 0
+                            for i in 0..<mutatedLocal.count {
+                                if let serverShape = serverById[mutatedLocal[i].id], serverShape.updatedAt >= mutatedLocal[i].updatedAt {
+                                    if mutatedLocal[i] != serverShape {
+                                        mutatedLocal[i] = serverShape
+                                        overwriteCount += 1
+                                    }
+                                }
+                            }
+                            if overwriteCount > 0 {
+                                print("🔁 서버 값으로 덮어쓰기(LWW): \(overwriteCount)개")
+                            }
+                            
+                            ShapeFileStore.shared.shapes = mutatedLocal
                             ShapeFileStore.shared.saveShapes()
                         }
-                        print("✅ 변경사항 다운로드 완료: \(firebaseShapes.count)개")
                     } else {
                         print("✅ 변경사항이 없어 동기화를 건너뜁니다.")
                     }
@@ -291,6 +460,15 @@ class AuthManager {
                 
             } catch {
                 print("❌ 로그인 후 자동 동기화 실패: \(error)")
+                
+                // 동기화 실패 시 백업에서 복구 시도
+                print("🔄 동기화 실패로 인한 백업 복구 시도...")
+                let restored = await restoreFromLocalBackup()
+                if restored {
+                    print("✅ 백업에서 복구 성공")
+                } else {
+                    print("❌ 백업 복구 실패")
+                }
             }
         } else {
             print("📝 실시간 백업이 비활성화되어 있어 자동 동기화를 건너뜁니다.")

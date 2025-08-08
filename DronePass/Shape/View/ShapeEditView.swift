@@ -148,8 +148,14 @@ struct BasicInfoSection: View {
                 Text("반경(m)")
                     .bold()
                 TextField("반경을 입력하세요", text: $radius)
-                    .keyboardType(.decimalPad)
+                    .keyboardType(.numberPad)
                     .multilineTextAlignment(.trailing)
+                    .onChange(of: radius) { oldValue, newValue in
+                        let filtered = newValue.filter { $0.isNumber }
+                        if filtered != newValue {
+                            radius = filtered
+                        }
+                    }
             }
             .frame(height: 30)
         }

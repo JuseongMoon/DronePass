@@ -59,7 +59,7 @@ final class ShapeRealtimeObserver: ObservableObject {
             }
             
             do {
-                let updatedShape = try self.parseShapeFromDocument(data, id: document.documentID)
+                        let updatedShape = try self.parseShapeFromDocument(data, id: document.documentID)
                 
                 // 현재 편집 중이 아닌 경우에만 실시간 업데이트
                 if !self.isEditing {
@@ -105,6 +105,11 @@ final class ShapeRealtimeObserver: ObservableObject {
                         if oldIsExpired != newIsExpired {
                             print("📅 실시간 만료 상태 변경 감지: \(oldIsExpired) → \(newIsExpired)")
                             NotificationCenter.default.post(name: .shapesDidChange, object: nil)
+                        }
+                        
+                        // updatedAt이 더 최신인 경우 서버 값 우선 반영 (LWW)
+                        if updatedShape.updatedAt > oldShape.updatedAt {
+                            print("🕒 실시간 업데이트: 서버 updatedAt이 더 최신 → 서버 값 유지")
                         }
                     }
                 } else {

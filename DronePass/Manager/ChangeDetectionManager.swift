@@ -154,6 +154,7 @@ final class ChangeDetectionManager {
             
             // 로컬 데이터 업데이트
             await MainActor.run {
+                // 서버 값으로 동기화하되 LWW(서버 updatedAt 기준) 반영
                 ShapeFileStore.shared.shapes = latestShapes
                 ShapeFileStore.shared.saveShapes()
                 

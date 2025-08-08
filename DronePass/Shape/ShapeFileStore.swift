@@ -243,7 +243,9 @@ final class ShapeFileStore: ObservableObject {
     }
     
     public func addShape(_ shape: ShapeModel) {
-        shapes.append(shape)
+        var s = shape
+        s.updatedAt = Date()
+        shapes.append(s)
         saveShapes()
         // NotificationCenter.default.post(name: .shapesDidChange, object: nil) // 중복 방지를 위해 제거
         
@@ -268,7 +270,9 @@ final class ShapeFileStore: ObservableObject {
                     
                     // 해당 도형에 deletedAt 설정
                     if let fileIndex = allShapes.firstIndex(where: { $0.id == id }) {
-                        allShapes[fileIndex].deletedAt = Date()
+                        let now = Date()
+                        allShapes[fileIndex].deletedAt = now
+                        allShapes[fileIndex].updatedAt = now
                         
                         // 파일에 직접 저장
                         let newData = try encoder.encode(allShapes)
@@ -343,7 +347,9 @@ final class ShapeFileStore: ObservableObject {
     public func updateShape(_ shape: ShapeModel) {
         if let idx = shapes.firstIndex(where: { $0.id == shape.id }) {
             var newShapes = shapes
-            newShapes[idx] = shape
+            var updated = shape
+            updated.updatedAt = Date()
+            newShapes[idx] = updated
             shapes = newShapes // 배열 자체를 새로 할당해야 @Published가 동작
             saveShapes()
             // NotificationCenter.default.post(name: .shapesDidChange, object: nil) // 중복 방지를 위해 제거
@@ -372,7 +378,9 @@ final class ShapeFileStore: ObservableObject {
                 // 만료된 도형들에 deletedAt 설정
                 for expiredShape in expiredShapes {
                     if let fileIndex = allShapes.firstIndex(where: { $0.id == expiredShape.id }) {
-                        allShapes[fileIndex].deletedAt = Date()
+                        let now = Date()
+                        allShapes[fileIndex].deletedAt = now
+                        allShapes[fileIndex].updatedAt = now
                         print("✅ 만료된 도형 soft delete 완료: \(expiredShape.id)")
                     }
                 }

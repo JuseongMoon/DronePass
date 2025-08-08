@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseAuth
 import Combine
 
 /// 두 디바이스 간의 실시간 동기화를 관리하는 매니저
@@ -68,9 +69,13 @@ final class RealtimeSyncManager: ObservableObject {
         syncDebounceTimer?.invalidate()
         syncDebounceTimer = nil
         
+        // 로그인 직후 경합을 방지하기 위해 인증 준비를 먼저 보장
+        if AuthManager.shared.currentAuthUser == nil {
+            Task { _ = await AuthManager.shared.ensureAuthUserAvailable() }
+        }
         guard AppleLoginManager.shared.isLogin,
               SettingManager.shared.isCloudBackupEnabled,
-              let userId = AuthManager.shared.currentAuthUser?.uid else {
+              let userId = (AuthManager.shared.currentAuthUser ?? Auth.auth().currentUser)?.uid else {
             print("❌ 실시간 동기화 조건 미충족: 로그인 상태 또는 클라우드 백업 설정 확인 필요")
             isRealtimeSyncEnabled = false
             return
@@ -132,11 +137,10 @@ final class RealtimeSyncManager: ObservableObject {
             print("   - 마지막 동기화: \(DateFormatter.korean.string(from: lastSyncTime))")
             print("   - 마지막 로컬 수정: \(lastLocalModification != nil ? DateFormatter.korean.string(from: lastLocalModification!) : "없음")")
             
-            // 자신이 방금 수정한 경우 동기화 건너뛰기 (무한 루프 방지)
+            // 자신의 변경으로 인한 메타데이터 갱신은 건너뛰되, 서버 시각이 로컬 수정보다 과거/동일일 때만 스킵
             if let localModTime = lastLocalModification {
-                let timeDifference = abs(serverLastModified.timeIntervalSince(localModTime))
-                if timeDifference < 3.0 { // 3초 이내의 변경은 같은 디바이스의 변경으로 간주
-                    print("⏭️ 자신의 변경사항으로 판단되어 동기화를 건너뜁니다.")
+                if serverLastModified <= localModTime {
+                    print("⏭️ 자신의 변경(또는 과거 시각)으로 판단되어 동기화를 건너뜁니다.")
                     return
                 }
             }
@@ -187,18 +191,78 @@ final class RealtimeSyncManager: ObservableObject {
         do {
             print("📥 실시간 동기화 시작: Firebase에서 최신 데이터 가져오기")
             
-            // Firebase에서 최신 도형 데이터 가져오기
-            let latestShapes = try await ShapeFirebaseStore.shared.loadShapes()
+            // Firebase에서 최신 도형 데이터 가져오기 (삭제된 도형 포함)
+            let latestShapes = try await ShapeFirebaseStore.shared.loadAllShapesIncludingDeleted()
+            
+            // 서버 기준 통일 색상을 로컬 기본 색상으로 즉시 반영 (신규 도형 생성 시 사용)
+            if let unifiedHex = latestShapes.first(where: { $0.deletedAt == nil })?.color,
+               let serverColor = PaletteColor.allCases.first(where: { $0.hex.lowercased() == unifiedHex.lowercased() }) {
+                await MainActor.run {
+                    ColorManager.shared.defaultColor = serverColor
+                    print("🎨 기본 색상 업데이트: 서버 통일 색상으로 설정 → \(serverColor.rawValue)")
+                }
+            }
             
             await MainActor.run {
-                // 로컬 데이터 업데이트
-                let currentLocalCount = ShapeFileStore.shared.shapes.count
-                ShapeFileStore.shared.shapes = latestShapes
-                ShapeFileStore.shared.saveShapes()
+                // 로컬 데이터를 보존하면서 Firebase의 추가 데이터 병합 + 색상 동기화
+                let currentLocalShapes = ShapeFileStore.shared.shapes
+                let localShapeIds = Set(currentLocalShapes.map { $0.id })
                 
-                print("✅ 실시간 동기화 완료:")
-                print("   - 이전 로컬 도형: \(currentLocalCount)개")
-                print("   - 새로운 도형: \(latestShapes.count)개")
+                // Firebase에만 있는 도형들을 로컬에 추가 (로컬 데이터는 보존)
+                let shapesToAdd = latestShapes.filter { !localShapeIds.contains($0.id) }
+                
+                var mutatedLocal = currentLocalShapes
+                if !shapesToAdd.isEmpty {
+                    mutatedLocal.append(contentsOf: shapesToAdd)
+                    print("✅ 실시간 동기화: 추가된 도형 \(shapesToAdd.count)개 병합")
+                } else {
+                    print("✅ 실시간 동기화: 추가 데이터 없음")
+                }
+                
+                // 서버 기준으로 활성 도형 색상 통일 (만료된 도형 제외)
+                if let unifiedColor = latestShapes.first(where: { $0.deletedAt == nil })?.color {
+                    var changedCount = 0
+                    for i in 0..<mutatedLocal.count {
+                        if mutatedLocal[i].deletedAt == nil && mutatedLocal[i].color != unifiedColor {
+                            mutatedLocal[i].color = unifiedColor
+                            changedCount += 1
+                        }
+                    }
+                    if changedCount > 0 {
+                        print("🎨 실시간 동기화: 로컬 활성 도형 색상 통일 \(changedCount)개 → \(unifiedColor)")
+                    }
+                }
+
+                // 서버가 가진 동일 ID 도형은 서버 데이터로 덮어쓰기 (Last-Writer-Wins 반영)
+                let serverById = Dictionary(uniqueKeysWithValues: latestShapes.map { ($0.id, $0) })
+                var overwriteCount = 0
+                for i in 0..<mutatedLocal.count {
+                    if let serverShape = serverById[mutatedLocal[i].id] {
+                        if mutatedLocal[i] != serverShape {
+                            mutatedLocal[i] = serverShape
+                            overwriteCount += 1
+                        }
+                    }
+                }
+                if overwriteCount > 0 {
+                    print("🔁 실시간 동기화: 서버 값으로 기존 도형 덮어쓰기 \(overwriteCount)개")
+                }
+
+                // 서버에서 삭제된 도형(soft delete 처리된 문서)은 로컬에서도 제거
+                let deletedServerIds = latestShapes.filter { $0.deletedAt != nil }.map { $0.id }
+                if !deletedServerIds.isEmpty {
+                    let beforeCount = mutatedLocal.count
+                    mutatedLocal.removeAll { deletedServerIds.contains($0.id) }
+                    let removed = beforeCount - mutatedLocal.count
+                    if removed > 0 {
+                        print("🗑️ 실시간 동기화: 서버에서 삭제된 도형 로컬 제거 \(removed)개")
+                    }
+                }
+
+                // 주의: 서버에 없는 로컬 활성 도형은 즉시 삭제하지 않음 (업로드 대기 중 데이터 손실 방지)
+                
+                ShapeFileStore.shared.shapes = mutatedLocal
+                ShapeFileStore.shared.saveShapes()
                 
                 // 동기화 시간 업데이트
                 let now = Date()
