@@ -7,20 +7,36 @@
 
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(FirebaseCore)
 import FirebaseCore
+#endif
+#if canImport(FirebaseFirestore)
 import FirebaseFirestore
+#endif
 
 
+#if canImport(UIKit)
 class AppDelegate: NSObject, UIApplicationDelegate {
   func application(_ application: UIApplication,
                    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    #if canImport(FirebaseCore)
     FirebaseApp.configure()
+    #endif
+    // 최초 설치 시 기본 설정 등록: 일단위 입력 기본 ON
+    UserDefaults.standard.register(defaults: [
+      "isDateOnlyMode": true
+    ])
     
     // Firestore 설정을 앱 시작 시 한 번만 수행
+    #if canImport(FirebaseFirestore)
     let settings = FirestoreSettings()
     settings.isPersistenceEnabled = true
     settings.cacheSizeBytes = FirestoreCacheSizeUnlimited
     Firestore.firestore().settings = settings
+    #endif
     
     // 앱 시작 시 마이그레이션 한 번만 실행
     MigrationManager.shared.performAllMigrationsIfNeeded()
@@ -47,11 +63,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ChangeDetectionManager.shared.resetCheckStatus()
   }
 }
+#endif
 
 
 @main
 struct DronePassApp: App {
+    #if canImport(UIKit)
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    #endif
 
     var body: some Scene {
         WindowGroup {

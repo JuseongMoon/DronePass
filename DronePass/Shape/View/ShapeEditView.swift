@@ -8,6 +8,9 @@
 import SwiftUI
 import CoreLocation
 import Combine
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // 동적으로 높이가 변하는 TextEditor
 struct GrowingTextEditor: View {
@@ -251,6 +254,13 @@ struct DateSection: View {
                     UserDefaults.standard.set(newValue, forKey: dateOnlyKey)
                     onDateOnlyChange()
                 }
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        #if canImport(UIKit)
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                        #endif
+                    }
+                )
                 .frame(height: 30)
                 .bold()
         }

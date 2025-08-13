@@ -15,13 +15,24 @@ struct LoginView: View {
     @State private var showLocationTerms = false
     @StateObject private var loginManager = AppleLoginManager.shared
     @Environment(\.dismiss) private var dismiss
+    
+    // 기기 유형에 따른 동적 여백 값
+    private var topSpacer: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 72 : 40
+    }
+    private var verticalPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 32 : 24
+    }
+    private var bottomExtraPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 40 : 24
+    }
 
     
     var body: some View {
         NavigationView {
             VStack {
-                // 전체적으로 위로 밀기 위해 상단 패딩 추가
-                Spacer(minLength: 16)
+                // 상단/하단 여백을 기기 유형에 맞춰 확보
+                Spacer(minLength: topSpacer)
                 
                 // 앱 아이콘
                 
@@ -92,13 +103,12 @@ struct LoginView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                .padding(.bottom, 244)
+                .padding(.bottom, bottomExtraPadding)
                 
-                Spacer(minLength: 0)
+                Spacer(minLength: topSpacer)
             }
-            .padding(.top, 40)
+            .padding(.vertical, verticalPadding)
             .background(Color(.systemBackground))
-            .ignoresSafeArea()
             .navigationBarHidden(true)
             // NavigationLink 연결
             .background(
